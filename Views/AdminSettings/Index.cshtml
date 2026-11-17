@@ -1,0 +1,94 @@
+@model LibrarySettingsViewModel
+@{ ViewData["Title"] = "Library Rules & Settings"; }
+
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">System Configuration</div>
+        <h1>Library Rules & Policy Settings</h1>
+        <p class="text-secondary mb-0 mt-1">Configure loan periods, overdue fine calculations, member borrowing limits, and penalties.</p>
+    </div>
+</div>
+
+<div class="panel" style="max-width:800px">
+    <form asp-action="Index" method="post">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+
+        <h2 class="h6 text-primary text-uppercase fw-bold mb-3 border-bottom pb-2">
+            <i class="bi bi-clock me-1"></i> Loan Durations & Overdue Penalties
+        </h2>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label asp-for="LoanPeriodDays" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="LoanPeriodDays" class="form-control" type="number" min="1" max="365" required />
+                    <span class="input-group-text">days</span>
+                </div>
+                <span asp-validation-for="LoanPeriodDays" class="text-danger small"></span>
+                <div class="form-text">Standard borrowing duration before an active loan becomes overdue.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="GracePeriodDays" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="GracePeriodDays" class="form-control" type="number" min="0" max="30" required />
+                    <span class="input-group-text">days</span>
+                </div>
+                <span asp-validation-for="GracePeriodDays" class="text-danger small"></span>
+                <div class="form-text">Days allowed after due date before daily fines begin accumulating.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="FineRatePerDay" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input asp-for="FineRatePerDay" class="form-control" type="number" min="0" max="10000" step="0.5" required />
+                    <span class="input-group-text">/ day</span>
+                </div>
+                <span asp-validation-for="FineRatePerDay" class="text-danger small"></span>
+                <div class="form-text">Daily fine levied per overdue title.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="LostBookPenaltyFee" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input asp-for="LostBookPenaltyFee" class="form-control" type="number" min="0" max="50000" step="10" required />
+                </div>
+                <span asp-validation-for="LostBookPenaltyFee" class="text-danger small"></span>
+                <div class="form-text">Standard penalty fee added when a title is declared lost.</div>
+            </div>
+        </div>
+
+        <h2 class="h6 text-primary text-uppercase fw-bold mb-3 border-bottom pb-2">
+            <i class="bi bi-person-badge me-1"></i> Borrower Quotas & Localization
+        </h2>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label asp-for="MaxBooksPerMember" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="MaxBooksPerMember" class="form-control" type="number" min="1" max="50" required />
+                    <span class="input-group-text">books</span>
+                </div>
+                <span asp-validation-for="MaxBooksPerMember" class="text-danger small"></span>
+                <div class="form-text">Maximum active titles allowed out on loan simultaneously per member.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TimeZoneId" class="form-label"></label>
+                <input asp-for="TimeZoneId" class="form-control" placeholder="e.g. Asia/Kolkata or UTC" required />
+                <span asp-validation-for="TimeZoneId" class="text-danger small"></span>
+                <div class="form-text">Library operational timezone used for midnight calendar calculations.</div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 pt-2 border-top">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-check-lg me-1"></i> Save Configuration Rules
+            </button>
+            <a class="btn btn-outline-secondary" asp-controller="Dashboard" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>
+

@@ -1,0 +1,77 @@
+@model Book
+@{ ViewData["Title"] = Model.Title; }
+
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">Catalogue Record</div>
+        <h1>@Model.Title</h1>
+        <p class="text-secondary mb-0 mt-1">Authored by <span class="fw-semibold text-dark">@Model.Author</span></p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="bi bi-arrow-left me-1"></i> Back to Catalogue
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="panel text-center p-4">
+            <div class="book-cover" style="height:260px;font-size:5rem">
+                <i class="bi bi-book"></i>
+            </div>
+            <div class="mt-3">
+                <span class="badge rounded-pill badge-soft px-3 py-2 fs-6 mb-2">@Model.Category</span>
+                <div class="mt-2">
+                    @if (Model.AvailableQuantity > 0)
+                    {
+                        <span class="badge text-bg-success px-3 py-2">
+                            <i class="bi bi-check-circle me-1"></i> In Stock: @Model.AvailableQuantity Copies
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge text-bg-danger px-3 py-2">
+                            <i class="bi bi-clock-history me-1"></i> Currently All Copies On Loan
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="panel h-100">
+            <h2 class="h5 mb-3 border-bottom pb-2">Bibliographic Details</h2>
+            <dl class="row mb-4">
+                <dt class="col-sm-4 text-secondary">Author</dt>
+                <dd class="col-sm-8 fw-semibold">@Model.Author</dd>
+
+                <dt class="col-sm-4 text-secondary">Standard ISBN</dt>
+                <dd class="col-sm-8"><code>@(Model.Isbn ?? "Not assigned")</code></dd>
+
+                <dt class="col-sm-4 text-secondary">Category / Subject</dt>
+                <dd class="col-sm-8">@Model.Category</dd>
+
+                <dt class="col-sm-4 text-secondary">Publisher</dt>
+                <dd class="col-sm-8">@(Model.Publisher ?? "—")</dd>
+
+                <dt class="col-sm-4 text-secondary">Publication Year</dt>
+                <dd class="col-sm-8">@(Model.PublicationYear?.ToString() ?? "—")</dd>
+
+                <dt class="col-sm-4 text-secondary">Shelf Inventory</dt>
+                <dd class="col-sm-8">
+                    <strong>@Model.AvailableQuantity</strong> available out of <strong>@Model.TotalQuantity</strong> total copies
+                </dd>
+            </dl>
+
+            <h2 class="h5 mb-2 border-bottom pb-2">Synopsis & Description</h2>
+            <p class="text-secondary leading-relaxed">
+                @(string.IsNullOrWhiteSpace(Model.Description) ? "No synopsis or descriptive summary has been recorded for this catalogue title." : Model.Description)
+            </p>
+
+            <div class="p-3 bg-light rounded border mt-4 small text-secondary">
+                <i class="bi bi-info-circle text-primary me-1"></i>
+                Borrowing is managed at the Circulation Desk. Registered members may request loan issuance directly by presenting this title's ISBN or title to library staff.
+            </div>
+        </div>
+    </div>
+</div>

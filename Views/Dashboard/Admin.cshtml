@@ -1,0 +1,112 @@
+@model AdminDashboardData
+@{ ViewData["Title"] = "Overview"; }
+
+<section class="dashboard-welcome" aria-labelledby="welcome-title">
+    <div class="welcome-copy">
+        <div class="eyebrow"><span class="eyebrow-mark"></span> YOUR LIBRARY, IN MOTION</div>
+        <h1 id="welcome-title">Good to see you,<br /><span>Library team.</span></h1>
+        <p>Here’s what’s happening across your shelves today.</p>
+        <div class="welcome-actions">
+            <a class="btn btn-ink" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-arrow-up-right me-2"></i>Issue a book</a>
+            <a class="btn btn-paper" asp-controller="AdminReports" asp-action="Index">View reports <i class="bi bi-arrow-right ms-2"></i></a>
+        </div>
+    </div>
+    <div class="welcome-art" aria-hidden="true">
+        <div class="art-sun"></div><div class="art-shelf shelf-one"></div><div class="art-shelf shelf-two"></div>
+        <div class="art-book book-one"></div><div class="art-book book-two"></div><div class="art-book book-three"></div>
+        <span class="art-note">A good day<br />to turn a page.</span>
+    </div>
+    <div class="welcome-date"><i class="bi bi-calendar3 me-2"></i>@DateTime.Today.ToString("dddd, d MMMM yyyy")</div>
+</section>
+
+<section class="stats-grid" aria-label="Library at a glance">
+    <a class="metric-card metric-books" asp-controller="AdminBooks" asp-action="Index">
+        <div class="metric-top"><span class="metric-label">Total books</span><span class="metric-icon"><i class="bi bi-bookshelf"></i></span></div>
+        <div class="metric-value">@Model.TotalBooks.ToString("N0")</div><div class="metric-foot">Titles in your catalogue <i class="bi bi-arrow-up-right"></i></div>
+    </a>
+    <a class="metric-card" asp-controller="AdminMembers" asp-action="Index">
+        <div class="metric-top"><span class="metric-label">Active members</span><span class="metric-icon icon-blue"><i class="bi bi-people"></i></span></div>
+        <div class="metric-value">@Model.TotalMembers.ToString("N0")</div><div class="metric-foot">Readers with active accounts <i class="bi bi-arrow-up-right"></i></div>
+    </a>
+    <a class="metric-card" asp-controller="AdminCirculation" asp-action="Index">
+        <div class="metric-top"><span class="metric-label">Books issued</span><span class="metric-icon icon-cream"><i class="bi bi-arrow-left-right"></i></span></div>
+        <div class="metric-value">@Model.ActiveLoans.ToString("N0")</div><div class="metric-foot">Currently out with readers <i class="bi bi-arrow-up-right"></i></div>
+    </a>
+    <a class="metric-card metric-alert" asp-controller="AdminCirculation" asp-action="Overdue">
+        <div class="metric-top"><span class="metric-label">Overdue books</span><span class="metric-icon icon-red"><i class="bi bi-clock-history"></i></span></div>
+        <div class="metric-value">@Model.OverdueLoans.ToString("N0")</div><div class="metric-foot">Need a little follow-up <i class="bi bi-arrow-up-right"></i></div>
+    </a>
+</section>
+
+<div class="dashboard-columns">
+    <section class="surface-panel activity-panel">
+        <div class="section-heading"><div><div class="eyebrow">THE BORROWING DESK</div><h2>Recent activity</h2></div><a class="text-link" asp-controller="AdminCirculation" asp-action="Index">All circulation <i class="bi bi-arrow-up-right"></i></a></div>
+        @if (Model.RecentIssues.Count == 0)
+        {
+            <div class="empty-state dashboard-empty"><span class="empty-icon"><i class="bi bi-journal-bookmark"></i></span><h3>Quiet shelves today</h3><p>No circulation activity yet. New issues will show up here.</p><a class="btn btn-ink btn-sm" asp-controller="AdminCirculation" asp-action="Issue">Issue the first book</a></div>
+        }
+        else
+        {
+            <div class="table-responsive activity-table-wrap"><table class="table activity-table mb-0"><thead><tr><th>Book & member</th><th>Issued</th><th>Due back</th><th>Status</th></tr></thead><tbody>
+            @foreach (var item in Model.RecentIssues)
+            {
+                <tr><td><div class="activity-book"><span class="mini-book"><i class="bi bi-book"></i></span><span><strong>@item.Book.Title</strong><small>@item.Member.FullName</small></span></div></td><td>@item.IssueDateUtc.ToString("d MMM")</td><td>@item.DueDateUtc.ToString("d MMM yyyy")</td><td><span class="status-pill @(item.Status == IssueStatus.Active ? "status-active" : item.Status == IssueStatus.Lost ? "status-lost" : "status-returned")"><i></i>@item.Status</span></td></tr>
+            }
+            </tbody></table></div>
+        }
+    </section>
+    <section class="surface-panel rhythm-panel">
+        <div class="section-heading"><div><div class="eyebrow">LAST 7 DAYS</div><h2>Issue rhythm</h2></div><span class="chart-tag"><i class="bi bi-bar-chart-fill"></i> Daily issues</span></div>
+        @if (Model.WeeklyIssueActivity.Count == 0 || Model.WeeklyIssueActivity.Sum(day => day.IssueCount) == 0)
+        {
+            <div class="empty-state chart-empty"><span class="empty-icon"><i class="bi bi-bar-chart"></i></span><p>No issues recorded this week.</p></div>
+        }
+        else
+        {
+            var maxIssues = Math.Max(1, Model.WeeklyIssueActivity.Max(day => day.IssueCount));
+            <div class="weekly-chart" role="img" aria-label="Daily book issues for the past seven days">
+                @foreach (var day in Model.WeeklyIssueActivity)
+                {
+                    var barHeight = day.IssueCount == 0 ? 5 : Math.Max(12, (int)Math.Round(day.IssueCount * 100d / maxIssues));
+                    <div class="chart-day" title="@day.Date.ToString("dddd, d MMMM"): @day.IssueCount issues"><span class="chart-count">@day.IssueCount</span><div class="chart-track"><div class="chart-fill" style="height:@(barHeight)%"></div></div><span class="chart-label">@day.Date.ToString("ddd").Substring(0, 1)</span></div>
+                }
+            </div>
+            <div class="chart-summary"><span><b>@Model.WeeklyIssueActivity.Sum(day => day.IssueCount)</b> books issued this week</span><span class="chart-legend"><i></i> Circulation</span></div>
+        }
+        <div class="availability-note"><span class="note-icon"><i class="bi bi-bookmark-check"></i></span><div><strong>@Model.AvailableCopies.ToString("N0") copies ready to go</strong><small>Available across your collection</small></div><a asp-controller="AdminBooks" asp-action="Index" aria-label="View catalogue"><i class="bi bi-arrow-right"></i></a></div>
+    </section>
+</div>
+
+<div class="dashboard-columns lower-columns">
+    <section class="surface-panel popular-panel">
+        <div class="section-heading"><div><div class="eyebrow">READER FAVOURITES</div><h2>Popular on the shelves</h2></div><a class="text-link" asp-controller="AdminBooks" asp-action="Index">Browse catalogue <i class="bi bi-arrow-up-right"></i></a></div>
+        @if (Model.PopularBooks.Count == 0)
+        {
+            <div class="empty-state"><span class="empty-icon"><i class="bi bi-stars"></i></span><h3>Stories are waiting</h3><p>Once books start circulating, reader favourites will appear here.</p><a class="btn btn-paper btn-sm" asp-controller="AdminBooks" asp-action="Create">Add a book</a></div>
+        }
+        else
+        {
+            <div class="popular-books">
+            @{ var coverClasses = new[] { "cover-saffron", "cover-blue", "cover-sage", "cover-rose", "cover-lilac" }; var coverIcons = new[] { "bi-sun", "bi-compass", "bi-flower1", "bi-moon-stars", "bi-feather" }; }
+            @for (var i = 0; i < Model.PopularBooks.Count; i++)
+            {
+                var book = Model.PopularBooks[i];
+                <article class="popular-book"><div class="book-cover-art @coverClasses[i % coverClasses.Length]"><span class="cover-topline">SHELFWISE PICKS</span><i class="bi @coverIcons[i % coverIcons.Length]"></i><span class="cover-title">@book.Title</span><span class="cover-rule"></span></div><div class="popular-book-meta"><span class="popular-category">@book.Category</span><strong title="@book.Title">@book.Title</strong><small>@book.Author</small><span class="borrow-count"><i class="bi bi-arrow-repeat"></i> @book.IssueCount loans</span></div></article>
+            }
+            </div>
+        }
+    </section>
+    <aside class="dashboard-aside">
+        <section class="overdue-card">
+            <div class="overdue-heading"><span class="overdue-symbol"><i class="bi bi-alarm"></i></span><span class="overdue-count">@Model.OverdueLoans.ToString("00")</span></div>
+            <div class="eyebrow">A FRIENDLY NUDGE</div><h2>Overdue check-in</h2><p>@(Model.OverdueLoans == 0 ? "All caught up. Your borrowed books are right on time." : $"{Model.OverdueLoans} { (Model.OverdueLoans == 1 ? "book is" : "books are") } past their due date. A quick check-in can help bring them home.")</p>
+            <a class="overdue-link" asp-controller="AdminCirculation" asp-action="Overdue">Review overdue loans <i class="bi bi-arrow-right"></i></a>
+        </section>
+        <section class="surface-panel quick-panel"><div class="eyebrow">KEEP THINGS MOVING</div><h2>Quick actions</h2>
+            <a class="quick-action" asp-controller="AdminBooks" asp-action="Create"><span class="quick-icon quick-yellow"><i class="bi bi-plus-lg"></i></span><span><strong>Add a book</strong><small>Grow the collection</small></span><i class="bi bi-arrow-up-right ms-auto"></i></a>
+            <a class="quick-action" asp-controller="Account" asp-action="Register"><span class="quick-icon quick-blue"><i class="bi bi-person-plus"></i></span><span><strong>Register a member</strong><small>Welcome a new reader</small></span><i class="bi bi-arrow-up-right ms-auto"></i></a>
+            <a class="quick-action" asp-controller="AdminCirculation" asp-action="Issue"><span class="quick-icon quick-ink"><i class="bi bi-box-arrow-up-right"></i></span><span><strong>Issue a book</strong><small>Start a new loan</small></span><i class="bi bi-arrow-up-right ms-auto"></i></a>
+        </section>
+        <section class="fine-strip"><span class="fine-icon"><i class="bi bi-receipt"></i></span><span><small>Outstanding fines</small><strong>@Model.OutstandingFines.ToString("C")</strong></span><a asp-controller="AdminCirculation" asp-action="Payments" aria-label="Manage fine payments"><i class="bi bi-arrow-up-right"></i></a></section>
+    </aside>
+</div>

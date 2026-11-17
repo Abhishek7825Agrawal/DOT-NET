@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+.vs/
+.vscode/*.log
+.idea/
+*.user
+*.suo
+*.cache
+*.db
+*.sqlite
+*.bak
+*.publishsettings
+appsettings.*.local.json
+secrets.json
+.env
+.env.*
+!.env.example

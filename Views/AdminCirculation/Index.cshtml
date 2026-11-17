@@ -1,0 +1,234 @@
+@model IReadOnlyList<IssueRecord>
+@inject LibraryCalendar LibraryCalendar
+@{ ViewData["Title"] = (bool)ViewBag.Overdue ? "Overdue Loans Register" : "Circulation Desk"; }
+
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">Circulation & Borrowing</div>
+        <h1>@ViewData["Title"]</h1>
+        <p class="text-secondary mb-0 mt-1">Track loans, process book returns, collect fine settlements, and manage lost titles.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Payments">
+            <i class="bi bi-receipt me-1"></i> Payment Ledger
+        </a>
+        <a class="btn btn-primary" asp-action="Issue">
+            <i class="bi bi-plus-lg me-1"></i> Issue a Book
+        </a>
+    </div>
+</div>
+
+<form method="get" class="panel mb-3">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input class="form-control border-start-0 ps-0" name="q" value="@ViewBag.Query" placeholder="Search member name, email, book title or ISBN..." aria-label="Search circulation" />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="status" aria-label="Filter by loan status">
+                <option value="">All Statuses</option>
+                <option value="0" selected="@(ViewBag.Status is IssueStatus s && s == IssueStatus.Active)">Active Loans Only</option>
+                <option value="1" selected="@(ViewBag.Status is IssueStatus s1 && s1 == IssueStatus.Returned)">Returned Only</option>
+                <option value="2" selected="@(ViewBag.Status is IssueStatus s2 && s2 == IssueStatus.Lost)">Lost Books Only</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <div class="form-check pt-1">
+                <input class="form-check-input" type="checkbox" name="overdue" value="true" id="overdueCheck" checked="@((bool)ViewBag.Overdue)" />
+                <label class="form-check-label fw-semibold" for="overdueCheck">Overdue only</label>
+            </div>
+        </div>
+        <div class="col-md-2 d-grid">
+            <button class="btn btn-outline-secondary" type="submit">Filter Desk</button>
+        </div>
+    </div>
+</form>
+
+<div class="panel">
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="bi bi-arrow-left-right"></i>
+            <h3 class="h6 mt-3">No circulation records found</h3>
+            <p class="mb-0 text-muted">No loans match the selected filter criteria.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Borrower</th>
+                        <th>Issued</th>
+                        <th>Due Date</th>
+                        <th>Fines & Dues</th>
+                        <th>Status</th>
+                        <th class="text-end">Desk Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var issue in Model)
+                {
+                    var today = (DateTime)ViewBag.Today;
+                    var isOverdue = issue.Status == IssueStatus.Active && issue.DueDateUtc.Date < today;
+                    var accruedFine = FineCalculator.CalculateAccruedFine(issue, today);
+                    var outstandingBalance = FineCalculator.CalculateOutstandingBalance(issue, today);
+
+                    <tr class="@(isOverdue ? "table-light" : "")">
+                        <td>
+                            <div class="fw-semibold">@issue.Book.Title</div>
+                            <small class="text-secondary">ISBN: @(issue.Book.Isbn ?? "—")</small>
+                            @if (!string.IsNullOrWhiteSpace(issue.Remarks))
+                            {
+                                <div class="small text-muted fst-italic mt-1"><i class="bi bi-info-circle me-1"></i>@issue.Remarks</div>
+                            }
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@issue.Member.FullName</div>
+                            <small class="text-secondary">@issue.Member.User.Email</small>
+                        </td>
+                        <td>@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
+                        <td>
+                            <span class="@(isOverdue ? "text-danger fw-bold" : "")">
+                                @issue.DueDateUtc.ToString("dd MMM yyyy")
+                                @if (isOverdue)
+                                {
+                                    <span class="d-block badge text-bg-danger" style="font-size:.65rem">@((today - issue.DueDateUtc.Date).Days) days late</span>
+                                }
+                            </span>
+                        </td>
+                        <td>
+                            <div>
+                                <span class="fw-bold @(outstandingBalance > 0 ? "text-danger" : "text-muted")">
+                                    @accruedFine.ToString("C")
+                                </span>
+                                @if (issue.Status != IssueStatus.Active && issue.FinePaidAmount > 0)
+                                {
+                                    <small class="text-success d-block">Paid: @issue.FinePaidAmount.ToString("C")</small>
+                                }
+                                @if (outstandingBalance > 0)
+                                {
+                                    <small class="text-danger fw-semibold d-block">Due: @outstandingBalance.ToString("C")</small>
+                                }
+                            </div>
+                            @if (issue.FinePayments.Count > 0)
+                            {
+                                <details class="small mt-1 text-secondary">
+                                    <summary>Payments (@issue.FinePayments.Count)</summary>
+                                    <div class="p-2 border rounded bg-light mt-1" style="font-size:.78rem">
+                                        @foreach (var p in issue.FinePayments.OrderByDescending(x => x.PaymentDateUtc))
+                                        {
+                                            <div>
+                                                <strong>@p.Amount.ToString("C")</strong> via @p.PaymentMethod on @LibraryCalendar.ToLocal(p.PaymentDateUtc).ToString("dd MMM yyyy")
+                                                @(string.IsNullOrWhiteSpace(p.ReferenceNumber) ? "" : $" (Ref: {p.ReferenceNumber})")
+                                            </div>
+                                        }
+                                    </div>
+                                </details>
+                            }
+                        </td>
+                        <td>
+                            @if (isOverdue)
+                            {
+                                <span class="badge rounded-pill text-bg-danger">Overdue</span>
+                            }
+                            else if (issue.Status == IssueStatus.Active)
+                            {
+                                <span class="badge rounded-pill badge-soft">Active Loan</span>
+                            }
+                            else if (issue.Status == IssueStatus.Returned)
+                            {
+                                <span class="badge rounded-pill text-bg-light border">Returned</span>
+                            }
+                            else if (issue.Status == IssueStatus.Lost)
+                            {
+                                <span class="badge rounded-pill text-bg-dark">Declared Lost</span>
+                            }
+                        </td>
+                        <td class="text-end text-nowrap">
+                            @if (issue.Status == IssueStatus.Active)
+                            {
+                                <div class="d-flex gap-1 justify-content-end">
+                                    <!-- Return Form -->
+                                    <form asp-action="Return" asp-route-id="@issue.Id" method="post" class="d-inline" data-confirm="Confirm receipt and return of '@issue.Book.Title'?">
+                                        <button class="btn btn-sm btn-outline-primary" type="submit" title="Record Return">
+                                            <i class="bi bi-box-arrow-in-down me-1"></i> Return
+                                        </button>
+                                    </form>
+
+                                    <!-- Mark Lost Form -->
+                                    <form asp-action="MarkLost" asp-route-id="@issue.Id" method="post" class="d-inline" data-confirm="Declare this title as LOST by the borrower? Total book inventory will be adjusted and penalty recorded.">
+                                        <button class="btn btn-sm btn-outline-dark" type="submit" title="Mark as Lost">
+                                            <i class="bi bi-x-octagon me-1"></i> Lost
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                            else if (outstandingBalance > 0)
+                            {
+                                <!-- Record Fine Payment Form -->
+                                <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#payForm_@issue.Id" aria-expanded="false" aria-controls="payForm_@issue.Id">
+                                    <i class="bi bi-cash me-1"></i> Record Payment
+                                </button>
+                                <div class="collapse mt-2 text-start" id="payForm_@issue.Id">
+                                    <form asp-action="PayFine" asp-route-id="@issue.Id" method="post" class="p-2 border rounded bg-white shadow-sm" style="min-width:240px">
+                                        <div class="mb-2">
+                                            <label class="form-label small mb-1" for="amt_@issue.Id">Amount (₹)</label>
+                                            <input id="amt_@issue.Id" name="Amount" type="number" min="0.01" max="@outstandingBalance" step="0.01" value="@outstandingBalance" class="form-control form-control-sm" required />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small mb-1" for="method_@issue.Id">Payment Method</label>
+                                            <select id="method_@issue.Id" name="PaymentMethod" class="form-select form-select-sm">
+                                                <option value="0">Cash</option>
+                                                <option value="1">Bank Transfer (UPI / IMPS)</option>
+                                                <option value="2">Card</option>
+                                                <option value="3">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small mb-1" for="ref_@issue.Id">Transaction Reference</label>
+                                            <input id="ref_@issue.Id" name="ReferenceNumber" maxlength="120" placeholder="Optional Receipt / UPI ID" class="form-control form-control-sm" />
+                                        </div>
+                                        <button class="btn btn-success btn-sm w-100" type="submit">Submit Payment</button>
+                                    </form>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-success small fw-semibold"><i class="bi bi-check2-all me-1"></i>Settled</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if ((int)ViewBag.TotalPages > 1)
+{
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <span class="small text-secondary">Page @ViewBag.Page of @ViewBag.TotalPages</span>
+        <nav aria-label="Circulation pagination">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @((int)ViewBag.Page <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page - 1)" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">Previous</a>
+                </li>
+                @for (var p = Math.Max(1, (int)ViewBag.Page - 2); p <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.Page + 2); p++)
+                {
+                    <li class="page-item @(p == (int)ViewBag.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">@p</a>
+                    </li>
+                }
+                <li class="page-item @((int)ViewBag.Page >= (int)ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page + 1)" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

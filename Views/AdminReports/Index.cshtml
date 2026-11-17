@@ -1,0 +1,201 @@
+@model ReportsDashboardDto
+@{ ViewData["Title"] = "Reports & Analytics"; }
+
+<div class="page-heading">
+    <div>
+        <div class="eyebrow">Executive Intelligence</div>
+        <h1>Reports & Library Analytics</h1>
+        <p class="text-secondary mb-0 mt-1">Operational metrics, circulation volume trends, borrowing leaderboards, and CSV data exports.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-secondary" asp-action="ExportBooks">
+            <i class="bi bi-filetype-csv me-1"></i> Books CSV
+        </a>
+        <a class="btn btn-outline-secondary" asp-action="ExportCirculation">
+            <i class="bi bi-filetype-csv me-1"></i> Loans CSV
+        </a>
+        <a class="btn btn-outline-secondary" asp-action="ExportPayments">
+            <i class="bi bi-filetype-csv me-1"></i> Fines CSV
+        </a>
+    </div>
+</div>
+
+<!-- Primary Metric Counters -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon"><i class="bi bi-journal-album"></i></div>
+            <div class="stat-label">Total Inventory Copies</div>
+            <div class="stat-value">@Model.TotalCopies</div>
+            <div class="small text-secondary mt-1">
+                <span class="text-success fw-semibold">@Model.AvailableCopies</span> available · <span class="text-primary fw-semibold">@Model.CheckedOutCopies</span> on loan
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon" style="background:#e8f4fd;color:#0d6efd"><i class="bi bi-people"></i></div>
+            <div class="stat-label">Borrower Registry</div>
+            <div class="stat-value">@Model.TotalMembers</div>
+            <div class="small text-secondary mt-1">
+                <span class="text-success fw-semibold">@Model.ActiveMembers</span> active · <span class="text-muted">@Model.InactiveMembers</span> suspended
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon" style="background:#fef7ea;color:#b87d18"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-label">Total Collected Fines</div>
+            <div class="stat-value text-success">@Model.TotalFinesCollected.ToString("C")</div>
+            <div class="small text-secondary mt-1">
+                Total levied: @Model.TotalFinesLevied.ToString("C")
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon" style="background:#fbeeee;color:#c93b3b"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="stat-label">Outstanding Balances</div>
+            <div class="stat-value text-danger">@Model.OutstandingBalance.ToString("C")</div>
+            <div class="small text-secondary mt-1">
+                <span class="text-danger fw-semibold">@Model.OverdueLoans</span> loans currently overdue
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Circulation Trends & Activity -->
+<div class="panel mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="panel-title"><i class="bi bi-graph-up text-primary me-2"></i>7-Day Circulation Activity</h2>
+            <small class="text-secondary">Comparative volume of book loans and returns over the past week</small>
+        </div>
+        <div class="d-flex gap-3 small">
+            <div><span class="d-inline-block rounded me-1" style="width:12px;height:12px;background:var(--brand)"></span> Issues</div>
+            <div><span class="d-inline-block rounded me-1" style="width:12px;height:12px;background:#8fb9a8"></span> Returns</div>
+        </div>
+    </div>
+
+    @{
+        var maxActivity = Model.TrendDays.Select(d => Math.Max(d.Issues, d.Returns)).DefaultIfEmpty(1).Max();
+        if (maxActivity == 0) maxActivity = 1;
+    }
+
+    <div class="chart-bar-wrap">
+        @foreach (var day in Model.TrendDays)
+        {
+            var issueHeight = (int)Math.Max(6, (day.Issues / (double)maxActivity) * 90);
+            var returnHeight = (int)Math.Max(6, (day.Returns / (double)maxActivity) * 90);
+
+            <div class="chart-col">
+                <div class="d-flex align-items-flex-end gap-1 w-100 justify-content-center" style="height:90px">
+                    <div class="chart-bar" style="height:@issueHeight% !important" title="@day.Issues issues on @day.Label"></div>
+                    <div class="chart-bar secondary" style="height:@returnHeight% !important" title="@day.Returns returns on @day.Label"></div>
+                </div>
+                <span class="chart-bar-label">@day.Label</span>
+                <span class="text-muted" style="font-size:.65rem">@day.Issues / @day.Returns</span>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Leaderboards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="panel h-100">
+            <h2 class="panel-title mb-3"><i class="bi bi-trophy text-warning me-2"></i>Most Borrowed Titles</h2>
+            @if (Model.TopBooks.Count == 0)
+            {
+                <div class="empty-state py-4"><i class="bi bi-book"></i><p class="mb-0 mt-2">No borrowing records available yet.</p></div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead><tr><th>Rank & Title</th><th>Category</th><th class="text-end">Times Borrowed</th></tr></thead>
+                        <tbody>
+                            @{ var rank = 1; }
+                            @foreach (var book in Model.TopBooks)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge text-bg-light border rounded-circle">@rank</span>
+                                            <div>
+                                                <div class="fw-semibold">@book.Title</div>
+                                                <small class="text-secondary">by @book.Author</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge rounded-pill badge-soft">@book.Category</span></td>
+                                    <td class="text-end fw-bold text-primary">@book.BorrowCount</td>
+                                </tr>
+                                rank++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="panel h-100">
+            <h2 class="panel-title mb-3"><i class="bi bi-star text-primary me-2"></i>Top Active Borrowers</h2>
+            @if (Model.TopBorrowers.Count == 0)
+            {
+                <div class="empty-state py-4"><i class="bi bi-people"></i><p class="mb-0 mt-2">No borrower activity recorded yet.</p></div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead><tr><th>Member</th><th class="text-end">Total Loans</th></tr></thead>
+                        <tbody>
+                            @foreach (var member in Model.TopBorrowers)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">@member.MemberName</div>
+                                        <small class="text-secondary">@member.Email</small>
+                                    </td>
+                                    <td class="text-end fw-bold text-success">@member.TotalLoans loans</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Data Export Hub -->
+<div class="panel">
+    <h2 class="panel-title mb-3"><i class="bi bi-cloud-arrow-down text-secondary me-2"></i>Data Export & Reporting Hub</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-light">
+                <div class="fw-bold mb-1"><i class="bi bi-journal-text text-primary me-1"></i> Books Catalogue CSV</div>
+                <p class="small text-secondary mb-3">Download complete list of books, ISBNs, categories, and inventory counts.</p>
+                <a class="btn btn-outline-primary btn-sm w-100" asp-action="ExportBooks">Download Inventory CSV</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-light">
+                <div class="fw-bold mb-1"><i class="bi bi-arrow-repeat text-success me-1"></i> Circulation History CSV</div>
+                <p class="small text-secondary mb-3">Download historical loan logs, due dates, return dates, and fine amounts.</p>
+                <a class="btn btn-outline-success btn-sm w-100" asp-action="ExportCirculation">Download Circulation CSV</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-light">
+                <div class="fw-bold mb-1"><i class="bi bi-cash-coin text-warning me-1"></i> Fine Settlements CSV</div>
+                <p class="small text-secondary mb-3">Download comprehensive receipt logs with dates, amounts, and transaction IDs.</p>
+                <a class="btn btn-outline-secondary btn-sm w-100" asp-action="ExportPayments">Download Payments CSV</a>
+            </div>
+        </div>
+    </div>
+</div>
+
