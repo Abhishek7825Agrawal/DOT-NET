@@ -1,16 +1,18 @@
 /* ==========================================================================
-   SHELFWISE — THE ART OF READING
-   Dashboard: Editorial Magazine Dashboard & Operations Desk
+   SHELFWISE — WARM ARCHIVE & WOODEN SHELF
+   Dashboard: Wooden Archive Bureau & Librarian Operations Desk
    ========================================================================== */
 
-/* Editorial Hero Banner */
+/* --------------------------------------------------------------------------
+   1. Archival Bureau Hero Banner (Warm Parchment & Dark Walnut Wood)
+   -------------------------------------------------------------------------- */
 .sw-editorial-hero {
     position: relative;
-    padding: clamp(1.5rem, 4vw, 3.25rem);
-    background-color: var(--sw-surface);
-    border: 1.5px solid var(--sw-border);
+    padding: clamp(1.75rem, 4vw, 3.25rem);
+    background: radial-gradient(circle at 85% 15%, var(--sw-bg-alt) 0%, var(--sw-surface) 65%);
+    border: 1px solid var(--sw-border-warm);
     border-radius: var(--sw-radius-lg);
-    box-shadow: var(--sw-shadow-sm);
+    box-shadow: var(--sw-shadow-parchment);
     margin-bottom: var(--sw-space-8);
     overflow: hidden;
     display: flex;
@@ -28,7 +30,8 @@
     left: 0;
     bottom: 0;
     width: 6px;
-    background: linear-gradient(180deg, var(--sw-terracotta) 0%, var(--sw-sage) 100%);
+    background: linear-gradient(180deg, var(--sw-gold-brass) 0%, var(--sw-wood-dark) 100%);
+    box-shadow: 1px 0 3px rgba(0, 0, 0, 0.25);
 }
 
 .sw-hero-content {
@@ -48,29 +51,31 @@
     margin-bottom: var(--sw-space-3);
     font-family: var(--sw-font-mono);
     font-size: var(--sw-text-xs);
-    color: var(--sw-text-muted);
+    color: var(--sw-gold-brass);
+    font-weight: 600;
 }
 
 .sw-hero-title {
-    font-size: clamp(1.75rem, 3.8vw, 3.25rem);
-    line-height: 1.1;
-    letter-spacing: -0.03em;
+    font-size: clamp(1.85rem, 3.8vw, 3.25rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
     margin-bottom: var(--sw-space-3);
     word-break: break-word;
     overflow-wrap: break-word;
+    color: var(--sw-text);
 }
 
 .sw-hero-title em {
     font-family: var(--sw-font-heading);
     font-style: italic;
     font-weight: 400;
-    color: var(--sw-terracotta);
+    color: var(--sw-gold-brass);
 }
 
 .sw-hero-desc {
     font-size: var(--sw-text-md);
     color: var(--sw-text-muted);
-    line-height: 1.6;
+    line-height: 1.65;
     margin-bottom: var(--sw-space-6);
     max-width: 580px;
     word-break: normal;
@@ -84,26 +89,27 @@
     flex-wrap: wrap;
 }
 
+/* Vintage Archive Seal Artwork */
 .sw-hero-artwork {
     position: relative;
     display: none;
     z-index: 1;
 }
 
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 992px) {
     .sw-hero-artwork {
         display: block;
-        width: 160px;
-        height: 160px;
+        width: 180px;
+        height: 180px;
         flex-shrink: 0;
     }
     .sw-hero-art-circle {
         position: absolute;
-        width: 145px;
-        height: 145px;
+        width: 170px;
+        height: 170px;
         border-radius: 50%;
         background-color: var(--sw-bg-alt);
-        border: 2px dashed var(--sw-border);
+        border: 2px dashed var(--sw-gold-brass);
         top: 5px;
         right: 5px;
     }
@@ -112,54 +118,21 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(-6deg);
-        font-size: 4.5rem;
-        color: var(--sw-primary);
-        opacity: 0.85;
+        font-size: 5rem;
+        color: var(--sw-gold-brass);
+        opacity: 0.9;
     }
 }
 
-@media (min-width: 1200px) {
-    .sw-hero-artwork {
-        display: block;
-        width: 220px;
-        height: 220px;
-        flex-shrink: 0;
-    }
-    .sw-hero-art-circle {
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        background-color: var(--sw-bg-alt);
-        border: 2px dashed var(--sw-border);
-        top: 10px;
-        right: 10px;
-    }
-    .sw-hero-art-icon {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(-6deg);
-        font-size: 6rem;
-        color: var(--sw-primary);
-        opacity: 0.85;
-    }
-}
-
-/* Featured / Popular Books Showcase */
-.sw-showcase-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: var(--sw-space-5);
-}
-
-/* Analytics & Circulation Bars */
+/* --------------------------------------------------------------------------
+   2. Archival Loan & Circulation Ledgers (Analytics Panel)
+   -------------------------------------------------------------------------- */
 .sw-analytics-panel {
     background-color: var(--sw-surface);
-    border: 1.5px solid var(--sw-border);
+    border: 1px solid var(--sw-border-warm);
     border-radius: var(--sw-radius-md);
     padding: var(--sw-space-6);
-    box-shadow: var(--sw-shadow-sm);
+    box-shadow: var(--sw-shadow-parchment);
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -193,30 +166,34 @@
     background-color: var(--sw-bg-alt);
     border-radius: var(--sw-radius-xs);
     overflow: hidden;
+    border: 1px solid var(--sw-border-subtle);
 }
 
 .sw-chart-bar-fill {
     width: 100%;
-    background-color: var(--sw-primary);
+    background: linear-gradient(180deg, var(--sw-gold-brass) 0%, var(--sw-walnut-deep) 100%);
     border-radius: var(--sw-radius-xs) var(--sw-radius-xs) 0 0;
     transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sw-chart-bar-fill.accent {
-    background-color: var(--sw-terracotta);
+    background: linear-gradient(180deg, #dfbd78 0%, #c8963e 100%);
 }
 
-.sw-chart-bar-fill.sage {
-    background-color: var(--sw-sage-dark);
+.sw-chart-bar-fill.sage,
+.sw-chart-bar-fill.forest {
+    background: linear-gradient(180deg, #2e594f 0%, #1f3d36 100%);
 }
 
 .sw-chart-day-label {
     font-family: var(--sw-font-mono);
     font-size: var(--sw-text-2xs);
-    color: var(--sw-text-subtle);
+    color: var(--sw-text-muted);
 }
 
-/* Quick Action Desk Bar */
+/* --------------------------------------------------------------------------
+   3. Librarian Desk Tools & Quick Action Tiles
+   -------------------------------------------------------------------------- */
 .sw-quick-actions-bar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -230,35 +207,38 @@
     gap: 0.85rem;
     padding: var(--sw-space-4);
     background-color: var(--sw-surface);
-    border: 1.5px solid var(--sw-border);
+    border: 1px solid var(--sw-border-warm);
     border-radius: var(--sw-radius-md);
     text-decoration: none;
     color: var(--sw-text);
     transition: all var(--sw-transition-fast);
+    box-shadow: var(--sw-shadow-parchment);
 }
 
 .sw-quick-action-tile:hover {
-    border-color: var(--sw-border-strong);
+    border-color: var(--sw-gold-brass);
     transform: translateY(-2px);
     box-shadow: var(--sw-shadow-md);
-    color: var(--sw-terracotta);
+    color: var(--sw-walnut-deep);
 }
 
 .sw-tile-icon {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     display: grid;
     place-items: center;
     border-radius: var(--sw-radius-sm);
     background-color: var(--sw-bg-alt);
     font-size: 1.25rem;
-    color: var(--sw-text);
+    color: var(--sw-gold-brass);
     flex-shrink: 0;
+    border: 1px solid var(--sw-border-warm);
 }
 
 .sw-quick-action-tile:hover .sw-tile-icon {
-    background-color: var(--sw-terracotta-light);
-    color: var(--sw-terracotta);
+    background: linear-gradient(135deg, var(--sw-walnut-deep) 0%, var(--sw-wood-dark) 100%);
+    color: var(--sw-gold-brass);
+    border-color: var(--sw-gold-brass);
 }
 
 .sw-tile-info {

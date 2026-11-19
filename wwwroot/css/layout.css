@@ -1,6 +1,6 @@
 /* ==========================================================================
-   SHELFWISE — THE ART OF READING
-   Layout: Balanced Editorial Container Architecture
+   SHELFWISE — WARM ARCHIVE & WOODEN SHELF
+   Layout: Balanced Archival Container Architecture & Grand Wooden Shelves
    ========================================================================== */
 
 html {
@@ -19,6 +19,9 @@ body {
     position: relative;
     margin: 0;
     padding: 0;
+    background-color: var(--sw-bg);
+    color: var(--sw-text);
+    font-family: var(--sw-font-body);
 }
 
 .sw-shell {
@@ -52,7 +55,18 @@ body {
     gap: var(--sw-space-4);
     margin-bottom: var(--sw-space-8);
     padding-bottom: var(--sw-space-6);
-    border-bottom: 1.5px solid var(--sw-border);
+    border-bottom: 2px solid var(--sw-border-warm);
+    position: relative;
+}
+
+.sw-page-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 80px;
+    height: 2px;
+    background-color: var(--sw-gold-brass);
 }
 
 .sw-page-title-group {
@@ -66,7 +80,7 @@ body {
     flex-wrap: wrap;
 }
 
-/* Breadcrumbs */
+/* Breadcrumbs (Archive Call Numbers & Catalog Index) */
 .sw-breadcrumbs {
     display: flex;
     align-items: center;
@@ -84,20 +98,24 @@ body {
 }
 
 .sw-breadcrumbs a:hover {
-    color: var(--sw-terracotta);
+    color: var(--sw-gold-brass);
 }
 
 .sw-breadcrumbs .sw-crumb-separator {
-    color: var(--sw-text-subtle);
-    font-size: 0.7rem;
+    color: var(--sw-gold-brass);
+    font-size: 0.75rem;
 }
 
 .sw-breadcrumbs .sw-crumb-current {
-    color: var(--sw-text);
-    font-weight: 500;
+    color: var(--sw-walnut-deep);
+    font-weight: 600;
 }
 
-/* Editorial Grid Layouts */
+[data-theme="dark"] .sw-breadcrumbs .sw-crumb-current {
+    color: var(--sw-paper-cream);
+}
+
+/* Archival Grid Layouts */
 .sw-grid-asymmetric {
     display: grid;
     grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
@@ -126,14 +144,14 @@ body {
     margin-bottom: var(--sw-space-8);
 }
 
-/* Call to Action Band */
+/* Call to Action Band: Warm Archive Mahogany Plaque */
 .sw-cta-card {
     padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 3rem);
-    background-color: var(--sw-navy);
-    color: var(--sw-paper);
+    background: radial-gradient(circle at 70% 30%, var(--sw-wood-dark) 0%, var(--sw-walnut-deep) 100%);
+    color: var(--sw-paper-cream);
     border-radius: var(--sw-radius-lg);
-    border: 1.5px solid var(--sw-border-strong);
-    box-shadow: var(--sw-shadow-sm);
+    border: 2px solid var(--sw-gold-brass);
+    box-shadow: 0 10px 30px rgba(20, 13, 8, 0.45);
     overflow: hidden;
     width: 100%;
 }
@@ -146,15 +164,15 @@ body {
     flex-wrap: wrap;
 }
 
-/* Editorial Footer */
+/* Archival Wood Footer */
 .sw-footer {
-    background-color: var(--sw-surface);
-    border-top: 1.5px solid var(--sw-border);
+    background-color: var(--sw-nav-bg);
+    border-top: 2px solid var(--sw-gold-brass);
     padding: var(--sw-space-8) clamp(1rem, 3vw, 2.5rem);
     margin-top: auto;
     font-family: var(--sw-font-body);
     font-size: var(--sw-text-sm);
-    color: var(--sw-text-muted);
+    color: var(--sw-gold-muted);
 }
 
 .sw-footer-inner {
@@ -174,20 +192,20 @@ body {
     font-family: var(--sw-font-heading);
     font-weight: 700;
     font-size: var(--sw-text-md);
-    color: var(--sw-text);
+    color: var(--sw-paper-cream);
 }
 
 .sw-footer-tagline {
     font-family: var(--sw-font-heading);
     font-style: italic;
-    color: var(--sw-text-subtle);
+    color: var(--sw-gold-brass);
 }
 
 .sw-footer-meta {
     font-family: var(--sw-font-mono);
     font-size: var(--sw-text-2xs);
-    letter-spacing: 0.06em;
-    color: var(--sw-text-subtle);
+    letter-spacing: 0.08em;
+    color: var(--sw-gold-muted);
 }
 
 /* Responsive Overrides */

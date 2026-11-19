@@ -1,13 +1,13 @@
 @model IssueBookViewModel
 @{
-    ViewData["Title"] = "Issue a Book";
+    ViewData["Title"] = "Circulation Desk · Issue Volume";
 }
 
 <div class="sw-page-header">
     <div class="sw-page-title-group">
-        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Circulation Operations</div>
-        <h1 class="sw-title-display">Issue a Book</h1>
-        <p class="sw-page-subtitle">Select an eligible borrower and an available catalogue title to originate a loan record.</p>
+        <div class="sw-kicker sw-kicker-forest"><i class="bi bi-arrow-left-right me-1"></i> CIRCULATION &amp; LOAN DESK</div>
+        <h1 class="sw-h1">Issue Archive Volume</h1>
+        <p class="sw-body text-muted mb-0">Record loan issuance onto reader's library card with automated 14-day return period.</p>
     </div>
     <div class="sw-page-actions">
         <a class="sw-btn sw-btn-outline" asp-action="Index">
@@ -18,40 +18,51 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-8 col-xl-7">
-        <div class="sw-table-card p-4 p-md-5 sw-fade-in-up">
+        <!-- Vintage Library Borrower Card Visual Container -->
+        <div class="library-card-visual sw-fade-in-up">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-warning border-opacity-50">
+                <div>
+                    <span class="brass-tag"><i class="bi bi-card-text me-1"></i> BORROWER LOAN SLIP</span>
+                    <h3 class="sw-h3 mt-1 mb-0" style="color: var(--sw-walnut-deep);">Shelfwise Library Card Register</h3>
+                </div>
+                <div class="stamp-box stamp-issued">
+                    STANDARD 14 DAYS
+                </div>
+            </div>
+
             <form asp-action="Issue" method="post" id="issueBookForm">
                 <div asp-validation-summary="ModelOnly" class="sw-alert sw-alert-danger mb-4"></div>
 
                 <div class="mb-4">
-                    <label asp-for="MemberId" class="sw-form-label">Select Borrower / Member <span class="text-danger">*</span></label>
-                    <select asp-for="MemberId" asp-items="ViewBag.Members" class="form-select sw-input" required>
-                        <option value="0">-- Choose registered active member --</option>
+                    <label asp-for="MemberId" class="sw-form-label">Borrower / Cardholder Name <span class="text-danger">*</span></label>
+                    <select asp-for="MemberId" asp-items="ViewBag.Members" class="sw-input" required>
+                        <option value="0">-- Choose registered active member card --</option>
                     </select>
                     <span asp-validation-for="MemberId" class="text-danger small mt-1 d-block"></span>
-                    <div class="form-text small text-muted mt-1">Only active borrowers without excessive overdue penalties are eligible for issuance.</div>
+                    <div class="form-text small text-muted mt-1">Only active borrowers without outstanding penalty holds are eligible.</div>
                 </div>
 
                 <div class="mb-4">
-                    <label asp-for="BookId" class="sw-form-label">Select Book Volume <span class="text-danger">*</span></label>
-                    <select asp-for="BookId" asp-items="ViewBag.Books" class="form-select sw-input" required>
-                        <option value="0">-- Choose book title with available inventory copies --</option>
+                    <label asp-for="BookId" class="sw-form-label">Archive Volume Selection <span class="text-danger">*</span></label>
+                    <select asp-for="BookId" asp-items="ViewBag.Books" class="sw-input" required>
+                        <option value="0">-- Choose catalogued volume with stack inventory --</option>
                     </select>
                     <span asp-validation-for="BookId" class="text-danger small mt-1 d-block"></span>
-                    <div class="form-text small text-muted mt-1">Available inventory count decrements immediately upon issue submission.</div>
+                    <div class="form-text small text-muted mt-1">Available stack copies decrement immediately upon loan creation.</div>
                 </div>
 
-                <div class="p-3 rounded mb-4 d-flex align-items-start gap-2" style="background-color: var(--sw-bg-alt); border: 1.5px solid var(--sw-border);">
-                    <i class="bi bi-info-circle text-primary mt-1"></i>
+                <div class="p-3 rounded mb-4 d-flex align-items-start gap-2" style="background-color: rgba(200, 150, 62, 0.1); border: 1px dashed var(--sw-gold-brass);">
+                    <i class="bi bi-info-circle text-warning mt-1 fs-5"></i>
                     <div class="small text-muted">
-                        Due date will automatically be set according to the active library loan period (14 standard days). Duplicate active loans of the exact same title to a single member are prevented.
+                        Due date will automatically be calculated as <strong>@(DateTime.Today.AddDays(14).ToString("dd MMMM yyyy"))</strong>. Borrowing limits and duplicate active loan protections are actively enforced.
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center gap-3 pt-3 border-top" style="border-color: var(--sw-border) !important;">
-                    <button class="sw-btn sw-btn-primary sw-btn-lg" type="submit">
-                        <i class="bi bi-check2-circle me-1"></i> Confirm &amp; Issue Volume
+                <div class="d-flex align-items-center justify-content-between pt-3 border-top border-warning border-opacity-50">
+                    <button class="sw-btn sw-btn-brass sw-btn-lg" type="submit">
+                        <i class="bi bi-check2-circle me-1"></i> Stamp &amp; Issue Volume
                     </button>
-                    <a class="sw-btn sw-btn-outline sw-btn-lg" asp-action="Index">Cancel</a>
+                    <a class="sw-btn sw-btn-outline" asp-action="Index">Cancel</a>
                 </div>
             </form>
         </div>

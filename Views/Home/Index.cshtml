@@ -1,32 +1,32 @@
 @{
-    ViewData["Title"] = "The Art of Reading";
+    ViewData["Title"] = "Warm Archive & Wooden Shelf Library";
 }
 
-<!-- Editorial Magazine Hero -->
+<!-- Grand Wooden Library Entrance Hero -->
 <section class="sw-editorial-hero sw-fade-in-up my-4" aria-labelledby="home-hero-title">
     <div class="sw-hero-content">
         <div class="sw-hero-meta">
-            <span class="sw-kicker">The Art of Reading</span>
-            <span class="sw-volume-tag">Shelfwise Library Edition</span>
+            <span class="brass-tag"><i class="bi bi-bank me-1"></i> GRAND ARCHIVE</span>
+            <span class="sw-mono small">EST. UNIVERSITY ARCHIVE</span>
             <span class="d-none d-sm-inline">·</span>
-            <span>Open Access Archive</span>
+            <span class="sw-mono small">READ. HIGHLIGHT. THINK. CREATE. SHARE.</span>
         </div>
         <h1 class="sw-hero-title" id="home-hero-title">
-            Where every page turns<br class="d-none d-sm-inline" />
-            into <em>a new horizon.</em>
+            The timeless warmth of wooden stacks,<br class="d-none d-sm-inline" />
+            powered by <em>modern scholarship.</em>
         </h1>
         <p class="sw-hero-desc">
-            A modern library platform pairing timeless editorial design with precision circulation management. Explore curated literature, track borrowing history, and discover ideas that endure.
+            A university-grade digital archive inspired by antique wooden reading rooms, library card catalogs, and parchment manuscripts. Browse realistic book spines, stream digital PDFs with side-by-side notes, and trade peer-reviewed research folios.
         </p>
         <div class="sw-hero-actions">
-            <a class="sw-btn sw-btn-accent sw-btn-lg" asp-controller="Books" asp-action="Index">
-                <i class="bi bi-compass"></i> Explore the Catalogue
+            <a class="sw-btn sw-btn-brass sw-btn-lg" asp-controller="Books" asp-action="Index">
+                <i class="bi bi-bookshelf"></i> Explore Wooden Bookshelf
             </a>
-            <a class="sw-btn sw-btn-primary sw-btn-lg" asp-controller="Account" asp-action="Register">
-                <i class="bi bi-person-plus"></i> Join the Library
+            <a class="sw-btn sw-btn-forest sw-btn-lg" asp-controller="DigitalLibrary" asp-action="Index">
+                <i class="bi bi-file-earmark-pdf"></i> Digital Reading Room
             </a>
-            <a class="sw-btn sw-btn-outline sw-btn-lg" asp-controller="Account" asp-action="Login">
-                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            <a class="sw-btn sw-btn-outline sw-btn-lg" asp-controller="Marketplace" asp-action="Index">
+                <i class="bi bi-mortarboard"></i> Research Marketplace
             </a>
         </div>
     </div>
@@ -36,78 +36,106 @@
     </div>
 </section>
 
-<!-- Editorial Highlights & Features Grid -->
+<!-- Archival Pillars Grid -->
 <section class="my-5 sw-fade-in-up" aria-labelledby="features-heading">
     <div class="sw-section-header">
         <div>
-            <span class="sw-kicker">Platform Pillars</span>
-            <h2 class="sw-h2" id="features-heading">Crafted for Readers &amp; Curators</h2>
+            <span class="sw-kicker sw-kicker-forest"><i class="bi bi-compass"></i> PLATFORM ARCHITECTURE</span>
+            <h2 class="sw-h2" id="features-heading">Crafted for Scholars, Curators &amp; Researchers</h2>
         </div>
-        <span class="sw-mono small text-muted">Enterprise Monolith Architecture</span>
+        <span class="brass-tag">ASP.NET Core &amp; EF Core 10</span>
     </div>
 
-    <div class="sw-grid-3-col">
-        <article class="sw-kpi-card sw-stagger-1">
+    <div class="sw-grid-4-col">
+        <article class="parchment-card sw-stagger-1">
             <div class="sw-kpi-header">
-                <span class="sw-kpi-label">Archive Collection</span>
-                <div class="sw-kpi-icon sw-icon-terracotta"><i class="bi bi-journals"></i></div>
+                <span class="sw-kpi-label">Physical Archive</span>
+                <div class="sw-kpi-icon sw-icon-brass"><i class="bi bi-bookshelf"></i></div>
             </div>
-            <h3 class="sw-h3 mt-2 mb-2">Curated Stacks</h3>
+            <h3 class="sw-h3 mt-2 mb-2">Wooden Bookshelf</h3>
             <p class="text-muted small mb-4">
-                Rich cataloguing across computer science, literature, history, and scientific treatises with ISBN validation and instant availability tracking.
+                Rich 3D horizontal book spines arranged on realistic wooden shelves with vertical embossed titles, leather colors, and lift-up hover transitions.
             </p>
-            <div class="mt-auto pt-2 border-top">
-                <a class="sw-mono small text-terracotta text-decoration-none" asp-controller="Books" asp-action="Index">
-                    Browse shelves <i class="bi bi-arrow-right"></i>
+            <div class="mt-auto pt-2 border-top border-warning border-opacity-25">
+                <a class="sw-mono small text-decoration-none fw-bold" style="color: var(--sw-gold-brass);" asp-controller="Books" asp-action="Index">
+                    Open bookshelf &rarr;
                 </a>
             </div>
         </article>
 
-        <article class="sw-kpi-card sw-stagger-2">
+        <article class="parchment-card sw-stagger-2">
             <div class="sw-kpi-header">
-                <span class="sw-kpi-label">Desk Operations</span>
-                <div class="sw-kpi-icon sw-icon-sage"><i class="bi bi-arrow-left-right"></i></div>
+                <span class="sw-kpi-label">Digital Workspace</span>
+                <div class="sw-kpi-icon sw-icon-forest"><i class="bi bi-layout-split"></i></div>
             </div>
-            <h3 class="sw-h3 mt-2 mb-2">Precision Circulation</h3>
+            <h3 class="sw-h3 mt-2 mb-2">Parchment Reader</h3>
             <p class="text-muted small mb-4">
-                Seamless issue, check-in, loan renewals, automated daily overdue calculation, and financial fine receipt management.
+                Side-by-side workspace combining Mozilla PDF.js streaming, 4-color persistent highlights, autosaved Quill notes, and citation clipping.
             </p>
-            <div class="mt-auto pt-2 border-top">
+            <div class="mt-auto pt-2 border-top border-warning border-opacity-25">
+                <a class="sw-mono small text-decoration-none fw-bold" style="color: var(--sw-forest-green);" asp-controller="DigitalLibrary" asp-action="Index">
+                    Enter reading room &rarr;
+                </a>
+            </div>
+        </article>
+
+        <article class="parchment-card sw-stagger-3">
+            <div class="sw-kpi-header">
+                <span class="sw-kpi-label">Marketplace</span>
+                <div class="sw-kpi-icon sw-icon-walnut"><i class="bi bi-mortarboard"></i></div>
+            </div>
+            <h3 class="sw-h3 mt-2 mb-2">Research Folios</h3>
+            <p class="text-muted small mb-4">
+                Scholarly manuscript marketplace with author publishing desk, editorial review, immutable document versioning, and itemized sales ledgers.
+            </p>
+            <div class="mt-auto pt-2 border-top border-warning border-opacity-25">
+                <a class="sw-mono small text-decoration-none fw-bold" style="color: var(--sw-walnut-deep);" asp-controller="Marketplace" asp-action="Index">
+                    Explore research &rarr;
+                </a>
+            </div>
+        </article>
+
+        <article class="parchment-card sw-stagger-4">
+            <div class="sw-kpi-header">
+                <span class="sw-kpi-label">Circulation Desk</span>
+                <div class="sw-kpi-icon sw-icon-brass"><i class="bi bi-card-checklist"></i></div>
+            </div>
+            <h3 class="sw-h3 mt-2 mb-2">Rubber-Stamp Desk</h3>
+            <p class="text-muted small mb-4">
+                Vintage borrower card visuals, 14-day loan stamps, automated daily penalty calculations, and animated "STAMPED RETURNED" seals.
+            </p>
+            <div class="mt-auto pt-2 border-top border-warning border-opacity-25">
                 <span class="sw-mono small text-muted">14-Day Terms · Zero-Grace Audit</span>
-            </div>
-        </article>
-
-        <article class="sw-kpi-card sw-stagger-3">
-            <div class="sw-kpi-header">
-                <span class="sw-kpi-label">Reader Experience</span>
-                <div class="sw-kpi-icon sw-icon-navy"><i class="bi bi-person-vcard"></i></div>
-            </div>
-            <h3 class="sw-h3 mt-2 mb-2">Personal Reading Room</h3>
-            <p class="text-muted small mb-4">
-                Dedicated cardholder portal tracking currently borrowed volumes, due date countdowns, outstanding balances, and historical loans.
-            </p>
-            <div class="mt-auto pt-2 border-top">
-                <a class="sw-mono small text-terracotta text-decoration-none" asp-controller="Account" asp-action="Login">
-                    Reader Sign in <i class="bi bi-arrow-right"></i>
-                </a>
             </div>
         </article>
     </div>
 </section>
 
+<!-- Archival Quote Plaque -->
+<section class="p-4 p-md-5 my-5 rounded text-center position-relative overflow-hidden" 
+         style="background: radial-gradient(circle at 50% 50%, #3d291b 0%, #251810 100%); border: 2px solid var(--sw-gold-brass); box-shadow: 0 8px 24px rgba(20, 13, 8, 0.45);">
+    <span class="brass-tag mb-3 d-inline-block">ARCHIVAL PROVERB</span>
+    <blockquote class="blockquote my-2" style="font-family: var(--sw-font-heading); font-size: clamp(1.2rem, 2.5vw, 1.75rem); color: #fff8e9; font-style: italic;">
+        &ldquo;A library is not a luxury but one of the necessities of life &mdash; an archive where the thoughts of centuries wait upon the scholar's touch.&rdquo;
+    </blockquote>
+    <figcaption class="blockquote-footer mt-2" style="color: var(--sw-gold-muted); font-family: var(--sw-font-mono);">
+        Henry Ward Beecher &middot; Shelfwise University Archive Collection
+    </figcaption>
+</section>
+
 <!-- Call to Action Band -->
 <section class="sw-cta-card text-center my-5 sw-fade-in-up">
-    <span class="sw-kicker" style="color: var(--sw-sand);">Membership Open</span>
-    <h2 class="sw-h1 text-white mb-3">Begin Your Reading Journey</h2>
-    <p class="text-sand mx-auto mb-4" style="max-width: 520px; font-size: var(--sw-text-md);">
-        Create your digital library card today to check out titles, place holds, and explore our growing collection.
+    <span class="brass-tag mb-2">OPEN ARCHIVE REGISTRATION</span>
+    <h2 class="sw-h1 text-white mb-3">Begin Your Scholarship Journey</h2>
+    <p class="mx-auto mb-4" style="max-width: 540px; color: var(--sw-gold-muted); font-size: var(--sw-text-md);">
+        Enroll your digital library card today to browse wooden stacks, borrow volumes, take notes in the digital reading room, and publish research.
     </p>
     <div class="sw-cta-actions">
-        <a class="sw-btn sw-btn-accent sw-btn-lg" asp-controller="Account" asp-action="Register">
-            <i class="bi bi-person-plus"></i> Create Member Account
+        <a class="sw-btn sw-btn-brass sw-btn-lg" asp-controller="Account" asp-action="Register">
+            <i class="bi bi-person-plus"></i> Register Archive Card
         </a>
-        <a class="sw-btn sw-btn-outline sw-btn-lg" asp-controller="Books" asp-action="Index" style="border-color: rgba(245,241,232,0.3); color: var(--sw-paper);">
-            <i class="bi bi-book"></i> Browse Titles First
+        <a class="sw-btn sw-btn-outline sw-btn-lg" asp-controller="Books" asp-action="Index" style="border-color: var(--sw-gold-brass); color: var(--sw-paper-cream);">
+            <i class="bi bi-bookshelf"></i> Browse Wooden Stacks
         </a>
     </div>
 </section>

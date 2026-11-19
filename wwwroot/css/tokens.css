@@ -1,36 +1,52 @@
 /* ==========================================================================
-   SHELFWISE — THE ART OF READING
+   SHELFWISE — WARM ARCHIVE & WOODEN SHELF DESIGN SYSTEM
    Design Tokens & Variable Architecture
+   Primary Palette: Deep Walnut, Parchment, Brass Gold, Forest Green
+   Tagline: READ. HIGHLIGHT. THINK. CREATE. SHARE.
    ========================================================================== */
 
 :root {
-    /* 1. Core Palette Tokens */
-    --sw-paper: #F5F1E8;
-    --sw-navy: #17243A;
-    --sw-terracotta: #D96C45;
-    --sw-sage: #A6B39B;
-    --sw-sand: #E5DFD2;
-    --sw-charcoal: #252525;
-    --sw-white: #FFFFFF;
+    /* 1. Core Warm Archive Palette Tokens */
+    --sw-walnut-deep: #2b1d14;      /* Deep Walnut primary */
+    --sw-wood-dark: #3b281c;        /* Dark Wood shelf surface */
+    --sw-wood-antique: #63452e;     /* Antique Brown wood trim */
+    --sw-wood-light: #845d3e;       /* Light wood grain highlight */
+    
+    --sw-parchment: #f3e9d2;        /* Parchment page background */
+    --sw-parchment-light: #fff8e9;  /* Cream Paper card surface */
+    --sw-parchment-dark: #e8d9ba;   /* Aged parchment tint */
+    
+    --sw-brass-gold: #c8963e;       /* Brass Gold primary metallic */
+    --sw-gold-muted: #dfbd78;       /* Muted Gold border & ribs */
+    --sw-gold-bright: #eecf8e;      /* Polished brass highlight */
+    --sw-gold-deep: #9d7126;        /* Antique brass shade */
 
-    /* Secondary / Accent Tints & Shades */
-    --sw-navy-dark: #0F1725;
-    --sw-navy-light: #243550;
-    --sw-terracotta-dark: #B85330;
-    --sw-terracotta-light: #FCECE6;
-    --sw-sage-dark: #6C7D61;
-    --sw-sage-light: #F0F4ED;
-    --sw-sand-dark: #C9C1B2;
-    --sw-sand-light: #FAF8F4;
-    --sw-gold: #DFB15B;
-    --sw-crimson: #C84630;
-    --sw-crimson-light: #FBEBE8;
+    --sw-forest-green: #1f3d36;     /* Forest Green accent & stamp */
+    --sw-forest-light: #2e564d;     /* Forest light shade */
+    --sw-forest-subtle: #e5ece9;    /* Forest green tint */
+
+    --sw-ink-black: #251c16;        /* Archival Ink Black text */
+    --sw-text-muted: #806d58;       /* Muted archival notation */
+    --sw-text-subtle: #9c8a74;      /* Subtle annotation */
+    --sw-border: #d7c5a4;           /* Antique Paper / Joinery Border */
+    --sw-border-strong: #63452e;    /* Antique Brown Border */
+
+    /* Leather Spine Color Palette (For Realistic Varied Book Spines) */
+    --sw-spine-forest: #1f3d36;
+    --sw-spine-burgundy: #5c1d1d;
+    --sw-spine-leather: #4a2f1c;
+    --sw-spine-navy: #16233b;
+    --sw-spine-walnut: #2b1d14;
+    --sw-spine-amber: #754c19;
+    --sw-spine-plum: #3d1e3d;
+    --sw-spine-teal: #183e42;
 
     /* 2. Typography Stacks */
-    --sw-font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
-    --sw-font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --sw-font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-    --sw-font-mono: 'DM Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --sw-font-heading: 'Fraunces', 'Playfair Display', Georgia, serif;
+    --sw-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --sw-font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
+    --sw-font-numbers: 'Space Grotesk', -apple-system, BlinkMacSystemFont, monospace;
+    --sw-font-mono: 'Space Grotesk', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
     /* Type Scale */
     --sw-text-2xs: 0.6875rem; /* 11px */
@@ -58,17 +74,34 @@
     --sw-space-16: 4rem;     /* 64px */
 
     /* Border Radii */
-    --sw-radius-xs: 3px;
-    --sw-radius-sm: 6px;
-    --sw-radius-md: 10px;
-    --sw-radius-lg: 14px;
-    --sw-radius-xl: 20px;
+    --sw-radius-xs: 2px;
+    --sw-radius-sm: 4px;
+    --sw-radius-md: 8px;
+    --sw-radius-lg: 12px;
+    --sw-radius-xl: 16px;
     --sw-radius-pill: 9999px;
 
+    /* Realistic Textures & Wood Gradients */
+    --sw-wood-gradient-navbar: linear-gradient(180deg, #332217 0%, #2b1d14 45%, #241810 100%);
+    --sw-wood-gradient-shelf: linear-gradient(180deg, #442e20 0%, #352317 40%, #2b1d14 85%, #20150e 100%);
+    --sw-wood-shelf-beam: linear-gradient(180deg, #63452e 0%, #4a3220 50%, #3b281c 100%);
+    --sw-brass-gradient: linear-gradient(135deg, #dfbd78 0%, #c8963e 50%, #9d7126 100%);
+    --sw-brass-plaque-bg: linear-gradient(180deg, #2b1d14 0%, #1f140e 100%);
+    --sw-parchment-gradient: linear-gradient(180deg, #fffbf2 0%, #fff8e9 60%, #f3e9d2 100%);
+    --sw-leather-emboss: inset 1px 0 2px rgba(255,255,255,0.2), inset -2px 0 5px rgba(0,0,0,0.4);
+
+    /* Shadows & Warm Depth */
+    --sw-shadow-shelf: 0 15px 25px -8px rgba(20, 12, 7, 0.55), 0 6px 12px -3px rgba(20, 12, 7, 0.35);
+    --sw-shadow-book-spine: -3px 0 8px rgba(0, 0, 0, 0.4), 2px 0 4px rgba(255, 255, 255, 0.1) inset;
+    --sw-shadow-book-hover: 0 16px 32px rgba(20, 12, 7, 0.6), -4px 0 12px rgba(0, 0, 0, 0.5);
+    --sw-shadow-card: 0 4px 14px rgba(43, 29, 20, 0.08), 0 1px 3px rgba(43, 29, 20, 0.04);
+    --sw-shadow-brass: 0 3px 8px rgba(200, 150, 62, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --sw-shadow-inset-parchment: inset 0 2px 6px rgba(99, 69, 46, 0.06);
+
     /* Transitions & Motion */
-    --sw-transition-fast: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+    --sw-transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
     --sw-transition-smooth: 240ms cubic-bezier(0.16, 1, 0.3, 1);
-    --sw-transition-editorial: 360ms cubic-bezier(0.16, 1, 0.3, 1);
+    --sw-transition-shelf: 320ms cubic-bezier(0.16, 1, 0.3, 1);
 
     /* Z-Index Hierarchy */
     --sw-z-base: 1;
@@ -79,60 +112,48 @@
     --sw-z-modal: 1000;
     --sw-z-toast: 1100;
 
-    /* 3. Semantic Theme Variables (Light Mode Default) */
-    --sw-bg: #F5F1E8;
-    --sw-bg-alt: #EFE9DD;
-    --sw-surface: #FFFFFF;
-    --sw-surface-alt: #FAF8F4;
-    --sw-surface-elevated: #FFFFFF;
-    --sw-surface-dark: #17243A;
+    /* 3. Semantic Theme Variables (Warm Archive Light Mode Default) */
+    --sw-bg: #f3e9d2;                  /* Warm parchment background */
+    --sw-bg-alt: #fff8e9;              /* Cream paper */
+    --sw-surface: #fff8e9;             /* Cream library card surface */
+    --sw-surface-alt: #f3e9d2;         /* Parchment */
+    --sw-surface-elevated: #ffffff;    /* Elevated paper */
+    --sw-surface-dark: #2b1d14;        /* Deep Walnut */
 
-    --sw-text: #17243A;
-    --sw-text-muted: #566479;
-    --sw-text-subtle: #8491A2;
-    --sw-text-inverse: #FFFFFF;
-    --sw-text-on-accent: #FFFFFF;
+    --sw-text: #251c16;                /* Archival Ink Black */
+    --sw-text-muted: #806d58;          /* Antique Muted Text */
+    --sw-text-subtle: #9c8a74;         /* Subtle Muted */
+    --sw-text-inverse: #f3e9d2;        /* Parchment text on walnut */
+    --sw-text-on-accent: #ffffff;      /* White text */
 
-    --sw-border: #E5DFD2;
-    --sw-border-strong: #17243A;
-    --sw-border-subtle: #EDE7DC;
+    --sw-border: #d7c5a4;              /* Antique Parchment Border */
+    --sw-border-strong: #63452e;       /* Dark Walnut Border */
+    --sw-border-subtle: #e5dfd2;       /* Light border */
 
-    --sw-primary: #17243A;
-    --sw-primary-hover: #243550;
-    --sw-accent: #D96C45;
-    --sw-accent-hover: #B85330;
-    --sw-accent-subtle: #FCECE6;
+    --sw-primary: #2b1d14;             /* Deep Walnut */
+    --sw-primary-hover: #3b281c;       /* Dark Wood */
+    --sw-accent: #c8963e;              /* Brass Gold */
+    --sw-accent-hover: #dfbd78;        /* Muted Gold */
+    --sw-accent-subtle: rgba(200, 150, 62, 0.12);
 
-    --sw-status-success: #527A4B;
-    --sw-status-success-bg: #EFF5ED;
-    --sw-status-success-border: #C8DEBF;
+    --sw-status-success: #1f3d36;      /* Forest Green */
+    --sw-status-success-bg: rgba(31, 61, 54, 0.12);
+    --sw-status-success-border: rgba(31, 61, 54, 0.35);
 
-    --sw-status-warning: #B37D20;
-    --sw-status-warning-bg: #FCF6EA;
-    --sw-status-warning-border: #F0DDB3;
+    --sw-status-warning: #c8963e;      /* Brass Amber */
+    --sw-status-warning-bg: rgba(200, 150, 62, 0.12);
+    --sw-status-warning-border: rgba(200, 150, 62, 0.35);
 
-    --sw-status-danger: #C84630;
-    --sw-status-danger-bg: #FBEBE8;
-    --sw-status-danger-border: #F1C3BA;
+    --sw-status-danger: #8b2518;       /* Archival Carmine Red */
+    --sw-status-danger-bg: rgba(139, 37, 24, 0.12);
+    --sw-status-danger-border: rgba(139, 37, 24, 0.35);
 
-    --sw-status-info: #355E94;
-    --sw-status-info-bg: #EEF3FA;
-    --sw-status-info-border: #C0D3EB;
+    --sw-status-info: #2c4a52;         /* Deep Antique Slate */
+    --sw-status-info-bg: rgba(44, 74, 82, 0.12);
+    --sw-status-info-border: rgba(44, 74, 82, 0.35);
 
-    /* Editorial Shadows */
-    --sw-shadow-sm: 0 1px 3px rgba(23, 36, 58, 0.05);
-    --sw-shadow-md: 0 4px 12px rgba(23, 36, 58, 0.07);
-    --sw-shadow-lg: 0 12px 28px rgba(23, 36, 58, 0.10);
-    --sw-shadow-editorial: 3px 3px 0 var(--sw-border-strong);
-    --sw-shadow-editorial-hover: 4px 5px 0 var(--sw-border-strong);
-    --sw-shadow-book: 4px 6px 14px rgba(23, 36, 58, 0.16), 1px 2px 4px rgba(23, 36, 58, 0.08);
-
-    /* Form & Input Tokens */
-    --sw-input-bg: #FFFFFF;
-    --sw-input-border: #D5CEBE;
-    --sw-input-focus-border: #17243A;
-    --sw-input-focus-ring: rgba(23, 36, 58, 0.12);
-
-    /* Navigation Height */
-    --sw-nav-height: 72px;
+    --sw-input-bg: #fff8e9;            /* Cream paper inputs */
+    --sw-input-border: #d7c5a4;
+    --sw-input-focus-border: #c8963e;  /* Brass focus ring */
+    --sw-input-focus-ring: rgba(200, 150, 62, 0.25);
 }

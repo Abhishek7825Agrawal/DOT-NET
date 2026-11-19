@@ -1,35 +1,44 @@
 @model MemberDashboardData
 @{
-    ViewData["Title"] = "My Reading Room";
+    ViewData["Title"] = "My Scholar Reading Room";
     var overdueCount = Model.ActiveLoans.Count(issue => issue.DueDateUtc.Date < Model.Today);
 }
 
-<!-- Editorial Reading Room Welcome Hero -->
+@functions {
+    string GetSpineColor(string? category, int id)
+    {
+        string[] colors = ["walnut", "navy", "forest", "burgundy", "leather-red", "ochre", "midnight"];
+        var seed = Math.Abs((category?.GetHashCode(StringComparison.OrdinalIgnoreCase) ?? 0) * 31 + id);
+        return colors[seed % colors.Length];
+    }
+}
+
+<!-- Warm Archive Reading Room Welcome Hero -->
 <section class="sw-editorial-hero sw-fade-in-up" aria-labelledby="member-hero-title">
     <div class="sw-hero-content">
         <div class="sw-hero-meta">
-            <span class="sw-kicker">Personal Stacks</span>
-            <span class="sw-volume-tag">Member Reading Room</span>
+            <span class="brass-tag"><i class="bi bi-person-vcard me-1"></i> SCHOLAR CARD #MB-@(Model.Profile?.Id.ToString("D4") ?? "0000")</span>
+            <span class="sw-volume-tag">Personal Reading Desk</span>
             <span>·</span>
-            <span><i class="bi bi-person-vcard me-1"></i>#MB-@(Model.Profile?.Id.ToString("D4") ?? "0000")</span>
+            <span><i class="bi bi-clock me-1"></i>@Model.Today.ToString("dddd, d MMMM yyyy")</span>
         </div>
         <h1 class="sw-hero-title" id="member-hero-title">
-            Welcome back,<br />
+            Welcome back to the stacks,<br />
             <em>@(Model.Profile?.FullName ?? User.Identity?.Name).</em>
         </h1>
         <p class="sw-hero-desc">
-            Your personal literary sanctuary. Track active loans, discover upcoming due dates, and explore fresh volumes waiting on library shelves.
+            Your personal scholar workspace. View currently checked-out volumes on your wooden shelf, monitor loan returns, and access digital editions.
         </p>
         <div class="sw-hero-actions">
-            <a class="sw-btn sw-btn-accent" asp-controller="Books" asp-action="Index">
-                <i class="bi bi-compass"></i> Discover Books Catalogue
+            <a class="sw-btn sw-btn-brass" asp-controller="Books" asp-action="Index">
+                <i class="bi bi-bookshelf"></i> Explore Catalogue Shelves
+            </a>
+            <a class="sw-btn sw-btn-forest" asp-controller="DigitalLibrary" asp-action="Index">
+                <i class="bi bi-file-earmark-pdf"></i> Digital Reading Room
             </a>
             <a class="sw-btn sw-btn-outline" asp-controller="Profile" asp-action="Index">
                 <i class="bi bi-person-vcard"></i> View Library Card
             </a>
-            <div class="sw-badge sw-badge-success d-inline-flex align-items-center">
-                <span class="sw-badge-dot"></span> Active Reader Account
-            </div>
         </div>
     </div>
     <div class="sw-hero-artwork" aria-hidden="true">
@@ -43,8 +52,8 @@
     <!-- Currently Borrowed Titles -->
     <article class="sw-kpi-card sw-kpi-primary sw-stagger-1">
         <div class="sw-kpi-header">
-            <span class="sw-kpi-label">Currently Borrowed</span>
-            <div class="sw-kpi-icon sw-icon-terracotta"><i class="bi bi-book-half"></i></div>
+            <span class="sw-kpi-label">On Your Shelf</span>
+            <div class="sw-kpi-icon sw-icon-brass"><i class="bi bi-bookshelf"></i></div>
         </div>
         <div class="sw-kpi-value" data-count-up="@Model.ActiveLoans.Count">@Model.ActiveLoans.Count.ToString("00")</div>
         <div class="sw-kpi-footer">
@@ -55,7 +64,7 @@
     <!-- Due Dates to Watch -->
     <article class="sw-kpi-card @(overdueCount > 0 ? "border-danger" : "") sw-stagger-2">
         <div class="sw-kpi-header">
-            <span class="sw-kpi-label">Due Dates to Watch</span>
+            <span class="sw-kpi-label">Due Dates Status</span>
             <div class="sw-kpi-icon @(overdueCount > 0 ? "sw-icon-danger" : "sw-icon-sage")">
                 <i class="bi bi-calendar2-check"></i>
             </div>
@@ -76,7 +85,7 @@
     <!-- Outstanding Fines Balance -->
     <article class="sw-kpi-card @(Model.OutstandingFines > 0 ? "border-danger" : "") sw-stagger-3">
         <div class="sw-kpi-header">
-            <span class="sw-kpi-label">Outstanding Balance</span>
+            <span class="sw-kpi-label">Fine Balance</span>
             <div class="sw-kpi-icon sw-icon-warning"><i class="bi bi-receipt"></i></div>
         </div>
         <div class="sw-kpi-value @(Model.OutstandingFines > 0 ? "text-danger" : "")">@Model.OutstandingFines.ToString("C")</div>
@@ -88,8 +97,8 @@
     <!-- Total Reading History -->
     <article class="sw-kpi-card sw-stagger-4">
         <div class="sw-kpi-header">
-            <span class="sw-kpi-label">Reading Journey</span>
-            <div class="sw-kpi-icon sw-icon-navy"><i class="bi bi-journal-check"></i></div>
+            <span class="sw-kpi-label">Archive Journey</span>
+            <div class="sw-kpi-icon sw-icon-forest"><i class="bi bi-journal-check"></i></div>
         </div>
         <div class="sw-kpi-value" data-count-up="@Model.History.Count">@Model.History.Count.ToString("00")</div>
         <div class="sw-kpi-footer">
@@ -98,23 +107,75 @@
     </article>
 </section>
 
-<!-- Active Books On Loan Section -->
+<!-- Personal Wooden Shelf (Active Loans Spine Display) -->
+@if (Model.ActiveLoans.Count > 0)
+{
+    <section class="mb-5 sw-fade-in-up">
+        <div class="sw-section-header">
+            <div>
+                <span class="sw-kicker sw-kicker-forest"><i class="bi bi-bookshelf"></i> PERSONAL STACK</span>
+                <h2 class="sw-h2">Your Borrowed Wooden Shelf</h2>
+            </div>
+            <span class="brass-tag">@Model.ActiveLoans.Count Volumes Preserved</span>
+        </div>
+
+        <div class="wooden-bookshelf-container py-4">
+            <div class="wooden-shelf mb-1">
+                <div class="shelf-books-row">
+                    @foreach (var issue in Model.ActiveLoans)
+                    {
+                        var isLate = issue.DueDateUtc.Date < Model.Today;
+                        var spineColor = GetSpineColor(issue.Book.Category, issue.Book.Id);
+                        <a asp-controller="Books" asp-action="Details" asp-route-id="@issue.Book.Id" 
+                           class="book-spine spine-height-lg spine-width-md" 
+                           data-color="@spineColor"
+                           title="@issue.Book.Title (Due: @issue.DueDateUtc.ToString("dd MMM yyyy"))">
+                            
+                            <div class="spine-top-filigree">
+                                <span class="spine-status-dot @(isLate ? "spine-status-borrowed" : "spine-status-available")"></span>
+                                <div class="spine-gilt-band"></div>
+                                <div class="spine-rib"></div>
+                            </div>
+
+                            <div class="spine-title">@issue.Book.Title</div>
+                            <div class="spine-author">@issue.Book.Author</div>
+
+                            <div class="spine-bottom-filigree">
+                                <div class="spine-rib"></div>
+                                <div class="spine-gilt-band"></div>
+                                <span class="spine-brass-call">DUE @issue.DueDateUtc.ToString("dd/MM")</span>
+                            </div>
+                        </a>
+                    }
+                </div>
+                <div class="shelf-ledge">
+                    <span class="brass-plate">
+                        CARDHOLDER DESK &middot; ACTIVE LENDING SHELF
+                    </span>
+                </div>
+                <div class="shelf-ledge-shadow"></div>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Active Books On Loan Ledger Section -->
 <section class="sw-table-card mb-5 sw-fade-in-up" aria-labelledby="active-loans-heading">
     <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <span class="sw-kicker">On Your Library Card</span>
-            <h3 class="sw-h3 mb-0" id="active-loans-heading">Currently Borrowed Volumes</h3>
+            <span class="sw-kicker sw-kicker-forest">Cardholder Register</span>
+            <h3 class="sw-h3 mb-0" id="active-loans-heading">Active Loan Records</h3>
         </div>
-        <span class="sw-badge sw-badge-info">@Model.ActiveLoans.Count Active Loans</span>
+        <span class="brass-tag">@Model.ActiveLoans.Count Active Loans</span>
     </div>
 
     @if (Model.ActiveLoans.Count == 0)
     {
         <div class="sw-empty-state">
-            <div class="sw-empty-icon"><i class="bi bi-book"></i></div>
-            <h4 class="sw-empty-title">Room for a new story?</h4>
-            <p class="sw-empty-text">You have no active loans right now. Explore the library catalogue to discover your next favourite volume.</p>
-            <a class="sw-btn sw-btn-accent sw-btn-sm" asp-controller="Books" asp-action="Index">
+            <div class="sw-empty-icon"><i class="bi bi-bookshelf"></i></div>
+            <h4 class="sw-empty-title">Your bookshelf is ready for a new volume</h4>
+            <p class="sw-empty-text">You have no active loans right now. Explore the library catalogue to discover your next scholarly read.</p>
+            <a class="sw-btn sw-btn-brass sw-btn-sm" asp-controller="Books" asp-action="Index">
                 Explore the Catalogue <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
@@ -125,8 +186,8 @@
             <table class="sw-table">
                 <thead>
                     <tr>
-                        <th>Book Title &amp; Author</th>
-                        <th>Category</th>
+                        <th>Book Volume &amp; Author</th>
+                        <th>Section</th>
                         <th>Borrowed On</th>
                         <th>Due Date</th>
                         <th>Accrued Fine</th>
@@ -141,16 +202,16 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="sw-kpi-icon sw-icon-sage" style="width:34px;height:34px;font-size:.9rem">
+                                    <div class="sw-kpi-icon sw-icon-brass" style="width:34px;height:34px;font-size:.9rem">
                                         <i class="bi bi-book"></i>
                                     </div>
                                     <div>
-                                        <div class="fw-bold text-truncate" style="max-width:260px">@issue.Book.Title</div>
+                                        <div class="fw-bold text-truncate" style="max-width:260px; color: var(--sw-walnut-deep);">@issue.Book.Title</div>
                                         <div class="sw-mono small text-muted">by @issue.Book.Author</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="sw-badge sw-badge-neutral">@issue.Book.Category</span></td>
+                            <td><span class="brass-tag">@issue.Book.Category</span></td>
                             <td class="sw-mono">@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
                             <td>
                                 <span class="sw-mono @(isLate ? "text-danger fw-bold" : "")">
@@ -165,7 +226,7 @@
                             <td>
                                 @if (isLate)
                                 {
-                                    <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span>Please Return</span>
+                                    <span class="stamp-box stamp-overdue" style="font-size:0.65rem; padding:0.15rem 0.45rem;">OVERDUE</span>
                                 }
                                 else
                                 {
@@ -184,8 +245,8 @@
 <section class="sw-table-card sw-fade-in-up" aria-labelledby="history-heading">
     <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
-            <span class="sw-kicker">Reading Ledger</span>
-            <h3 class="sw-h3 mb-0" id="history-heading">Borrowing History</h3>
+            <span class="sw-kicker sw-kicker-forest">Reading Ledger</span>
+            <h3 class="sw-h3 mb-0" id="history-heading">Borrowing History Archive</h3>
         </div>
         <span class="sw-mono small text-muted">@Model.History.Count total loans recorded</span>
     </div>
@@ -194,7 +255,7 @@
     {
         <div class="sw-empty-state">
             <div class="sw-empty-icon"><i class="bi bi-journal"></i></div>
-            <h4 class="sw-empty-title">Your bookshelf awaits</h4>
+            <h4 class="sw-empty-title">Your bookshelf history awaits</h4>
             <p class="sw-empty-text">Your reading history will appear here once you check out your first book.</p>
         </div>
     }
@@ -204,7 +265,7 @@
             <table class="sw-table">
                 <thead>
                     <tr>
-                        <th>Book Title</th>
+                        <th>Book Volume</th>
                         <th>Issued Date</th>
                         <th>Returned Date</th>
                         <th>Fine Assessed</th>
@@ -218,7 +279,7 @@
                         var balance = Math.Max(0m, issue.FineAmount - issue.FinePaidAmount);
                         <tr>
                             <td>
-                                <div class="fw-bold text-truncate" style="max-width:260px">@issue.Book.Title</div>
+                                <div class="fw-bold text-truncate" style="max-width:260px; color: var(--sw-walnut-deep);">@issue.Book.Title</div>
                                 <span class="small text-muted">@issue.Book.Author</span>
                             </td>
                             <td class="sw-mono">@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
@@ -245,7 +306,7 @@
                                 }
                                 else if (issue.Status == IssueStatus.Returned)
                                 {
-                                    <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span>Returned</span>
+                                    <div class="stamp-box stamp-returned" style="font-size:0.65rem; padding:0.15rem 0.45rem;">RETURNED</div>
                                 }
                                 else
                                 {

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SHELFWISE — THE ART OF READING
+   SHELFWISE — WARM ARCHIVE & WOODEN SHELF
    Responsive: Multi-Viewport Refinements & Touch Optimization
    ========================================================================== */
 
@@ -34,6 +34,10 @@
     }
     .sw-table {
         min-width: 680px;
+    }
+    .shelf-books-row {
+        gap: 8px;
+        padding: 0 1rem;
     }
 }
 
@@ -114,6 +118,35 @@
         white-space: normal;
         text-align: center;
         min-height: 48px;
+    }
+
+    /* Mobile Bookshelf Enhancements */
+    .wooden-bookshelf-container {
+        padding: 1.5rem 0.75rem 1rem;
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+        border-radius: 0;
+    }
+
+    .shelf-books-row {
+        gap: 6px;
+        padding: 0 0.5rem;
+        min-height: 220px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .book-spine {
+        padding: 10px 4px;
+    }
+
+    .spine-title {
+        font-size: 0.75rem;
+        max-height: 110px;
+    }
+
+    .spine-author {
+        font-size: 0.58rem;
+        max-height: 45px;
     }
 }
 

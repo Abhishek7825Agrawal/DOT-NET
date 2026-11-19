@@ -1,9 +1,11 @@
 /* ==========================================================================
-   SHELFWISE — THE ART OF READING
-   Catalogue: Bookstore Collection Grid & Immersive Detail Hero
+   SHELFWISE — WARM ARCHIVE & WOODEN SHELF
+   Catalogue: Wooden Bookshelf Spine Display & Antique Folio Details
    ========================================================================== */
 
-/* Catalogue Filter & Search Bar */
+/* --------------------------------------------------------------------------
+   1. Catalogue Toolbar & Archive Filter Bar
+   -------------------------------------------------------------------------- */
 .sw-catalogue-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -13,8 +15,9 @@
     margin-bottom: var(--sw-space-6);
     padding: var(--sw-space-4) var(--sw-space-5);
     background-color: var(--sw-surface);
-    border: 1.5px solid var(--sw-border);
+    border: 1px solid var(--sw-border-warm);
     border-radius: var(--sw-radius-md);
+    box-shadow: var(--sw-shadow-parchment);
 }
 
 .sw-catalogue-search-form {
@@ -32,7 +35,273 @@
     flex-wrap: wrap;
 }
 
-/* Book Grid Responsive Layout */
+/* View Mode Switcher (Spine Shelf vs Card Catalog) */
+.sw-view-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--sw-bg-alt);
+    border: 1px solid var(--sw-border-warm);
+    border-radius: var(--sw-radius-sm);
+    padding: 3px;
+    gap: 3px;
+}
+
+.sw-view-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--sw-radius-xs);
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-xs);
+    font-weight: 600;
+    color: var(--sw-text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--sw-transition-fast);
+}
+
+.sw-view-toggle-btn:hover {
+    color: var(--sw-walnut-deep);
+}
+
+.sw-view-toggle-btn.active {
+    background-color: var(--sw-walnut-deep);
+    color: var(--sw-gold-muted);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .sw-view-toggle-btn.active {
+    background-color: var(--sw-wood-dark);
+    color: var(--sw-gold-brass);
+}
+
+/* --------------------------------------------------------------------------
+   2. Signature Wooden Bookshelf (Realistic 3D Spines on Wood Beam)
+   -------------------------------------------------------------------------- */
+.wooden-bookshelf-container {
+    background: radial-gradient(circle at 50% 0%, #3e2819 0%, #251810 60%, #170e09 100%);
+    border: 3px solid #4a301d;
+    border-radius: var(--sw-radius-md);
+    padding: 2.5rem 1.5rem 1.5rem;
+    box-shadow: inset 0 15px 35px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(20, 13, 8, 0.5);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: var(--sw-space-8);
+}
+
+.wooden-bookshelf-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.08) 0px,
+        rgba(0, 0, 0, 0.08) 1px,
+        transparent 1px,
+        transparent 8px
+    );
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+.wooden-shelf {
+    position: relative;
+    margin-bottom: 3.5rem;
+}
+
+.wooden-shelf:last-child {
+    margin-bottom: 1rem;
+}
+
+.shelf-books-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+    padding: 0 1.5rem 0;
+    min-height: 250px;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: thin;
+    scrollbar-color: var(--sw-gold-brass) var(--sw-wood-dark);
+}
+
+.shelf-books-row::-webkit-scrollbar {
+    height: 7px;
+}
+
+.shelf-books-row::-webkit-scrollbar-track {
+    background: #1e130c;
+    border-radius: 4px;
+}
+
+.shelf-books-row::-webkit-scrollbar-thumb {
+    background: var(--sw-gold-brass);
+    border-radius: 4px;
+}
+
+/* Wooden Shelf Beam & Ledge */
+.shelf-ledge {
+    height: 24px;
+    background: linear-gradient(180deg, #6c472d 0%, #4f331f 35%, #342013 100%);
+    border-top: 2px solid #8e5e3a;
+    border-bottom: 2px solid #140c07;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -1px;
+}
+
+.shelf-ledge-shadow {
+    height: 14px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+}
+
+.shelf-ledge .brass-plate {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.68rem;
+    padding: 0.18rem 0.85rem;
+    z-index: 2;
+}
+
+/* --------------------------------------------------------------------------
+   3. Realistic 3D Book Spines
+   -------------------------------------------------------------------------- */
+.book-spine {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 6px;
+    border-radius: 4px 4px 1px 1px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: -2px 0 6px rgba(0, 0, 0, 0.35), 4px 0 8px rgba(0, 0, 0, 0.5), inset 2px 0 3px rgba(255, 255, 255, 0.18), inset -2px 0 4px rgba(0, 0, 0, 0.4);
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease, filter 0.28s ease;
+    flex-shrink: 0;
+    user-select: none;
+    overflow: hidden;
+}
+
+.book-spine:hover {
+    transform: translateY(-16px) scale(1.02);
+    box-shadow: 0 20px 28px rgba(0, 0, 0, 0.7), 0 0 16px rgba(200, 150, 62, 0.45);
+    z-index: 10;
+    filter: brightness(1.08);
+}
+
+/* Spine Dimension Classes (Randomized/Realistic Variety) */
+.spine-height-sm { height: 215px; }
+.spine-height-md { height: 235px; }
+.spine-height-lg { height: 255px; }
+.spine-height-xl { height: 275px; }
+
+.spine-width-sm { width: 38px; }
+.spine-width-md { width: 48px; }
+.spine-width-lg { width: 58px; }
+.spine-width-xl { width: 68px; }
+
+/* Spine Leather Textures & Rich Colors */
+.book-spine[data-color="navy"] { background: linear-gradient(90deg, #131e2e, #1e314a 50%, #131e2e); }
+.book-spine[data-color="forest"] { background: linear-gradient(90deg, #11241f, #1f3d36 50%, #11241f); }
+.book-spine[data-color="walnut"] { background: linear-gradient(90deg, #241810, #3d291b 50%, #241810); }
+.book-spine[data-color="burgundy"] { background: linear-gradient(90deg, #3d0f13, #5a171d 50%, #3d0f13); }
+.book-spine[data-color="leather-red"] { background: linear-gradient(90deg, #4d1717, #702222 50%, #4d1717); }
+.book-spine[data-color="ochre"] { background: linear-gradient(90deg, #4d380f, #705218 50%, #4d380f); }
+.book-spine[data-color="midnight"] { background: linear-gradient(90deg, #0a111a, #152233 50%, #0a111a); }
+
+/* Spine Ribs & Gilt Filigree */
+.spine-top-filigree,
+.spine-bottom-filigree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: 100%;
+}
+
+.spine-rib {
+    width: 90%;
+    height: 3px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.45));
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+    border-radius: 1px;
+}
+
+.spine-gilt-band {
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--sw-gold-brass), transparent);
+    box-shadow: 0 0 3px rgba(200, 150, 62, 0.6);
+}
+
+.spine-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-family: var(--sw-font-heading);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #ebd193;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 140px;
+    margin: 8px 0;
+}
+
+.spine-author {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-family: var(--sw-font-body);
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: #bfa67c;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 55px;
+    opacity: 0.9;
+}
+
+.spine-brass-call {
+    font-family: var(--sw-font-mono);
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #251c16;
+    background: linear-gradient(180deg, #dfbd78, #c8963e);
+    padding: 1px 4px;
+    border-radius: 2px;
+    margin-top: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Spine Availability Dot */
+.spine-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-bottom: 2px;
+    box-shadow: 0 0 4px currentColor;
+}
+
+.spine-status-available { color: #38a169; background-color: #38a169; }
+.spine-status-reserved { color: #dd6b20; background-color: #dd6b20; }
+.spine-status-borrowed { color: #e53e3e; background-color: #e53e3e; }
+
+/* --------------------------------------------------------------------------
+   4. Card Catalog Grid View (Standard Parchment Library Cards)
+   -------------------------------------------------------------------------- */
 .sw-books-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -47,28 +316,30 @@
     }
 }
 
-/* Immersive Dark Book Detail Hero Section */
+/* --------------------------------------------------------------------------
+   5. Immersive Antique Library Folio (Book Detail Hero)
+   -------------------------------------------------------------------------- */
 .sw-book-detail-hero {
-    background-color: var(--sw-navy);
-    color: var(--sw-paper);
+    background: radial-gradient(circle at 75% 25%, #3d291b 0%, #2b1d14 60%, #1a110b 100%);
+    color: var(--sw-paper-cream);
     border-radius: var(--sw-radius-lg);
-    border: 1.5px solid rgba(245, 241, 232, 0.15);
+    border: 2px solid var(--sw-gold-brass);
     padding: clamp(2rem, 4vw, 3.5rem);
     margin-bottom: var(--sw-space-8);
     position: relative;
     overflow: hidden;
-    box-shadow: var(--sw-shadow-lg);
+    box-shadow: 0 12px 32px rgba(20, 13, 8, 0.55), inset 0 0 40px rgba(0, 0, 0, 0.4);
 }
 
 .sw-book-detail-hero::before {
     content: '';
     position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 300px;
-    height: 300px;
+    top: -60px;
+    right: -60px;
+    width: 320px;
+    height: 320px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(217, 108, 69, 0.25) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(200, 150, 62, 0.22) 0%, transparent 70%);
     pointer-events: none;
 }
 
@@ -92,9 +363,9 @@
     aspect-ratio: 3 / 4;
     border-radius: var(--sw-radius-md);
     overflow: hidden;
-    box-shadow: var(--sw-shadow-book);
-    border: 2px solid rgba(245, 241, 232, 0.2);
-    background-color: var(--sw-navy-dark);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--sw-gold-brass);
+    background-color: var(--sw-wood-dark);
 }
 
 .sw-book-detail-cover img {
@@ -110,21 +381,23 @@
 
 .sw-book-detail-title {
     font-size: clamp(2rem, 3.5vw, 3rem);
-    line-height: 1.1;
-    color: var(--sw-paper);
+    line-height: 1.12;
+    color: var(--sw-paper-cream);
     margin: var(--sw-space-2) 0 var(--sw-space-3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .sw-book-detail-author {
     font-family: var(--sw-font-body);
     font-size: var(--sw-text-lg);
-    color: var(--sw-sand);
+    color: var(--sw-gold-muted);
     margin-bottom: var(--sw-space-6);
 }
 
 .sw-book-detail-author em {
     font-style: normal;
-    color: var(--sw-terracotta);
+    color: var(--sw-gold-brass);
+    font-weight: 600;
 }
 
 .sw-book-specs-strip {
@@ -133,35 +406,35 @@
     gap: var(--sw-space-4);
     padding: var(--sw-space-4) 0;
     margin: var(--sw-space-4) 0 var(--sw-space-6);
-    border-top: 1px solid rgba(245, 241, 232, 0.15);
-    border-bottom: 1px solid rgba(245, 241, 232, 0.15);
+    border-top: 1px solid rgba(200, 150, 62, 0.25);
+    border-bottom: 1px solid rgba(200, 150, 62, 0.25);
 }
 
 .sw-spec-item {
     display: flex;
     flex-direction: column;
-    min-width: 100px;
+    min-width: 105px;
 }
 
 .sw-spec-label {
     font-family: var(--sw-font-mono);
     font-size: var(--sw-text-2xs);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--sw-text-subtle);
+    letter-spacing: 0.12em;
+    color: var(--sw-gold-muted);
 }
 
 .sw-spec-value {
     font-family: var(--sw-font-body);
     font-size: var(--sw-text-sm);
     font-weight: 600;
-    color: var(--sw-paper);
+    color: var(--sw-paper-cream);
     margin-top: 0.2rem;
 }
 
 .sw-book-detail-desc {
     font-size: var(--sw-text-base);
     line-height: 1.7;
-    color: var(--sw-sand);
+    color: var(--sw-paper-parchment);
     margin-bottom: var(--sw-space-6);
 }

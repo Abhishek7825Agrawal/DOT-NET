@@ -9,7 +9,7 @@
     var isStaff = User.IsInRole("Staff");
     var isMember = User.IsInRole("Member");
     var isSignedIn = SignInManager.IsSignedIn(User);
-    var roleLabel = isAdmin ? "Administrator" : isStaff ? "Library Staff" : isMember ? "Cardholder Member" : "Visitor";
+    var roleLabel = isAdmin ? "Chief Archivist (Admin)" : isStaff ? "Librarian Operations" : isMember ? "Scholar Cardholder" : "Archive Visitor";
 }
 <!DOCTYPE html>
 <html lang="en" data-theme="auto">
@@ -17,7 +17,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="view-transition" content="same-origin" />
-    <title>@ViewData["Title"] · Shelfwise — The Art of Reading</title>
+    <title>@ViewData["Title"] · Shelfwise — Warm Archive & Wooden Shelf Library</title>
     
     <!-- Theme Flash Prevention -->
     <script>
@@ -29,21 +29,21 @@
         })();
     </script>
 
-    <!-- Typography Fonts: Playfair Display, DM Sans, Space Grotesk, DM Mono -->
+    <!-- Warm Archive Typography Fonts: Fraunces, Playfair Display, Inter, Space Grotesk -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400..700&display=swap" rel="stylesheet">
     
     <!-- Framework Styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     
-    <!-- Shelfwise Design Tokens & Editorial Styles -->
+    <!-- Shelfwise Design Tokens & Warm Archive Styles -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="sw-shell">
 
-    <!-- Minimal Horizontal Top Navigation -->
+    <!-- Warm Archive Wooden Shelf Top Navigation -->
     <header class="sw-navbar">
         <div class="sw-navbar-inner">
             <!-- Brand -->
@@ -51,19 +51,19 @@
                 <span class="sw-brand-icon"><i class="bi bi-book-half"></i></span>
                 <span class="sw-brand-text">
                     <span class="sw-brand-title">Shelfwise<span class="sw-brand-period">.</span></span>
-                    <span class="sw-brand-subtitle">The Art of Reading</span>
+                    <span class="sw-brand-subtitle">READ. HIGHLIGHT. THINK. CREATE. SHARE.</span>
                 </span>
             </a>
 
             <!-- Role-Specific Horizontal Navigation Menu (Desktop) -->
-            <nav class="sw-nav-menu" aria-label="Primary Navigation">
+            <nav class="sw-nav-menu" aria-label="Primary Archive Navigation">
                 @if (isAdmin)
                 {
                     <a class="sw-nav-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
                         <i class="bi bi-grid-1x2"></i> Overview
                     </a>
                     <a class="sw-nav-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index">
-                        <i class="bi bi-journal-bookmark"></i> Catalogue
+                        <i class="bi bi-bookshelf"></i> Catalogue
                     </a>
                     <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
                         <i class="bi bi-file-earmark-pdf"></i> Digital Library
@@ -74,9 +74,9 @@
                             <i class="bi bi-mortarboard"></i> Marketplace
                         </a>
                         <ul class="dropdown-menu sw-dropdown-menu">
-                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop me-2 text-primary"></i>Research Marketplace</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop me-2 text-warning"></i>Research Marketplace</a></li>
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check me-2 text-danger"></i>Moderation Desk</a></li>
-                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square me-2"></i>Author Desk</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square me-2 text-info"></i>Author Desk</a></li>
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check me-2 text-success"></i>My Acquired Papers</a></li>
                         </ul>
                     </div>
@@ -90,7 +90,7 @@
                             <i class="bi bi-arrow-left-right"></i> Circulation
                         </a>
                         <ul class="dropdown-menu sw-dropdown-menu">
-                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle me-2 text-primary"></i>Issue a Book</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle me-2 text-warning"></i>Issue a Book</a></li>
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Index"><i class="bi bi-arrow-left-right me-2"></i>Circulation Desk</a></li>
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history me-2 text-danger"></i>Overdue Loans</a></li>
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Payments"><i class="bi bi-cash-stack me-2 text-success"></i>Fine Payments</a></li>
@@ -122,7 +122,7 @@
                         <i class="bi bi-clock-history"></i> Overdue
                     </a>
                     <a class="sw-nav-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index">
-                        <i class="bi bi-journal-bookmark"></i> Books
+                        <i class="bi bi-bookshelf"></i> Books
                     </a>
                     <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
                         <i class="bi bi-file-earmark-pdf"></i> Digital Library
@@ -133,9 +133,9 @@
                             <i class="bi bi-mortarboard"></i> Marketplace
                         </a>
                         <ul class="dropdown-menu sw-dropdown-menu">
-                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop me-2 text-primary"></i>Research Marketplace</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop me-2 text-warning"></i>Research Marketplace</a></li>
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check me-2 text-danger"></i>Moderation Desk</a></li>
-                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square me-2"></i>Author Desk</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square me-2 text-info"></i>Author Desk</a></li>
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check me-2 text-success"></i>My Acquired Papers</a></li>
                         </ul>
                     </div>
@@ -150,7 +150,7 @@
                 else if (isMember)
                 {
                     <a class="sw-nav-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
-                        <i class="bi bi-book-half"></i> Reading Room
+                        <i class="bi bi-bookshelf"></i> Reading Room
                     </a>
                     <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
                         <i class="bi bi-file-earmark-pdf"></i> Digital Library
@@ -162,7 +162,7 @@
                         <i class="bi bi-pencil-square"></i> Author Desk
                     </a>
                     <a class="sw-nav-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index">
-                        <i class="bi bi-compass"></i> Discover Catalogue
+                        <i class="bi bi-compass"></i> Discover Bookshelf
                     </a>
                     <a class="sw-nav-link @(currentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="Index">
                         <i class="bi bi-person-vcard"></i> My Card
@@ -171,7 +171,7 @@
                 else
                 {
                     <a class="sw-nav-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index">
-                        <i class="bi bi-compass"></i> Explore Collection
+                        <i class="bi bi-bookshelf"></i> Explore Bookshelves
                     </a>
                     <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
                         <i class="bi bi-file-earmark-pdf"></i> Digital Library
@@ -180,7 +180,7 @@
                         <i class="bi bi-mortarboard"></i> Research Papers
                     </a>
                     <a class="sw-nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-house"></i> About Library
+                        <i class="bi bi-building"></i> Archive Tour
                     </a>
                 }
             </nav>
@@ -190,16 +190,16 @@
                 <!-- Global Quick Search -->
                 <div class="sw-nav-search">
                     <i class="bi bi-search"></i>
-                    <input type="search" placeholder="Search collection (title, author, ISBN)..." aria-label="Search collection" />
+                    <input type="search" placeholder="Search archive (title, author, ISBN)..." aria-label="Search archive" />
                 </div>
 
                 <!-- Theme Switcher -->
-                <button type="button" class="sw-tool-btn" data-theme-switcher aria-label="Toggle visual theme">
-                    <i class="bi bi-circle-half"></i>
+                <button type="button" class="sw-tool-btn" data-theme-switcher aria-label="Toggle daylight / night archive">
+                    <i class="bi bi-lamp"></i>
                 </button>
 
                 <!-- Notifications Toggle -->
-                <button type="button" class="sw-tool-btn" id="swNotificationToggle" aria-label="View library notices">
+                <button type="button" class="sw-tool-btn" id="swNotificationToggle" aria-label="View archive notices">
                     <i class="bi bi-bell"></i>
                     <span class="sw-tool-badge">2</span>
                 </button>
@@ -253,7 +253,7 @@
                 else
                 {
                     <a class="sw-btn sw-btn-outline sw-btn-sm d-none d-sm-inline-flex" asp-controller="Account" asp-action="Login">Sign in</a>
-                    <a class="sw-btn sw-btn-primary sw-btn-sm d-none d-md-inline-flex" asp-controller="Account" asp-action="Register">Join Library</a>
+                    <a class="sw-btn sw-btn-primary sw-btn-sm d-none d-md-inline-flex" asp-controller="Account" asp-action="Register">Join Archive</a>
                 }
 
                 <!-- Mobile Navigation Hamburger -->
@@ -278,17 +278,17 @@
         </div>
 
         <nav class="sw-mobile-drawer-links">
-            <span class="sw-kicker sw-kicker-navy">Navigation</span>
+            <span class="sw-kicker sw-kicker-forest">Archive Navigation</span>
             @if (isAdmin)
             {
                 <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-grid-1x2"></i> Dashboard Overview</a>
-                <a class="sw-mobile-drawer-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index"><i class="bi bi-journal-bookmark"></i> Books Catalogue</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index"><i class="bi bi-bookshelf"></i> Books Catalogue</a>
                 <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop"></i> Research Marketplace</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminMarketplace" ? "active" : "")" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check text-danger"></i> Moderation Desk</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AuthorMarketplace" ? "active" : "")" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square"></i> Author Desk</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminCategories" ? "active" : "")" asp-controller="AdminCategories" asp-action="Index"><i class="bi bi-tags"></i> Categories</a>
-                <a class="sw-mobile-drawer-link @(currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle text-primary"></i> Issue Book</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle text-warning"></i> Issue Book</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminCirculation" && currentAction == "Index" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Index"><i class="bi bi-arrow-left-right"></i> Circulation Desk</a>
                 <a class="sw-mobile-drawer-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history text-danger"></i> Overdue Loans</a>
                 <a class="sw-mobile-drawer-link @(currentAction == "Payments" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Payments"><i class="bi bi-cash-stack text-success"></i> Fine Payments</a>
@@ -299,10 +299,10 @@
             else if (isStaff)
             {
                 <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-inboxes"></i> Operations Desk</a>
-                <a class="sw-mobile-drawer-link @(currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle text-primary"></i> Quick Issue</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle text-warning"></i> Quick Issue</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminCirculation" && currentAction == "Index" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Index"><i class="bi bi-arrow-left-right"></i> Circulation</a>
                 <a class="sw-mobile-drawer-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history text-danger"></i> Overdue Loans</a>
-                <a class="sw-mobile-drawer-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index"><i class="bi bi-journal-bookmark"></i> Books Catalogue</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index"><i class="bi bi-bookshelf"></i> Books Catalogue</a>
                 <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop"></i> Research Marketplace</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminMarketplace" ? "active" : "")" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check text-danger"></i> Moderation Desk</a>
@@ -312,52 +312,52 @@
             }
             else if (isMember)
             {
-                <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-book-half"></i> Reading Room</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-bookshelf"></i> Reading Room</a>
                 <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-mortarboard"></i> Research Papers</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AuthorMarketplace" ? "active" : "")" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square"></i> Author Desk</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Marketplace" && currentAction == "MyPurchases" ? "active" : "")" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check"></i> My Acquired Papers</a>
-                <a class="sw-mobile-drawer-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index"><i class="bi bi-compass"></i> Discover Catalogue</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index"><i class="bi bi-compass"></i> Discover Bookshelf</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-vcard"></i> My Library Card</a>
             }
             else
             {
-                <a class="sw-mobile-drawer-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index"><i class="bi bi-compass"></i> Explore Collection</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index"><i class="bi bi-bookshelf"></i> Explore Bookshelves</a>
                 <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-mortarboard"></i> Research Papers</a>
                 <a class="sw-mobile-drawer-link" asp-controller="Account" asp-action="Login"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
-                <a class="sw-mobile-drawer-link" asp-controller="Account" asp-action="Register"><i class="bi bi-person-plus"></i> Join Library</a>
+                <a class="sw-mobile-drawer-link" asp-controller="Account" asp-action="Register"><i class="bi bi-person-plus"></i> Join Archive</a>
             }
         </nav>
     </aside>
 
     <!-- Notifications Drawer -->
-    <aside class="sw-notification-drawer" id="swNotificationDrawer" aria-label="Notifications Drawer">
+    <aside class="sw-notification-drawer" id="swNotificationDrawer" aria-label="Archive Notices Drawer">
         <div class="sw-mobile-drawer-header p-3 border-bottom d-flex align-items-center justify-content-between">
             <div>
-                <span class="sw-kicker mb-0">Editorial Dispatch</span>
-                <h5 class="sw-h5 mb-0">Library Notices</h5>
+                <span class="sw-kicker mb-0">Archival Notice</span>
+                <h5 class="sw-h5 mb-0">Archive Dispatch</h5>
             </div>
-            <button type="button" class="sw-tool-btn" id="swNotificationClose" aria-label="Close notifications">
+            <button type="button" class="sw-tool-btn" id="swNotificationClose" aria-label="Close notices">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
         <div class="p-3 d-flex flex-column gap-3 overflow-y-auto">
-            <div class="p-3 bg-light rounded border">
+            <div class="p-3 parchment-card">
                 <div class="d-flex align-items-center justify-content-between mb-1">
-                    <span class="sw-badge sw-badge-info">System Policy</span>
-                    <span class="sw-mono small text-muted">Today</span>
+                    <span class="brass-tag">System Regulation</span>
+                    <span class="sw-mono small text-muted">Active</span>
                 </div>
                 <div class="fw-bold small mb-1">14-Day Standard Loan Period</div>
                 <p class="text-muted small mb-0">Borrowing limits and daily overdue fees remain active under current library regulations.</p>
             </div>
-            <div class="p-3 bg-light rounded border">
+            <div class="p-3 parchment-card">
                 <div class="d-flex align-items-center justify-content-between mb-1">
-                    <span class="sw-badge sw-badge-success">Curated Shelf</span>
-                    <span class="sw-mono small text-muted">Active</span>
+                    <span class="sw-badge sw-badge-success">Curated Shelves</span>
+                    <span class="sw-mono small text-muted">New Additions</span>
                 </div>
-                <div class="fw-bold small mb-1">New Computer Science Editions</div>
-                <p class="text-muted small mb-0">Fresh arrivals in software architecture, cloud platforms, and modern systems are now available in the catalogue.</p>
+                <div class="fw-bold small mb-1">Computer Science & Research Manuscript Arrivals</div>
+                <p class="text-muted small mb-0">Fresh arrivals in software architecture, cloud platforms, and peer-reviewed research papers are ready on the shelves.</p>
             </div>
         </div>
     </aside>
@@ -383,19 +383,19 @@
         @RenderBody()
     </main>
 
-    <!-- Editorial Footer -->
+    <!-- Warm Archive Wooden Footer -->
     <footer class="sw-footer">
         <div class="sw-footer-inner">
             <div class="d-flex flex-column gap-1">
                 <div class="sw-footer-brand">
-                    <span class="text-primary"><i class="bi bi-book-half"></i></span>
-                    <span>Shelfwise Library Management</span>
+                    <span style="color: var(--sw-gold-brass);"><i class="bi bi-book-half"></i></span>
+                    <span>Shelfwise — Digital Library & Research Archive</span>
                 </div>
-                <div class="sw-footer-tagline">The Art of Reading — Curated Library Intelligence</div>
+                <div class="sw-footer-tagline">READ. HIGHLIGHT. THINK. CREATE. SHARE.</div>
             </div>
             <div class="d-flex flex-column align-items-md-end gap-1">
-                <div class="sw-footer-meta">VOL. XII · ENTERPRISE EDITION · HYBRID MONOLITH</div>
-                <div class="small text-muted">Crafted with ASP.NET Core &amp; Modern Editorial Standards</div>
+                <div class="sw-footer-meta">EST. ARCHIVE · UNIVERSITY PROJECT PRESENTATION · C# 14 / .NET 10 &amp; SQL SERVER 2022</div>
+                <div class="small" style="color: var(--sw-gold-muted);">Crafted with Warm Archive / Wooden Shelf Architecture</div>
             </div>
         </div>
     </footer>

@@ -1,6 +1,6 @@
 /* ==========================================================================
-   SHELFWISE — DIGITAL LIBRARY & SPLIT WORKSPACE STYLES (Phase 5)
-   Editorial Magazine Design System · Hybrid Light/Dark Theme
+   SHELFWISE — WARM ARCHIVE & WOODEN SHELF
+   Workspace: Parchment Reading Room & Side-by-Side Quill Notes
    ========================================================================== */
 
 /* Fullscreen Workspace Shell */
@@ -15,17 +15,18 @@
     color: var(--sw-text);
 }
 
-/* Minimal Top Navigation Header */
+/* Minimal Top Navigation Header (Walnut Archive Beam) */
 .sw-workspace-header {
     height: 56px;
-    background-color: var(--sw-surface);
-    border-bottom: 1px solid var(--sw-border);
+    background-color: var(--sw-walnut-deep);
+    border-bottom: 2px solid var(--sw-gold-brass);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 1.25rem;
     z-index: 50;
     flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
 }
 
 .sw-workspace-title-group {
@@ -36,18 +37,19 @@
 }
 
 .sw-workspace-book-title {
-    font-family: var(--sw-font-serif);
+    font-family: var(--sw-font-heading);
     font-weight: 700;
     font-size: 1.05rem;
-    color: var(--sw-navy);
+    color: var(--sw-paper-cream);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 380px;
+    letter-spacing: -0.01em;
 }
 
 .sw-workspace-author {
-    color: var(--sw-text-muted);
+    color: var(--sw-gold-muted);
     font-size: 0.85rem;
     white-space: nowrap;
 }
@@ -61,8 +63,8 @@
 /* Mobile Tab Switcher */
 .sw-workspace-mobile-nav {
     display: none;
-    background-color: var(--sw-surface-alt, #faf7f2);
-    border-bottom: 1px solid var(--sw-border);
+    background-color: var(--sw-wood-dark);
+    border-bottom: 1px solid var(--sw-gold-brass);
     padding: 0.35rem 0.75rem;
     gap: 0.5rem;
 }
@@ -73,7 +75,7 @@
     display: flex;
     overflow: hidden;
     position: relative;
-    background-color: var(--sw-paper-warm, #fdfbf7);
+    background-color: var(--sw-bg-alt);
 }
 
 /* Left Pane: PDF Reader */
@@ -82,16 +84,16 @@
     min-width: 320px;
     display: flex;
     flex-direction: column;
-    background-color: #525659;
+    background-color: #2b1d14;
     position: relative;
     overflow: hidden;
 }
 
-/* Reader Toolbar */
+/* Reader Toolbar: Walnut Beam with Brass Fittings */
 .sw-reader-toolbar {
     height: 48px;
-    background-color: var(--sw-surface);
-    border-bottom: 1px solid var(--sw-border);
+    background-color: var(--sw-wood-dark);
+    border-bottom: 1.5px solid var(--sw-gold-brass);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -99,6 +101,7 @@
     gap: 0.75rem;
     z-index: 30;
     flex-shrink: 0;
+    color: var(--sw-paper-cream);
 }
 
 .sw-reader-tools-left,
@@ -115,17 +118,19 @@
     gap: 0.35rem;
     font-family: var(--sw-font-mono);
     font-size: 0.85rem;
+    color: var(--sw-gold-muted);
 }
 
 .sw-page-input {
     width: 50px;
     height: 28px;
     text-align: center;
-    border: 1px solid var(--sw-input-border);
-    background: var(--sw-bg);
-    color: var(--sw-text);
+    border: 1px solid var(--sw-gold-brass);
+    background: rgba(20, 13, 8, 0.8);
+    color: var(--sw-paper-cream);
     font-size: 0.85rem;
     padding: 0 0.25rem;
+    border-radius: var(--sw-radius-xs);
 }
 
 /* PDF Scroll Viewport */
@@ -138,7 +143,7 @@
     align-items: center;
     padding: 1.5rem;
     gap: 1.5rem;
-    background-color: #4a4d50;
+    background: radial-gradient(circle at 50% 10%, #362215 0%, #20130a 100%);
     scroll-behavior: smooth;
     position: relative;
 }
@@ -146,9 +151,10 @@
 /* PDF Page Container */
 .pdf-page-container {
     position: relative;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-    background-color: #ffffff;
-    margin-bottom: 1rem;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.65);
+    background-color: #fffefb;
+    border: 1px solid #d5c3a5;
+    margin-bottom: 1.25rem;
 }
 
 .pdf-page-container canvas {
@@ -165,7 +171,7 @@
     right: 0;
     bottom: 0;
     overflow: hidden;
-    opacity: 0.25;
+    opacity: 0.28;
     line-height: 1.0;
     transform-origin: 0 0;
     pointer-events: auto;
@@ -180,7 +186,7 @@
 }
 
 .textLayer ::selection {
-    background: rgba(217, 108, 69, 0.4) !important;
+    background: rgba(200, 150, 62, 0.45) !important;
 }
 
 /* Persistent Highlight Overlays */
@@ -204,23 +210,24 @@
 
 .sw-pdf-highlight:hover {
     filter: brightness(0.92);
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
-.sw-highlight-yellow { background-color: rgba(255, 235, 59, 0.45) !important; border-bottom: 2px solid #fbc02d; }
-.sw-highlight-sage { background-color: rgba(166, 179, 155, 0.5) !important; border-bottom: 2px solid #78909c; }
+.sw-highlight-yellow { background-color: rgba(255, 235, 59, 0.45) !important; border-bottom: 2px solid #c8963e; }
+.sw-highlight-sage { background-color: rgba(46, 89, 79, 0.45) !important; border-bottom: 2px solid #1f3d36; }
 .sw-highlight-blue { background-color: rgba(66, 165, 245, 0.4) !important; border-bottom: 2px solid #1e88e5; }
-.sw-highlight-terracotta { background-color: rgba(217, 108, 69, 0.45) !important; border-bottom: 2px solid #d96c45; }
+.sw-highlight-terracotta { background-color: rgba(200, 150, 62, 0.45) !important; border-bottom: 2px solid #dfbd78; }
 
 /* Contextual Floating Selection Toolbar */
 .sw-selection-toolbar {
     position: absolute;
     display: none;
-    background-color: var(--sw-navy);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--sw-walnut-deep) 0%, var(--sw-wood-dark) 100%);
+    color: var(--sw-paper-cream);
+    border: 1px solid var(--sw-gold-brass);
     border-radius: 6px;
-    padding: 0.35rem 0.6rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    padding: 0.35rem 0.65rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
     z-index: 100;
     align-items: center;
     gap: 0.5rem;
@@ -236,7 +243,7 @@
     left: 50%;
     transform: translateX(-50%);
     border: 6px solid transparent;
-    border-top-color: var(--sw-navy);
+    border-top-color: var(--sw-walnut-deep);
 }
 
 .sw-color-swatch {
@@ -253,25 +260,26 @@
     border-color: #ffffff;
 }
 
-.sw-color-yellow { background-color: #fbc02d; }
-.sw-color-sage { background-color: #8da399; }
+.sw-color-yellow { background-color: #c8963e; }
+.sw-color-sage { background-color: #1f3d36; }
 .sw-color-blue { background-color: #42a5f5; }
-.sw-color-terracotta { background-color: #d96c45; }
+.sw-color-terracotta { background-color: #dfbd78; }
 
-/* Draggable Split Resizer Handle */
+/* Draggable Split Resizer Handle (Wooden Archival Divider) */
 .sw-workspace-resizer {
     width: 8px;
-    background-color: var(--sw-border);
+    background: linear-gradient(90deg, #2b1d14, #4a301d 50%, #2b1d14);
     cursor: col-resize;
     position: relative;
     z-index: 40;
     transition: background-color 0.2s ease;
     flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 .sw-workspace-resizer:hover,
 .sw-workspace-resizer.resizing {
-    background-color: var(--sw-terracotta);
+    background: var(--sw-gold-brass);
 }
 
 .sw-workspace-resizer::after {
@@ -282,23 +290,23 @@
     transform: translate(-50%, -50%);
     width: 2px;
     height: 28px;
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: var(--sw-gold-brass);
     border-radius: 1px;
 }
 
-/* Right Pane: Notes Workspace */
+/* Right Pane: Parchment Notes Workspace */
 .sw-pane-notes {
     flex: 1;
     min-width: 320px;
     display: flex;
     flex-direction: column;
-    background-color: var(--sw-surface);
+    background-color: var(--sw-bg-parchment);
     overflow: hidden;
 }
 
 .sw-notes-header {
     height: 48px;
-    border-bottom: 1px solid var(--sw-border);
+    border-bottom: 1px solid var(--sw-border-warm);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -309,12 +317,12 @@
 }
 
 .sw-notes-title-input {
-    font-family: var(--sw-font-serif);
+    font-family: var(--sw-font-heading);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.05rem;
     border: none;
     background: transparent;
-    color: var(--sw-navy);
+    color: var(--sw-walnut-deep);
     padding: 0.2rem 0.4rem;
     flex: 1;
     border-bottom: 1px dashed transparent;
@@ -324,7 +332,7 @@
 .sw-notes-title-input:hover,
 .sw-notes-title-input:focus {
     outline: none;
-    border-bottom-color: var(--sw-terracotta);
+    border-bottom-color: var(--sw-gold-brass);
 }
 
 .sw-notes-save-status {
@@ -340,11 +348,11 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #198754;
+    background-color: var(--sw-forest-green);
 }
 
 .sw-status-dot.saving {
-    background-color: #ffc107;
+    background-color: var(--sw-gold-brass);
     animation: sw-pulse 1s infinite alternate;
 }
 
@@ -352,18 +360,19 @@
     background-color: #dc3545;
 }
 
-/* Quill Editor Customizations */
+/* Quill Editor Customizations (Antique Manuscript Paper) */
 .sw-quill-container {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background-color: var(--sw-bg-parchment);
 }
 
 .ql-toolbar.ql-snow {
     border: none !important;
-    border-bottom: 1px solid var(--sw-border) !important;
-    background-color: var(--sw-bg) !important;
+    border-bottom: 1px solid var(--sw-border-warm) !important;
+    background-color: var(--sw-surface) !important;
     padding: 0.4rem 0.75rem !important;
 }
 
@@ -371,32 +380,33 @@
     border: none !important;
     flex: 1;
     overflow-y: auto;
-    font-family: var(--sw-font-sans);
-    font-size: 0.95rem;
-    line-height: 1.7;
-    background-color: var(--sw-surface);
+    font-family: var(--sw-font-body);
+    font-size: 0.98rem;
+    line-height: 1.75;
+    background-color: var(--sw-bg-parchment);
     color: var(--sw-text);
 }
 
 .ql-editor {
-    padding: 1.5rem !important;
+    padding: 1.75rem !important;
     min-height: 100%;
 }
 
 .ql-editor blockquote {
-    border-left: 4px solid var(--sw-terracotta) !important;
-    background-color: rgba(217, 108, 69, 0.05);
+    border-left: 4px solid var(--sw-gold-brass) !important;
+    background-color: rgba(200, 150, 62, 0.08);
     padding: 0.6rem 1rem !important;
     margin: 1rem 0 !important;
-    color: var(--sw-text-muted);
+    color: var(--sw-walnut-deep);
     font-style: italic;
+    font-family: var(--sw-font-heading);
 }
 
 .ql-editor h1,
 .ql-editor h2,
 .ql-editor h3 {
-    font-family: var(--sw-font-serif);
-    color: var(--sw-navy);
+    font-family: var(--sw-font-heading);
+    color: var(--sw-walnut-deep);
     margin-top: 1.25rem;
     margin-bottom: 0.5rem;
 }
@@ -406,11 +416,11 @@
     position: absolute;
     top: 48px;
     bottom: 0;
-    width: 280px;
+    width: 290px;
     background-color: var(--sw-surface);
-    border-right: 1px solid var(--sw-border);
+    border-right: 1px solid var(--sw-border-warm);
     z-index: 35;
-    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
     transform: translateX(-100%);
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
@@ -423,12 +433,13 @@
 
 .sw-drawer-header {
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--sw-border);
+    border-bottom: 1px solid var(--sw-border-warm);
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-weight: 700;
-    font-family: var(--sw-font-serif);
+    font-family: var(--sw-font-heading);
+    color: var(--sw-walnut-deep);
 }
 
 .sw-drawer-content {
@@ -442,7 +453,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.85rem;
-    border-bottom: 1px solid var(--sw-border-subtle, #f0ebe1);
+    border-bottom: 1px solid var(--sw-border-subtle);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -450,7 +461,7 @@
 }
 
 .sw-drawer-item:hover {
-    background-color: var(--sw-bg);
+    background-color: var(--sw-bg-alt);
 }
 
 /* Responsive Overrides (Tablet & Mobile < 992px) */

@@ -1,32 +1,35 @@
 /* ==========================================================================
-   SHELFWISE — THE ART OF READING
-   Typography: Editorial Magazine Hierarchy
+   SHELFWISE — WARM ARCHIVE & WOODEN SHELF
+   Typography: Scholarly Archive & Antique Library Hierarchy
    ========================================================================== */
 
 h1, h2, h3, h4, h5, h6,
-.sw-heading-editorial {
+.sw-heading-editorial,
+.sw-heading-archive {
     font-family: var(--sw-font-heading);
     font-weight: 700;
     color: var(--sw-text);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     margin-top: 0;
 }
 
 h1, .sw-h1 {
-    font-size: clamp(2.25rem, 5vw, 3.75rem);
-    line-height: 1.05;
-    letter-spacing: -0.035em;
+    font-size: clamp(2.25rem, 5vw, 3.65rem);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    font-variation-settings: 'opsz' 72, 'wght' 700;
 }
 
 h2, .sw-h2 {
-    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    font-size: clamp(1.75rem, 3.5vw, 2.4rem);
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+    font-variation-settings: 'opsz' 48, 'wght' 700;
 }
 
 h3, .sw-h3 {
-    font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+    font-size: clamp(1.3rem, 2.5vw, 1.75rem);
     line-height: 1.25;
 }
 
@@ -48,14 +51,14 @@ h6, .sw-h6 {
 p, .sw-body {
     font-family: var(--sw-font-body);
     font-size: var(--sw-text-base);
-    line-height: 1.65;
+    line-height: 1.68;
     color: var(--sw-text);
     margin-bottom: var(--sw-space-4);
 }
 
 .sw-body-lg {
     font-size: var(--sw-text-md);
-    line-height: 1.6;
+    line-height: 1.65;
 }
 
 .sw-body-sm {
@@ -68,7 +71,7 @@ p, .sw-body {
     line-height: 1.5;
 }
 
-/* Editorial Serif Accents */
+/* Scholarly & Archival Serif Accents */
 .sw-serif-italic {
     font-family: var(--sw-font-heading);
     font-style: italic;
@@ -76,24 +79,25 @@ p, .sw-body {
 }
 
 .sw-accent-word {
-    color: var(--sw-terracotta);
+    color: var(--sw-gold-brass);
+    text-shadow: 0 1px 1px rgba(43, 29, 20, 0.2);
 }
 
 [data-theme="dark"] .sw-accent-word {
-    color: var(--sw-accent);
+    color: var(--sw-gold-muted);
 }
 
-/* Editorial Kicker / Eyebrow */
+/* Brass & Parchment Kicker / Archive Eyebrow */
 .sw-kicker {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     font-family: var(--sw-font-mono);
     font-size: var(--sw-text-2xs);
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--sw-terracotta);
+    letter-spacing: 0.16em;
+    color: var(--sw-gold-brass);
     margin-bottom: var(--sw-space-2);
 }
 
@@ -102,24 +106,37 @@ p, .sw-body {
     display: inline-block;
     width: 14px;
     height: 2px;
-    background-color: currentColor;
+    background: linear-gradient(90deg, var(--sw-gold-brass), transparent);
 }
 
 .sw-kicker.sw-kicker-navy {
     color: var(--sw-text-muted);
 }
 
-/* KPI & Statistics Typography */
+.sw-kicker.sw-kicker-forest {
+    color: var(--sw-forest-green);
+}
+
+/* Antique Gold Foil Gilded Text */
+.sw-gilded-text {
+    background: linear-gradient(135deg, #dfbd78 0%, #c8963e 50%, #996e1a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+/* Archival Stamp & Monospace Call Numbers */
+.sw-call-number,
+.sw-dewey-code,
 .sw-stat-number,
 .sw-kpi-value {
-    font-family: var(--sw-font-display);
+    font-family: var(--sw-font-mono);
     font-weight: 700;
     line-height: 1;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
 }
 
-/* Monospace Technical Labels & Codes */
 .sw-mono,
 .sw-code,
 .sw-tag-mono {
@@ -131,30 +148,59 @@ p, .sw-body {
 .sw-badge-id {
     font-family: var(--sw-font-mono);
     font-size: var(--sw-text-2xs);
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.08em;
-    padding: 0.2rem 0.5rem;
+    padding: 0.22rem 0.55rem;
     border-radius: var(--sw-radius-xs);
-    background-color: var(--sw-bg-alt);
+    background-color: var(--sw-bg-parchment-subtle);
     color: var(--sw-text);
-    border: 1px solid var(--sw-border);
+    border: 1px solid var(--sw-border-warm);
+    box-shadow: inset 0 1px 2px rgba(43, 29, 20, 0.05);
 }
 
-/* Editorial Magazine Issue / Volume Tag */
+/* Archive Volume & Catalogue Shelf Tag */
 .sw-volume-tag {
     font-family: var(--sw-font-mono);
     font-size: var(--sw-text-2xs);
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--sw-text-muted);
 }
 
-/* Editorial Dropcap */
+/* Vintage Manuscript Dropcap */
 .sw-dropcap::first-letter {
     font-family: var(--sw-font-heading);
-    font-size: 3.5rem;
+    font-size: 3.6rem;
     float: left;
     line-height: 0.8;
-    margin-right: 0.6rem;
-    color: var(--sw-terracotta);
+    margin-right: 0.65rem;
+    color: var(--sw-gold-brass);
+    text-shadow: 1px 2px 3px rgba(43, 29, 20, 0.25);
+}
+
+/* Book Spine Vertical Titles */
+.spine-vertical-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-family: var(--sw-font-heading);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spine-vertical-author {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-family: var(--sw-font-body);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

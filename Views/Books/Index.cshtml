@@ -1,73 +1,91 @@
 @model IReadOnlyList<Book>
 @{
-    ViewData["Title"] = "Explore the Collection";
+    ViewData["Title"] = "Wooden Bookshelf & Archive Catalogue";
 }
 
 @functions {
-    string GetThemeClass(string? category, int id)
+    string GetSpineColor(string? category, int id)
     {
-        string[] themes = [
-            "cover-theme-saffron",
-            "cover-theme-cobalt",
-            "cover-theme-sage",
-            "cover-theme-crimson",
-            "cover-theme-charcoal",
-            "cover-theme-plum",
-            "cover-theme-terracotta",
-            "cover-theme-teal"
+        string[] colors = [
+            "walnut",
+            "navy",
+            "forest",
+            "burgundy",
+            "leather-red",
+            "ochre",
+            "midnight"
         ];
         var seed = Math.Abs((category?.GetHashCode(StringComparison.OrdinalIgnoreCase) ?? 0) * 31 + id);
-        return themes[seed % themes.Length];
+        return colors[seed % colors.Length];
+    }
+
+    string GetSpineHeightClass(int id)
+    {
+        string[] heights = ["spine-height-sm", "spine-height-md", "spine-height-lg", "spine-height-xl"];
+        return heights[Math.Abs(id * 17) % heights.Length];
+    }
+
+    string GetSpineWidthClass(int id)
+    {
+        string[] widths = ["spine-width-sm", "spine-width-md", "spine-width-lg", "spine-width-xl"];
+        return widths[Math.Abs(id * 23) % widths.Length];
     }
 }
 
-<!-- Page Heading & Subtitle -->
-<div class="catalogue-header">
-    <div class="eyebrow"><span class="eyebrow-mark"></span> SHELFWISE CURATED ARCHIVE</div>
-    <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-3">
-        <div>
-            <h1 class="catalogue-title">Explore the Collection</h1>
-            <p class="catalogue-subtitle">
-                Browsing <strong>@ViewBag.TotalCatalogueCount</strong> catalogued volumes ready for research, lending, and discovery.
-                @if ((int)ViewBag.FilteredCount != (int)ViewBag.TotalCatalogueCount)
-                {
-                    <span class="badge bg-dark text-white ms-2">@ViewBag.FilteredCount matching filters</span>
-                }
-            </p>
+<!-- Warm Archive Catalogue Header -->
+<div class="sw-page-header mb-4">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker sw-kicker-forest"><i class="bi bi-bookshelf"></i> SHELFWISE GRAND ARCHIVE</div>
+        <h1 class="sw-h1">The Bookshelf Catalogue</h1>
+        <p class="sw-body text-muted mb-0">
+            Browsing <strong>@ViewBag.TotalCatalogueCount</strong> catalogued volumes arranged on wooden library stacks.
+            @if ((int)ViewBag.FilteredCount != (int)ViewBag.TotalCatalogueCount)
+            {
+                <span class="brass-tag ms-2">@ViewBag.FilteredCount matching filters</span>
+            }
+        </p>
+    </div>
+    <div class="sw-page-actions">
+        <!-- View Mode Switcher -->
+        <div class="sw-view-toggle-group me-2" role="group" aria-label="Catalogue view format">
+            <button type="button" class="sw-view-toggle-btn active" id="btnViewShelf" onclick="setCatalogueView('shelf')" title="Wooden Bookshelf (Spine View)">
+                <i class="bi bi-bookshelf"></i> <span class="d-none d-sm-inline">Spine Shelf</span>
+            </button>
+            <button type="button" class="sw-view-toggle-btn" id="btnViewGrid" onclick="setCatalogueView('grid')" title="Card Catalog View">
+                <i class="bi bi-grid-3x3-gap"></i> <span class="d-none d-sm-inline">Card Catalog</span>
+            </button>
         </div>
+
         @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
         {
-            <div class="d-flex gap-2">
-                <a asp-controller="AdminBooks" asp-action="Create" class="btn btn-ink">
-                    <i class="bi bi-plus-lg me-1"></i> Add New Book
-                </a>
-                <a asp-controller="AdminCirculation" asp-action="Issue" class="btn btn-paper">
-                    <i class="bi bi-box-arrow-up-right me-1"></i> Issue Desk
-                </a>
-            </div>
+            <a asp-controller="AdminBooks" asp-action="Create" class="sw-btn sw-btn-primary sw-btn-sm">
+                <i class="bi bi-plus-lg"></i> Add New Book
+            </a>
+            <a asp-controller="AdminCirculation" asp-action="Issue" class="sw-btn sw-btn-outline sw-btn-sm">
+                <i class="bi bi-box-arrow-up-right"></i> Issue Desk
+            </a>
         }
     </div>
 </div>
 
-<!-- Prominent Search, Availability, & Sorting Bar -->
-<div class="catalogue-controls-panel mb-4">
-    <form method="get" class="row g-3 align-items-center" id="catalogueSearchForm">
-        <!-- Preserve selected category when searching -->
+<!-- Search, Availability, & Sorting Bar -->
+<div class="sw-catalogue-toolbar mb-4">
+    <form method="get" class="w-100 d-flex flex-wrap align-items-center justify-content-between gap-3" id="catalogueSearchForm">
         @if (!string.IsNullOrWhiteSpace((string?)ViewBag.Category))
         {
             <input type="hidden" name="category" value="@ViewBag.Category" />
         }
 
         <!-- Search input -->
-        <div class="col-lg-5 col-md-12">
-            <div class="catalogue-search-box">
-                <i class="bi bi-search search-icon"></i>
-                <input type="search" class="catalogue-search-input" id="q" name="q" value="@ViewBag.Query"
-                       placeholder="Search by title, author, subject, or ISBN..."
+        <div class="sw-catalogue-search-form">
+            <div class="position-relative w-100">
+                <input type="search" class="sw-input" id="q" name="q" value="@ViewBag.Query"
+                       placeholder="Search shelves by title, author, call number or ISBN..."
                        aria-label="Search catalogue" />
                 @if (!string.IsNullOrWhiteSpace((string?)ViewBag.Query))
                 {
-                    <a asp-action="Index" asp-route-category="@ViewBag.Category" asp-route-availability="@ViewBag.Availability" asp-route-sort="@ViewBag.Sort" class="clear-search-btn" title="Clear search">
+                    <a asp-action="Index" asp-route-category="@ViewBag.Category" asp-route-availability="@ViewBag.Availability" asp-route-sort="@ViewBag.Sort" 
+                       class="position-absolute end-0 top-50 translate-middle-y me-3 text-muted text-decoration-none" title="Clear search">
                         <i class="bi bi-x-circle-fill"></i>
                     </a>
                 }
@@ -75,273 +93,175 @@
         </div>
 
         <!-- Availability Filter -->
-        <div class="col-lg-4 col-md-7 col-sm-12">
-            <div class="availability-toggle-group" role="group" aria-label="Availability filter">
-                <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category" asp-route-sort="@ViewBag.Sort"
-                   class="availability-toggle-btn @(string.IsNullOrWhiteSpace((string?)ViewBag.Availability) ? "active" : "")">
-                    All Volumes
-                </a>
-                <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category" asp-route-availability="available" asp-route-sort="@ViewBag.Sort"
-                   class="availability-toggle-btn @((string?)ViewBag.Availability == "available" ? "active" : "")">
-                    <i class="bi bi-check2 me-1"></i> Available
-                </a>
-                <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category" asp-route-availability="issued" asp-route-sort="@ViewBag.Sort"
-                   class="availability-toggle-btn @((string?)ViewBag.Availability == "issued" ? "active" : "")">
-                    <i class="bi bi-clock-history me-1"></i> Issued
-                </a>
-            </div>
+        <div class="d-flex align-items-center gap-1 bg-surface border rounded p-1">
+            <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category" asp-route-sort="@ViewBag.Sort"
+               class="sw-btn sw-btn-sm @(string.IsNullOrWhiteSpace((string?)ViewBag.Availability) ? "sw-btn-primary" : "sw-btn-outline")">
+                All Volumes
+            </a>
+            <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category" asp-route-availability="available" asp-route-sort="@ViewBag.Sort"
+               class="sw-btn sw-btn-sm @((string?)ViewBag.Availability == "available" ? "sw-btn-primary" : "sw-btn-outline")">
+                <i class="bi bi-check2"></i> Available
+            </a>
+            <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category" asp-route-availability="issued" asp-route-sort="@ViewBag.Sort"
+               class="sw-btn sw-btn-sm @((string?)ViewBag.Availability == "issued" ? "sw-btn-primary" : "sw-btn-outline")">
+                <i class="bi bi-clock-history"></i> On Loan
+            </a>
         </div>
 
         <!-- Sorting -->
-        <div class="col-lg-3 col-md-5 col-sm-12">
-            <div class="d-flex align-items-center gap-2">
-                <label for="sort" class="form-label mb-0 small fw-bold text-nowrap text-uppercase text-secondary" style="font-size:0.7rem;letter-spacing:0.05em;">Sort By</label>
-                <select class="form-select catalogue-sort-select" id="sort" name="sort" onchange="this.form.submit()" aria-label="Sort books by">
-                    <option value="title" selected="@((string?)ViewBag.Sort == "title")">Title (A &ndash; Z)</option>
-                    <option value="newest" selected="@((string?)ViewBag.Sort == "newest")">Recently Added</option>
-                    <option value="popular" selected="@((string?)ViewBag.Sort == "popular")">Most Borrowed</option>
-                </select>
-                <noscript>
-                    <button type="submit" class="btn btn-ink btn-sm">Sort</button>
-                </noscript>
-            </div>
+        <div class="d-flex align-items-center gap-2">
+            <label for="sort" class="sw-form-label mb-0 text-nowrap sw-mono">Sort By</label>
+            <select class="sw-input" style="height: 38px; width: auto; min-width: 170px;" id="sort" name="sort" onchange="this.form.submit()" aria-label="Sort books by">
+                <option value="title" selected="@((string?)ViewBag.Sort == "title")">Title (A – Z)</option>
+                <option value="newest" selected="@((string?)ViewBag.Sort == "newest")">Recently Added</option>
+                <option value="popular" selected="@((string?)ViewBag.Sort == "popular")">Most Borrowed</option>
+            </select>
         </div>
     </form>
 </div>
 
-<!-- Category Filter Chips -->
+<!-- Subject Category Chips -->
 @if (ViewBag.Categories is List<string> catList && catList.Count > 0)
 {
-    <div class="category-chips-bar mb-4">
-        <span class="category-chips-label"><i class="bi bi-tags-fill me-1"></i> Subjects:</span>
-        <div class="category-chips-scroller">
-            <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-availability="@ViewBag.Availability" asp-route-sort="@ViewBag.Sort"
-               class="category-chip @(string.IsNullOrWhiteSpace((string?)ViewBag.Category) ? "active" : "")">
-                All Subjects
-            </a>
-            @foreach (var cat in catList)
-            {
-                <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@cat" asp-route-availability="@ViewBag.Availability" asp-route-sort="@ViewBag.Sort"
-                   class="category-chip @((string?)ViewBag.Category == cat ? "active" : "")">
-                    @cat
-                </a>
-            }
-        </div>
-    </div>
-}
-
-<!-- Featured Books Section (Only on page 1 with no search/filters active) -->
-@if (ViewBag.FeaturedBooks is List<Book> featured && featured.Count > 0 && (int)ViewBag.Page == 1 && string.IsNullOrWhiteSpace((string?)ViewBag.Query) && string.IsNullOrWhiteSpace((string?)ViewBag.Category) && string.IsNullOrWhiteSpace((string?)ViewBag.Availability))
-{
-    <section class="featured-section mb-5">
-        <div class="section-heading mb-3">
-            <div>
-                <div class="eyebrow"><span class="eyebrow-mark"></span> CURATOR'S HIGHLIGHTS</div>
-                <h2 class="h4 mb-0 fw-bold">Featured Books in Collection</h2>
-            </div>
-            <span class="text-secondary small fw-semibold">Top circulating and recommended volumes</span>
-        </div>
-        <div class="catalogue-grid">
-            @foreach (var book in featured)
-            {
-                <article class="editorial-book-card">
-                    <div class="featured-badge-pill">
-                        <i class="bi bi-star-fill me-1"></i> Featured
-                    </div>
-                    <div class="editorial-cover-container">
-                        <div class="editorial-book-cover @GetThemeClass(book.Category, book.Id)">
-                            <div class="cover-spine-edge"></div>
-                            <div class="cover-header">
-                                <span class="cover-tag"><i class="bi bi-bookmark-fill me-1"></i> @book.Category</span>
-                                <span class="cover-seal"><i class="bi bi-award-fill"></i></span>
-                            </div>
-                            <div class="cover-body">
-                                <h3 class="cover-title">@book.Title</h3>
-                            </div>
-                            <div class="cover-footer">
-                                <div class="cover-rule"></div>
-                                <div class="d-flex justify-content-between align-items-center w-100">
-                                    <span class="cover-author">@book.Author</span>
-                                    @if (book.PublicationYear.HasValue)
-                                    {
-                                        <span class="cover-year">@book.PublicationYear</span>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="editorial-card-body d-flex flex-column flex-grow-1 p-3">
-                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                            <span class="editorial-category-badge">@book.Category</span>
-                            @if (book.AvailableQuantity > 0)
-                            {
-                                <span class="editorial-status-pill pill-available">
-                                    <span class="status-indicator"></span> @book.AvailableQuantity Available
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="editorial-status-pill pill-issued">
-                                    <span class="status-indicator"></span> On Loan
-                                </span>
-                            }
-                        </div>
-                        <h2 class="editorial-book-title" title="@book.Title">@book.Title</h2>
-                        <p class="editorial-book-author">by <span class="fw-semibold">@book.Author</span></p>
-
-                        <div class="editorial-stock-bar mt-auto pt-2 mb-3">
-                            <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
-                                <span>Availability</span>
-                                <span class="fw-bold text-dark">@book.AvailableQuantity / @book.TotalQuantity copies</span>
-                            </div>
-                            <div class="editorial-stock-track">
-                                @{
-                                    var featPct = book.TotalQuantity > 0 ? Math.Clamp((int)Math.Round((double)book.AvailableQuantity / book.TotalQuantity * 100), 0, 100) : 0;
-                                }
-                                <div class="editorial-stock-fill @(book.AvailableQuantity > 0 ? "fill-available" : "fill-empty")" style="width: @featPct%;"></div>
-                            </div>
-                        </div>
-
-                        <div class="editorial-card-actions d-flex gap-2">
-                            <a class="btn btn-editorial-details flex-grow-1" asp-action="Details" asp-route-id="@book.Id">
-                                View Details &rarr;
-                            </a>
-                            @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
-                            {
-                                @if (book.AvailableQuantity > 0)
-                                {
-                                    <a class="btn btn-editorial-issue" asp-controller="AdminCirculation" asp-action="Issue" asp-route-bookId="@book.Id" title="Issue copy to a member">
-                                        <i class="bi bi-box-arrow-up-right me-1"></i> Issue
-                                    </a>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-editorial-issue disabled" disabled title="No copies available to issue">
-                                        <i class="bi bi-slash-circle me-1"></i> Issue
-                                    </button>
-                                }
-                            }
-                        </div>
-                    </div>
-                </article>
-            }
-        </div>
-    </section>
-}
-
-<!-- All Books / Results Grid -->
-<section class="all-books-section">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h2 class="h4 mb-0 fw-bold">
-            @if (!string.IsNullOrWhiteSpace((string?)ViewBag.Query) || !string.IsNullOrWhiteSpace((string?)ViewBag.Category) || !string.IsNullOrWhiteSpace((string?)ViewBag.Availability))
-            {
-                <span>Search & Filter Results <span class="text-secondary fw-normal">(@ViewBag.FilteredCount titles)</span></span>
-            }
-            else
-            {
-                <span>All Books in Collection <span class="text-secondary fw-normal">(@ViewBag.TotalCatalogueCount)</span></span>
-            }
-        </h2>
-        @if (!string.IsNullOrWhiteSpace((string?)ViewBag.Query) || !string.IsNullOrWhiteSpace((string?)ViewBag.Category) || !string.IsNullOrWhiteSpace((string?)ViewBag.Availability))
+    <div class="sw-filter-chips mb-4">
+        <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-availability="@ViewBag.Availability" asp-route-sort="@ViewBag.Sort"
+           class="sw-filter-chip @(string.IsNullOrWhiteSpace((string?)ViewBag.Category) ? "active" : "")">
+            All Archive Sections
+        </a>
+        @foreach (var cat in catList)
         {
-            <a asp-action="Index" class="btn btn-sm btn-outline-dark fw-bold">
-                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset All Filters
+            <a asp-action="Index" asp-route-q="@ViewBag.Query" asp-route-category="@cat" asp-route-availability="@ViewBag.Availability" asp-route-sort="@ViewBag.Sort"
+               class="sw-filter-chip @((string?)ViewBag.Category == cat ? "active" : "")">
+                <i class="bi bi-bookmark me-1 opacity-75"></i> @cat
             </a>
         }
     </div>
+}
 
-    @if (Model.Count == 0)
-    {
-        <div class="editorial-empty-state text-center p-5">
-            <div class="empty-icon-wrap mb-3">
-                <i class="bi bi-journal-x"></i>
-            </div>
-            <h3 class="h4 fw-bold">No Matching Volumes Found</h3>
-            <p class="text-secondary mb-4 mx-auto" style="max-width: 480px;">
-                We couldn't find any titles matching your current search query or filter combination. Try adjusting your search term, switching availability to All, or exploring other subjects.
-            </p>
-            <a class="btn btn-ink px-4 py-2" asp-action="Index">
-                <i class="bi bi-grid me-1"></i> Browse Entire Collection
-            </a>
+@if (Model.Count == 0)
+{
+    <div class="sw-empty-state">
+        <div class="sw-empty-icon">
+            <i class="bi bi-journal-x"></i>
         </div>
-    }
-    else
-    {
-        <div class="catalogue-grid">
+        <h3 class="sw-empty-title">No Matching Volumes in Archive</h3>
+        <p class="sw-empty-text">
+            No volumes match your current search query or filter combination. Try adjusting your query or resetting filters.
+        </p>
+        <a class="sw-btn sw-btn-primary" asp-action="Index">
+            <i class="bi bi-arrow-counterclockwise"></i> Browse Entire Archive
+        </a>
+    </div>
+}
+else
+{
+    <!-- 1. SIGNATURE WOODEN BOOKSHELF VIEW (Default) -->
+    <div id="shelfViewContainer" class="catalogue-view-pane">
+        @{
+            // Chunk books into realistic shelf rows of 6-8 volumes per row
+            var shelfGroups = Model.Select((book, index) => new { book, index })
+                                   .GroupBy(x => x.index / 7)
+                                   .Select(g => g.Select(x => x.book).ToList())
+                                   .ToList();
+        }
+
+        <div class="wooden-bookshelf-container">
+            @for (int sIdx = 0; sIdx < shelfGroups.Count; sIdx++)
+            {
+                var shelfBooks = shelfGroups[sIdx];
+                var sectionLetter = (char)('A' + (sIdx % 26));
+                <div class="wooden-shelf">
+                    <!-- Books Row Aligned Bottom -->
+                    <div class="shelf-books-row">
+                        @foreach (var book in shelfBooks)
+                        {
+                            var spineColor = GetSpineColor(book.Category, book.Id);
+                            var spineHeight = GetSpineHeightClass(book.Id);
+                            var spineWidth = GetSpineWidthClass(book.Id);
+                            var isAvail = book.AvailableQuantity > 0;
+                            var availClass = isAvail ? "spine-status-available" : "spine-status-borrowed";
+
+                            <a asp-action="Details" asp-route-id="@book.Id" 
+                               class="book-spine @spineHeight @spineWidth" 
+                               data-color="@spineColor"
+                               title="@book.Title by @book.Author (@book.AvailableQuantity/@book.TotalQuantity Available)">
+                                
+                                <!-- Top Filigree & Ribs -->
+                                <div class="spine-top-filigree">
+                                    <span class="spine-status-dot @availClass"></span>
+                                    <div class="spine-gilt-band"></div>
+                                    <div class="spine-rib"></div>
+                                </div>
+
+                                <!-- Vertical Gold Title & Author -->
+                                <div class="spine-title">@book.Title</div>
+                                <div class="spine-author">@book.Author</div>
+
+                                <!-- Bottom Ribs & Call Number Brass Tag -->
+                                <div class="spine-bottom-filigree">
+                                    <div class="spine-rib"></div>
+                                    <div class="spine-gilt-band"></div>
+                                    <span class="spine-brass-call">#@(book.Id.ToString("D4"))</span>
+                                </div>
+                            </a>
+                        }
+                    </div>
+
+                    <!-- 3D Wooden Shelf Ledge with Engraved Center Brass Plaque -->
+                    <div class="shelf-ledge">
+                        <span class="brass-plate">
+                            STACK @sectionLetter &middot; SECTION @(sIdx + 1) &middot; @(shelfBooks.FirstOrDefault()?.Category?.ToUpperInvariant() ?? "FOLIOS")
+                        </span>
+                    </div>
+                    <div class="shelf-ledge-shadow"></div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 2. CARD CATALOG GRID VIEW (Alternative) -->
+    <div id="gridViewContainer" class="catalogue-view-pane" style="display: none;">
+        <div class="sw-books-grid">
             @foreach (var book in Model)
             {
-                <article class="editorial-book-card">
-                    <div class="editorial-cover-container">
-                        <div class="editorial-book-cover @GetThemeClass(book.Category, book.Id)">
-                            <div class="cover-spine-edge"></div>
-                            <div class="cover-header">
-                                <span class="cover-tag"><i class="bi bi-bookmark-fill me-1"></i> @book.Category</span>
-                                <span class="cover-seal"><i class="bi bi-book-half"></i></span>
-                            </div>
-                            <div class="cover-body">
-                                <h3 class="cover-title">@book.Title</h3>
-                            </div>
-                            <div class="cover-footer">
-                                <div class="cover-rule"></div>
-                                <div class="d-flex justify-content-between align-items-center w-100">
-                                    <span class="cover-author">@book.Author</span>
-                                    @if (book.PublicationYear.HasValue)
-                                    {
-                                        <span class="cover-year">@book.PublicationYear</span>
-                                    }
-                                </div>
-                            </div>
+                <article class="sw-book-card">
+                    <div class="sw-book-cover-container">
+                        <div class="sw-book-cover-placeholder">
+                            <span class="sw-placeholder-spine">#@book.Id.ToString("D4") &middot; @book.Category</span>
+                            <div class="sw-placeholder-title">@book.Title</div>
+                            <div class="sw-placeholder-author">by @book.Author</div>
                         </div>
                     </div>
-                    <div class="editorial-card-body d-flex flex-column flex-grow-1 p-3">
-                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                            <span class="editorial-category-badge">@book.Category</span>
+                    <div class="sw-book-card-body">
+                        <div class="sw-book-meta-top">
+                            <span class="brass-tag">@book.Category</span>
                             @if (book.AvailableQuantity > 0)
                             {
-                                <span class="editorial-status-pill pill-available">
-                                    <span class="status-indicator"></span> @book.AvailableQuantity Available
+                                <span class="sw-badge sw-badge-success">
+                                    <span class="sw-badge-dot"></span> @book.AvailableQuantity Available
                                 </span>
                             }
                             else
                             {
-                                <span class="editorial-status-pill pill-issued">
-                                    <span class="status-indicator"></span> On Loan
+                                <span class="sw-badge sw-badge-danger">
+                                    <span class="sw-badge-dot"></span> On Loan
                                 </span>
                             }
                         </div>
-                        <h2 class="editorial-book-title" title="@book.Title">@book.Title</h2>
-                        <p class="editorial-book-author">by <span class="fw-semibold">@book.Author</span></p>
+                        <h3 class="sw-book-title" title="@book.Title">@book.Title</h3>
+                        <p class="sw-book-author">by @book.Author</p>
 
-                        <div class="editorial-stock-bar mt-auto pt-2 mb-3">
-                            <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
-                                <span>Availability</span>
-                                <span class="fw-bold text-dark">@book.AvailableQuantity / @book.TotalQuantity copies</span>
-                            </div>
-                            <div class="editorial-stock-track">
-                                @{
-                                    var pct = book.TotalQuantity > 0 ? Math.Clamp((int)Math.Round((double)book.AvailableQuantity / book.TotalQuantity * 100), 0, 100) : 0;
-                                }
-                                <div class="editorial-stock-fill @(book.AvailableQuantity > 0 ? "fill-available" : "fill-empty")" style="width: @pct%;"></div>
-                            </div>
-                        </div>
-
-                        <div class="editorial-card-actions d-flex gap-2">
-                            <a class="btn btn-editorial-details flex-grow-1" asp-action="Details" asp-route-id="@book.Id">
-                                View Details &rarr;
+                        <div class="sw-book-card-actions">
+                            <a class="sw-btn sw-btn-outline sw-btn-sm flex-grow-1" asp-action="Details" asp-route-id="@book.Id">
+                                Folio Card &rarr;
                             </a>
                             @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
                             {
                                 @if (book.AvailableQuantity > 0)
                                 {
-                                    <a class="btn btn-editorial-issue" asp-controller="AdminCirculation" asp-action="Issue" asp-route-bookId="@book.Id" title="Issue copy to a member">
-                                        <i class="bi bi-box-arrow-up-right me-1"></i> Issue
+                                    <a class="sw-btn sw-btn-primary sw-btn-sm" asp-controller="AdminCirculation" asp-action="Issue" asp-route-bookId="@book.Id" title="Issue copy">
+                                        <i class="bi bi-box-arrow-up-right"></i> Issue
                                     </a>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-editorial-issue disabled" disabled title="No copies available to issue">
-                                        <i class="bi bi-slash-circle me-1"></i> Issue
-                                    </button>
                                 }
                             }
                         </div>
@@ -349,48 +269,84 @@
                 </article>
             }
         </div>
+    </div>
 
-        @if ((int)ViewBag.TotalPages > 1)
-        {
-            <div class="d-flex justify-content-center mt-5">
-                <nav aria-label="Catalogue pagination">
-                    <ul class="editorial-pagination">
-                        <li class="page-item @((int)ViewBag.Page <= 1 ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index"
-                               asp-route-page="@((int)ViewBag.Page - 1)"
+    <!-- Pagination -->
+    @if ((int)ViewBag.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-center mt-5">
+            <nav aria-label="Archive pagination">
+                <ul class="pagination gap-1">
+                    <li class="page-item @((int)ViewBag.Page <= 1 ? "disabled" : "")">
+                        <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index"
+                           asp-route-page="@((int)ViewBag.Page - 1)"
+                           asp-route-q="@ViewBag.Query"
+                           asp-route-category="@ViewBag.Category"
+                           asp-route-availability="@ViewBag.Availability"
+                           asp-route-sort="@ViewBag.Sort">
+                            &larr; Prev
+                        </a>
+                    </li>
+                    @for (var p = Math.Max(1, (int)ViewBag.Page - 2); p <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.Page + 2); p++)
+                    {
+                        <li class="page-item">
+                            <a class="sw-btn sw-btn-sm @(p == (int)ViewBag.Page ? "sw-btn-primary" : "sw-btn-outline")" asp-action="Index"
+                               asp-route-page="@p"
                                asp-route-q="@ViewBag.Query"
                                asp-route-category="@ViewBag.Category"
                                asp-route-availability="@ViewBag.Availability"
                                asp-route-sort="@ViewBag.Sort">
-                                &larr; Prev
+                                @p
                             </a>
                         </li>
-                        @for (var p = Math.Max(1, (int)ViewBag.Page - 2); p <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.Page + 2); p++)
-                        {
-                            <li class="page-item @(p == (int)ViewBag.Page ? "active" : "")">
-                                <a class="page-link" asp-action="Index"
-                                   asp-route-page="@p"
-                                   asp-route-q="@ViewBag.Query"
-                                   asp-route-category="@ViewBag.Category"
-                                   asp-route-availability="@ViewBag.Availability"
-                                   asp-route-sort="@ViewBag.Sort">
-                                    @p
-                                </a>
-                            </li>
-                        }
-                        <li class="page-item @((int)ViewBag.Page >= (int)ViewBag.TotalPages ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index"
-                               asp-route-page="@((int)ViewBag.Page + 1)"
-                               asp-route-q="@ViewBag.Query"
-                               asp-route-category="@ViewBag.Category"
-                               asp-route-availability="@ViewBag.Availability"
-                               asp-route-sort="@ViewBag.Sort">
-                                Next &rarr;
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        }
+                    }
+                    <li class="page-item @((int)ViewBag.Page >= (int)ViewBag.TotalPages ? "disabled" : "")">
+                        <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index"
+                           asp-route-page="@((int)ViewBag.Page + 1)"
+                           asp-route-q="@ViewBag.Query"
+                           asp-route-category="@ViewBag.Category"
+                           asp-route-availability="@ViewBag.Availability"
+                           asp-route-sort="@ViewBag.Sort">
+                            Next &rarr;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     }
-</section>
+}
+
+@section Scripts {
+    <script>
+        function setCatalogueView(mode) {
+            const shelfView = document.getElementById('shelfViewContainer');
+            const gridView = document.getElementById('gridViewContainer');
+            const btnShelf = document.getElementById('btnViewShelf');
+            const btnGrid = document.getElementById('btnViewGrid');
+
+            if (mode === 'grid') {
+                if (shelfView) shelfView.style.display = 'none';
+                if (gridView) gridView.style.display = 'block';
+                if (btnShelf) btnShelf.classList.remove('active');
+                if (btnGrid) btnGrid.classList.add('active');
+                localStorage.setItem('shelfwise-catalogue-view', 'grid');
+            } else {
+                if (shelfView) shelfView.style.display = 'block';
+                if (gridView) gridView.style.display = 'none';
+                if (btnShelf) btnShelf.classList.add('active');
+                if (btnGrid) btnGrid.classList.remove('active');
+                localStorage.setItem('shelfwise-catalogue-view', 'shelf');
+            }
+        }
+
+        // Restore view preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedView = localStorage.getItem('shelfwise-catalogue-view');
+            if (savedView === 'grid') {
+                setCatalogueView('grid');
+            } else {
+                setCatalogueView('shelf');
+            }
+        });
+    </script>
+}
