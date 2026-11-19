@@ -12,24 +12,42 @@
     --sw-wood-antique: #63452e;     /* Antique Brown wood trim */
     --sw-wood-light: #845d3e;       /* Light wood grain highlight */
     
+    --sw-paper-cream: #fff8e9;      /* Cream Paper primary button text & card surface */
     --sw-parchment: #f3e9d2;        /* Parchment page background */
     --sw-parchment-light: #fff8e9;  /* Cream Paper card surface */
     --sw-parchment-dark: #e8d9ba;   /* Aged parchment tint */
+    --sw-bg-parchment: #f3e9d2;     /* Parchment background alias */
+    --sw-bg-parchment-subtle: #f9f4e8; /* Parchment subtle shade */
+    --sw-paper-parchment: #f3e9d2;  /* Parchment paper alias */
+    --sw-sand: #e8d9ba;             /* Sand tone */
     
     --sw-brass-gold: #c8963e;       /* Brass Gold primary metallic */
+    --sw-gold-brass: #c8963e;       /* Brass Gold alias */
     --sw-gold-muted: #dfbd78;       /* Muted Gold border & ribs */
     --sw-gold-bright: #eecf8e;      /* Polished brass highlight */
     --sw-gold-deep: #9d7126;        /* Antique brass shade */
 
     --sw-forest-green: #1f3d36;     /* Forest Green accent & stamp */
+    --sw-forest-green-dark: #152b26;/* Dark Forest Green for hover/borders */
     --sw-forest-light: #2e564d;     /* Forest light shade */
     --sw-forest-subtle: #e5ece9;    /* Forest green tint */
+
+    --sw-burgundy: #8b2525;         /* Archival Burgundy / Crimson Red */
+    --sw-burgundy-dark: #6e1b1b;    /* Dark Burgundy for hover states */
+    --sw-terracotta: #8b2518;       /* Archival terracotta alias */
+    --sw-terracotta-dark: #6e1b1b;  /* Dark terracotta */
+    --sw-terracotta-light: #d39e9e; /* Light terracotta */
 
     --sw-ink-black: #251c16;        /* Archival Ink Black text */
     --sw-text-muted: #806d58;       /* Muted archival notation */
     --sw-text-subtle: #9c8a74;      /* Subtle annotation */
     --sw-border: #d7c5a4;           /* Antique Paper / Joinery Border */
+    --sw-border-warm: #d7c5a4;      /* Warm border alias */
     --sw-border-strong: #63452e;    /* Antique Brown Border */
+
+    --sw-nav-bg: #2b1d14;           /* Warm Archive navigation background */
+    --sw-nav-text: #fff8e9;         /* Navigation text */
+    --sw-nav-text-muted: #dfbd78;   /* Navigation muted gold text */
 
     /* Leather Spine Color Palette (For Realistic Varied Book Spines) */
     --sw-spine-forest: #1f3d36;
@@ -95,8 +113,11 @@
     --sw-shadow-book-spine: -3px 0 8px rgba(0, 0, 0, 0.4), 2px 0 4px rgba(255, 255, 255, 0.1) inset;
     --sw-shadow-book-hover: 0 16px 32px rgba(20, 12, 7, 0.6), -4px 0 12px rgba(0, 0, 0, 0.5);
     --sw-shadow-card: 0 4px 14px rgba(43, 29, 20, 0.08), 0 1px 3px rgba(43, 29, 20, 0.04);
+    --sw-shadow-md: 0 6px 18px rgba(43, 29, 20, 0.14), 0 2px 6px rgba(43, 29, 20, 0.08);
     --sw-shadow-brass: 0 3px 8px rgba(200, 150, 62, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --sw-shadow-parchment: 0 4px 16px rgba(99, 69, 46, 0.1), 0 1px 4px rgba(99, 69, 46, 0.06);
     --sw-shadow-inset-parchment: inset 0 2px 6px rgba(99, 69, 46, 0.06);
+    --sw-wood-pattern: linear-gradient(180deg, #332217 0%, #2b1d14 100%);
 
     /* Transitions & Motion */
     --sw-transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);

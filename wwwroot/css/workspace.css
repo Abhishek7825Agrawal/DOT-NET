@@ -69,6 +69,25 @@
     gap: 0.5rem;
 }
 
+.sw-workspace-mobile-nav .sw-btn {
+    background-color: rgba(43, 29, 20, 0.85) !important;
+    color: #f3e9d2 !important;
+    border: 1px solid #63452e !important;
+}
+
+.sw-workspace-mobile-nav .sw-btn:hover {
+    background-color: #3b281c !important;
+    color: #ffffff !important;
+    border-color: #c8963e !important;
+}
+
+.sw-workspace-mobile-nav .sw-btn.active {
+    background-color: #c8963e !important;
+    color: #2b1d14 !important;
+    border-color: #dfbd78 !important;
+    font-weight: 700 !important;
+}
+
 /* Side-by-Side Split Container */
 .sw-workspace-body {
     flex: 1;
@@ -322,7 +341,7 @@
     font-size: 1.05rem;
     border: none;
     background: transparent;
-    color: var(--sw-walnut-deep);
+    color: var(--sw-text);
     padding: 0.2rem 0.4rem;
     flex: 1;
     border-bottom: 1px dashed transparent;
@@ -397,7 +416,7 @@
     background-color: rgba(200, 150, 62, 0.08);
     padding: 0.6rem 1rem !important;
     margin: 1rem 0 !important;
-    color: var(--sw-walnut-deep);
+    color: var(--sw-text);
     font-style: italic;
     font-family: var(--sw-font-heading);
 }
@@ -406,7 +425,7 @@
 .ql-editor h2,
 .ql-editor h3 {
     font-family: var(--sw-font-heading);
-    color: var(--sw-walnut-deep);
+    color: var(--sw-text);
     margin-top: 1.25rem;
     margin-bottom: 0.5rem;
 }
@@ -439,7 +458,7 @@
     justify-content: space-between;
     font-weight: 700;
     font-family: var(--sw-font-heading);
-    color: var(--sw-walnut-deep);
+    color: var(--sw-text);
 }
 
 .sw-drawer-content {

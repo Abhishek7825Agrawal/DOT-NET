@@ -62,7 +62,7 @@
                 </label>
                 <form method="get" asp-controller="Books" asp-action="Index" class="d-flex gap-2">
                     <input type="search" id="errorSearchInput" name="q" class="form-control" placeholder="Search titles, authors, or subjects..." aria-label="Search catalogue from error page" />
-                    <button type="submit" class="btn btn-ink text-nowrap">
+                    <button type="submit" class="sw-btn sw-btn-primary text-nowrap">
                         <i class="bi bi-arrow-right"></i>
                     </button>
                 </form>
@@ -72,14 +72,14 @@
         <div class="error-actions d-flex flex-wrap gap-2 pt-3 border-top">
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a class="btn btn-ink" asp-controller="Dashboard" asp-action="Index">
+                <a class="sw-btn sw-btn-primary" asp-controller="Dashboard" asp-action="Index">
                     <i class="bi bi-grid-1x2 me-1"></i> Back to Dashboard
                 </a>
             }
-            <a class="btn btn-paper" asp-controller="Books" asp-action="Index">
+            <a class="sw-btn sw-btn-outline" asp-controller="Books" asp-action="Index">
                 <i class="bi bi-book me-1"></i> Browse Catalogue
             </a>
-            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">
+            <a class="sw-btn sw-btn-outline" asp-controller="Home" asp-action="Index">
                 <i class="bi bi-house me-1"></i> Return Home
             </a>
         </div>

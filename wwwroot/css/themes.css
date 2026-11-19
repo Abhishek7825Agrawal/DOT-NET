@@ -51,6 +51,18 @@
     --sw-input-border: #4a3321;
     --sw-input-focus-border: #c8963e;
     --sw-input-focus-ring: rgba(200, 150, 62, 0.3);
+
+    --sw-paper-cream: #fff8e9;
+    --sw-gold-brass: #c8963e;
+    --sw-border-warm: #63452e;
+    --sw-bg-parchment: #231810;
+    --sw-bg-parchment-subtle: #2b1d14;
+    --sw-paper-parchment: #231810;
+    --sw-sand: #3b281c;
+    --sw-forest-green-dark: #152b26;
+    --sw-nav-bg: #1f140e;
+    --sw-nav-text: #fff8e9;
+    --sw-nav-text-muted: #dfbd78;
 }
 
 /* System preference fallback when theme is set to 'auto' */
@@ -102,5 +114,17 @@
         --sw-input-border: #4a3321;
         --sw-input-focus-border: #c8963e;
         --sw-input-focus-ring: rgba(200, 150, 62, 0.3);
+
+        --sw-paper-cream: #fff8e9;
+        --sw-gold-brass: #c8963e;
+        --sw-border-warm: #63452e;
+        --sw-bg-parchment: #231810;
+        --sw-bg-parchment-subtle: #2b1d14;
+        --sw-paper-parchment: #231810;
+        --sw-sand: #3b281c;
+        --sw-forest-green-dark: #152b26;
+        --sw-nav-bg: #1f140e;
+        --sw-nav-text: #fff8e9;
+        --sw-nav-text-muted: #dfbd78;
     }
 }

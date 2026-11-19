@@ -367,8 +367,14 @@
 
 .sw-dropdown-item:hover,
 .sw-dropdown-item:focus {
-    background-color: var(--sw-bg-alt);
-    color: var(--sw-gold-brass);
+    background-color: #2b1d14;
+    color: #fff8e9;
+}
+
+[data-theme="dark"] .sw-dropdown-item:hover,
+[data-theme="dark"] .sw-dropdown-item:focus {
+    background-color: #3b281c;
+    color: #dfbd78;
 }
 
 .sw-dropdown-divider {
