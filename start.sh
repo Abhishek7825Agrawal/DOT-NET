@@ -3,7 +3,7 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJECT_DIR"
-APP_URL="http://localhost:5180"
+APP_URL="http://localhost:5000"
 
 if ! command -v dotnet >/dev/null 2>&1; then
     echo "Shelfwise needs the .NET 10 SDK. Install it, then run this file again."

@@ -1,41 +1,54 @@
 @model IReadOnlyList<Member>
-@{ ViewData["Title"] = "Member Directory"; }
+@{
+    ViewData["Title"] = "Member Directory";
+}
 
-<div class="page-heading">
-    <div>
-        <div class="eyebrow">User Directory</div>
-        <h1>Member Accounts</h1>
-        <p class="text-secondary mb-0 mt-1">Review registered borrowers, inspect borrowing rights, and manage account statuses.</p>
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> User Directory</div>
+        <h1 class="sw-title-display">Member Accounts</h1>
+        <p class="sw-page-subtitle">Review registered cardholders, inspect borrowing history, and administer membership privileges.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-primary" asp-action="RegisterCustomer">
+            <i class="bi bi-person-plus me-1"></i> Register Member
+        </a>
+        <a class="sw-btn sw-btn-accent" asp-action="BulkImport">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Excel Bulk Import
+        </a>
+        <a class="sw-btn sw-btn-outline" asp-action="ImportHistory">
+            <i class="bi bi-clock-history me-1"></i> Batch History
+        </a>
     </div>
 </div>
 
-<form method="get" class="panel mb-3">
+<form method="get" class="sw-table-card p-3 mb-4">
     <div class="row g-2 align-items-center">
         <div class="col">
             <div class="input-group">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input class="form-control border-start-0 ps-0" name="q" value="@ViewBag.Query" placeholder="Search by member name, email address, or phone number..." aria-label="Search members" />
+                <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--sw-input-border);"><i class="bi bi-search text-muted"></i></span>
+                <input class="form-control border-start-0 ps-0 sw-input" name="q" value="@ViewBag.Query" placeholder="Search by member name, email address, or phone number..." aria-label="Search members" />
             </div>
         </div>
         <div class="col-auto">
-            <button class="btn btn-outline-secondary" type="submit">Search</button>
+            <button class="sw-btn sw-btn-outline" type="submit">Search Members</button>
         </div>
     </div>
 </form>
 
-<div class="panel">
+<div class="sw-table-card">
     @if (Model.Count == 0)
     {
-        <div class="empty-state">
-            <i class="bi bi-people"></i>
-            <h3 class="h6 mt-3">No members found</h3>
-            <p class="mb-0 text-muted">No member accounts match the current query.</p>
+        <div class="sw-empty-state py-5">
+            <div class="sw-empty-icon"><i class="bi bi-people"></i></div>
+            <h3 class="sw-empty-title">No members found</h3>
+            <p class="sw-empty-text">No member accounts match the current query.</p>
         </div>
     }
     else
     {
         <div class="table-responsive">
-            <table class="table mb-0">
+            <table class="sw-table mb-0">
                 <thead>
                     <tr>
                         <th>Member Details</th>
@@ -51,31 +64,41 @@
                     {
                         <tr>
                             <td>
-                                <div class="fw-semibold">@member.FullName</div>
-                                <small class="text-secondary">@member.User.Email</small>
+                                <div>
+                                    <a asp-action="Details" asp-route-id="@member.Id" class="fw-bold text-decoration-none" style="color: var(--sw-navy);">
+                                        @member.FullName
+                                    </a>
+                                </div>
+                                <small class="text-muted font-monospace">@member.User.Email</small>
                             </td>
                             <td>@(member.PhoneNumber ?? "—")</td>
-                            <td><small class="text-secondary">@(member.Address ?? "—")</small></td>
-                            <td>@member.RegisteredAtUtc.ToString("dd MMM yyyy")</td>
+                            <td><small class="text-muted">@(member.Address ?? "—")</small></td>
+                            <td class="font-monospace text-nowrap">@member.RegisteredAtUtc.ToString("dd MMM yyyy")</td>
                             <td>
                                 @if (member.IsActive)
                                 {
-                                    <span class="badge rounded-pill text-bg-success">Active Borrower</span>
+                                    <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span> Active</span>
                                 }
                                 else
                                 {
-                                    <span class="badge rounded-pill text-bg-secondary">Suspended</span>
+                                    <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span> Suspended</span>
                                 }
                             </td>
                             <td class="text-end text-nowrap">
-                                <form asp-action="SetStatus" method="post" class="d-inline" data-confirm="@(member.IsActive ? "Deactivate this member? Their borrowing privileges will be suspended immediately." : "Reactivate this member's borrowing account?")">
-                                    <input type="hidden" name="id" value="@member.Id" />
-                                    <input type="hidden" name="active" value="@(!member.IsActive)" />
-                                    <button class="btn btn-sm @(member.IsActive ? "btn-outline-danger" : "btn-outline-success")" type="submit">
-                                        <i class="bi @(member.IsActive ? "bi-person-x" : "bi-person-check") me-1"></i>
-                                        @(member.IsActive ? "Deactivate" : "Activate")
-                                    </button>
-                                </form>
+                                <a asp-action="Details" asp-route-id="@member.Id" class="sw-btn sw-btn-sm sw-btn-outline me-1" title="View Member Profile & Loans">
+                                    <i class="bi bi-person-vcard me-1"></i> Dossier
+                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <form asp-action="SetStatus" method="post" class="d-inline" data-confirm="@(member.IsActive ? "Deactivate this member? Their borrowing privileges will be suspended immediately." : "Reactivate this member's borrowing account?")">
+                                        <input type="hidden" name="id" value="@member.Id" />
+                                        <input type="hidden" name="active" value="@(!member.IsActive)" />
+                                        <button class="sw-btn sw-btn-sm sw-btn-outline @(member.IsActive ? "text-danger" : "text-success")" type="submit">
+                                            <i class="bi @(member.IsActive ? "bi-person-x" : "bi-person-check") me-1"></i>
+                                            @(member.IsActive ? "Suspend" : "Activate")
+                                        </button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }
@@ -87,23 +110,23 @@
 
 @if ((int)ViewBag.TotalPages > 1)
 {
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <span class="small text-secondary">Page @ViewBag.Page of @ViewBag.TotalPages</span>
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <span class="small text-muted font-monospace">Page @ViewBag.Page of @ViewBag.TotalPages</span>
         <nav aria-label="Member list pagination">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item @((int)ViewBag.Page <= 1 ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page - 1)" asp-route-q="@ViewBag.Query">Previous</a>
-                </li>
+            <div class="d-flex gap-1">
+                @if ((int)ViewBag.Page > 1)
+                {
+                    <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index" asp-route-page="@((int)ViewBag.Page - 1)" asp-route-q="@ViewBag.Query">&larr; Prev</a>
+                }
                 @for (var p = Math.Max(1, (int)ViewBag.Page - 2); p <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.Page + 2); p++)
                 {
-                    <li class="page-item @(p == (int)ViewBag.Page ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-q="@ViewBag.Query">@p</a>
-                    </li>
+                    <a class="sw-btn sw-btn-sm @(p == (int)ViewBag.Page ? "sw-btn-primary" : "sw-btn-outline")" asp-action="Index" asp-route-page="@p" asp-route-q="@ViewBag.Query">@p</a>
                 }
-                <li class="page-item @((int)ViewBag.Page >= (int)ViewBag.TotalPages ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page + 1)" asp-route-q="@ViewBag.Query">Next</a>
-                </li>
-            </ul>
+                @if ((int)ViewBag.Page < (int)ViewBag.TotalPages)
+                {
+                    <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index" asp-route-page="@((int)ViewBag.Page + 1)" asp-route-q="@ViewBag.Query">Next &rarr;</a>
+                }
+            </div>
         </nav>
     </div>
 }

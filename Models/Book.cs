@@ -37,4 +37,6 @@ public sealed class Book
     public bool IsActive { get; set; } = true;
     public byte[] RowVersion { get; set; } = [];
     public ICollection<IssueRecord> IssueRecords { get; set; } = new List<IssueRecord>();
+    public DigitalBook? DigitalEdition { get; set; }
+    public ICollection<UserNote> Notes { get; set; } = new List<UserNote>();
 }

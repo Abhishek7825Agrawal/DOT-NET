@@ -25,7 +25,7 @@ public sealed class BookService(ApplicationDbContext db)
     }
 
     public Task<Book?> GetAsync(int id, CancellationToken cancellationToken = default) =>
-        db.Books.AsNoTracking().FirstOrDefaultAsync(book => book.Id == id, cancellationToken);
+        db.Books.AsNoTracking().Include(b => b.DigitalEdition).FirstOrDefaultAsync(book => book.Id == id, cancellationToken);
 
     public async Task<(bool Success, string? Error)> CreateAsync(Book book, CancellationToken cancellationToken = default)
     {

@@ -1,16 +1,113 @@
-@{ ViewData["Title"] = "Welcome"; }
-<div class="row align-items-center g-4 hero">
-    <div class="col-lg-7">
-        <div class="eyebrow">A calmer way to run your library</div>
-        <h1>Every book, every borrower, in one place.</h1>
-        <p class="mt-3">Browse the catalogue, keep track of loans, and see what is due next with Shelfwise Library.</p>
-        <div class="d-flex flex-wrap gap-2 mt-4">
-            <a class="btn btn-primary btn-lg" asp-controller="Books" asp-action="Index">
-                <i class="bi bi-search me-1"></i> Browse Catalogue
+@{
+    ViewData["Title"] = "The Art of Reading";
+}
+
+<!-- Editorial Magazine Hero -->
+<section class="sw-editorial-hero sw-fade-in-up my-4" aria-labelledby="home-hero-title">
+    <div class="sw-hero-content">
+        <div class="sw-hero-meta">
+            <span class="sw-kicker">The Art of Reading</span>
+            <span class="sw-volume-tag">Shelfwise Library Edition</span>
+            <span class="d-none d-sm-inline">·</span>
+            <span>Open Access Archive</span>
+        </div>
+        <h1 class="sw-hero-title" id="home-hero-title">
+            Where every page turns<br class="d-none d-sm-inline" />
+            into <em>a new horizon.</em>
+        </h1>
+        <p class="sw-hero-desc">
+            A modern library platform pairing timeless editorial design with precision circulation management. Explore curated literature, track borrowing history, and discover ideas that endure.
+        </p>
+        <div class="sw-hero-actions">
+            <a class="sw-btn sw-btn-accent sw-btn-lg" asp-controller="Books" asp-action="Index">
+                <i class="bi bi-compass"></i> Explore the Catalogue
             </a>
-            <a class="btn btn-outline-secondary btn-lg" asp-controller="Account" asp-action="Register">Join the library</a>
-            <a class="btn btn-link btn-lg text-decoration-none" asp-controller="Account" asp-action="Login">Sign in</a>
+            <a class="sw-btn sw-btn-primary sw-btn-lg" asp-controller="Account" asp-action="Register">
+                <i class="bi bi-person-plus"></i> Join the Library
+            </a>
+            <a class="sw-btn sw-btn-outline sw-btn-lg" asp-controller="Account" asp-action="Login">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </a>
         </div>
     </div>
-    <div class="col-lg-5"><div class="hero-art"><i class="bi bi-book-half"></i></div></div>
-</div>
+    <div class="sw-hero-artwork" aria-hidden="true">
+        <div class="sw-hero-art-circle"></div>
+        <i class="bi bi-book-half sw-hero-art-icon"></i>
+    </div>
+</section>
+
+<!-- Editorial Highlights & Features Grid -->
+<section class="my-5 sw-fade-in-up" aria-labelledby="features-heading">
+    <div class="sw-section-header">
+        <div>
+            <span class="sw-kicker">Platform Pillars</span>
+            <h2 class="sw-h2" id="features-heading">Crafted for Readers &amp; Curators</h2>
+        </div>
+        <span class="sw-mono small text-muted">Enterprise Monolith Architecture</span>
+    </div>
+
+    <div class="sw-grid-3-col">
+        <article class="sw-kpi-card sw-stagger-1">
+            <div class="sw-kpi-header">
+                <span class="sw-kpi-label">Archive Collection</span>
+                <div class="sw-kpi-icon sw-icon-terracotta"><i class="bi bi-journals"></i></div>
+            </div>
+            <h3 class="sw-h3 mt-2 mb-2">Curated Stacks</h3>
+            <p class="text-muted small mb-4">
+                Rich cataloguing across computer science, literature, history, and scientific treatises with ISBN validation and instant availability tracking.
+            </p>
+            <div class="mt-auto pt-2 border-top">
+                <a class="sw-mono small text-terracotta text-decoration-none" asp-controller="Books" asp-action="Index">
+                    Browse shelves <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </article>
+
+        <article class="sw-kpi-card sw-stagger-2">
+            <div class="sw-kpi-header">
+                <span class="sw-kpi-label">Desk Operations</span>
+                <div class="sw-kpi-icon sw-icon-sage"><i class="bi bi-arrow-left-right"></i></div>
+            </div>
+            <h3 class="sw-h3 mt-2 mb-2">Precision Circulation</h3>
+            <p class="text-muted small mb-4">
+                Seamless issue, check-in, loan renewals, automated daily overdue calculation, and financial fine receipt management.
+            </p>
+            <div class="mt-auto pt-2 border-top">
+                <span class="sw-mono small text-muted">14-Day Terms · Zero-Grace Audit</span>
+            </div>
+        </article>
+
+        <article class="sw-kpi-card sw-stagger-3">
+            <div class="sw-kpi-header">
+                <span class="sw-kpi-label">Reader Experience</span>
+                <div class="sw-kpi-icon sw-icon-navy"><i class="bi bi-person-vcard"></i></div>
+            </div>
+            <h3 class="sw-h3 mt-2 mb-2">Personal Reading Room</h3>
+            <p class="text-muted small mb-4">
+                Dedicated cardholder portal tracking currently borrowed volumes, due date countdowns, outstanding balances, and historical loans.
+            </p>
+            <div class="mt-auto pt-2 border-top">
+                <a class="sw-mono small text-terracotta text-decoration-none" asp-controller="Account" asp-action="Login">
+                    Reader Sign in <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </article>
+    </div>
+</section>
+
+<!-- Call to Action Band -->
+<section class="sw-cta-card text-center my-5 sw-fade-in-up">
+    <span class="sw-kicker" style="color: var(--sw-sand);">Membership Open</span>
+    <h2 class="sw-h1 text-white mb-3">Begin Your Reading Journey</h2>
+    <p class="text-sand mx-auto mb-4" style="max-width: 520px; font-size: var(--sw-text-md);">
+        Create your digital library card today to check out titles, place holds, and explore our growing collection.
+    </p>
+    <div class="sw-cta-actions">
+        <a class="sw-btn sw-btn-accent sw-btn-lg" asp-controller="Account" asp-action="Register">
+            <i class="bi bi-person-plus"></i> Create Member Account
+        </a>
+        <a class="sw-btn sw-btn-outline sw-btn-lg" asp-controller="Books" asp-action="Index" style="border-color: rgba(245,241,232,0.3); color: var(--sw-paper);">
+            <i class="bi bi-book"></i> Browse Titles First
+        </a>
+    </div>
+</section>

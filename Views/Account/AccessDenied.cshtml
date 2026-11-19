@@ -1,2 +1,61 @@
-@{ ViewData["Title"] = "Access denied"; }
-<div class="empty-state panel"><i class="bi bi-shield-lock"></i><h1 class="h3 mt-3">You don’t have access to that page</h1><p>Your account does not have the required permission.</p><a class="btn btn-primary" asp-controller="Dashboard" asp-action="Index">Return to dashboard</a></div>
+@{
+    ViewData["Title"] = "403 · Access Denied";
+}
+
+<div class="error-hero-wrapper">
+    <div class="error-panel">
+        <div class="error-badge-row">
+            <div class="eyebrow mb-0">
+                <span class="eyebrow-mark"></span> SECURITY RESTRICTION &bull; HTTP 403
+            </div>
+            <div class="error-code-badge badge-403" aria-label="Error code 403">
+                <i class="bi bi-shield-slash-fill"></i>
+                <span>403</span>
+            </div>
+        </div>
+
+        <h1 class="error-title">Restricted Section</h1>
+        <div class="error-subtitle">Administrative Credentials Required</div>
+        <p class="error-desc">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <span>Your account (<strong>@User.Identity?.Name</strong>) does not have the required permissions to access this administrative desk. Only authorized library administrators may enter this section.</span>
+            }
+            else
+            {
+                <span>You do not have permission to view this resource. Please sign in with an authorized administrator account to continue.</span>
+            }
+        </p>
+
+        <div class="error-meta-box">
+            <span class="text-secondary"><i class="bi bi-shield-exclamation me-1"></i> Role Enforcement:</span>
+            <span>Policy requires <code>Admin</code> clearance.</span>
+        </div>
+
+        <div class="error-actions d-flex flex-wrap gap-2 pt-3 border-top">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a class="btn btn-ink" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-grid-1x2 me-1"></i> Back to My Dashboard
+                </a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button class="btn btn-outline-danger" type="submit">
+                        <i class="bi bi-box-arrow-right me-1"></i> Switch Account
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a class="btn btn-ink" asp-controller="Account" asp-action="Login">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign in as Admin
+                </a>
+            }
+            <a class="btn btn-paper" asp-controller="Books" asp-action="Index">
+                <i class="bi bi-book me-1"></i> Browse Catalogue
+            </a>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house me-1"></i> Return Home
+            </a>
+        </div>
+    </div>
+</div>

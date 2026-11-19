@@ -1,0 +1,267 @@
+@model AdminDashboardData
+@{
+    ViewData["Title"] = "Staff Operations Desk";
+    var maxWeekly = Math.Max(1, Model.WeeklyIssueActivity.Count > 0 ? Model.WeeklyIssueActivity.Max(d => d.IssueCount) : 1);
+}
+
+<!-- Staff Operations Welcome Hero -->
+<section class="sw-editorial-hero sw-fade-in-up" aria-labelledby="staff-title">
+    <div class="sw-hero-content">
+        <div class="sw-hero-meta">
+            <span class="sw-kicker">Circulation Operations Desk</span>
+            <span class="sw-volume-tag">Desk Duty · Level 1</span>
+            <span>·</span>
+            <span><i class="bi bi-clock me-1"></i>@DateTime.Today.ToString("dddd, d MMMM yyyy")</span>
+        </div>
+        <h1 class="sw-hero-title" id="staff-title">
+            Front desk readiness,<br />
+            <em>for every returning story.</em>
+        </h1>
+        <p class="sw-hero-desc">
+            Staff workstation for circulation management, checkouts, returns, cardholder lookup, and fine collection.
+        </p>
+        <div class="sw-hero-actions">
+            <a class="sw-btn sw-btn-accent" asp-controller="AdminCirculation" asp-action="Issue">
+                <i class="bi bi-plus-circle"></i> Quick Issue Book
+            </a>
+            <a class="sw-btn sw-btn-primary" asp-controller="AdminCirculation" asp-action="Index">
+                <i class="bi bi-arrow-left-right"></i> Return / Circulation Desk
+            </a>
+            <a class="sw-btn sw-btn-outline" asp-controller="AdminMembers" asp-action="Index">
+                <i class="bi bi-search"></i> Member Lookup
+            </a>
+        </div>
+    </div>
+    <div class="sw-hero-artwork" aria-hidden="true">
+        <div class="sw-hero-art-circle"></div>
+        <i class="bi bi-inboxes sw-hero-art-icon"></i>
+    </div>
+</section>
+
+<!-- Operations KPIs -->
+<section class="sw-grid-kpi" aria-label="Daily Operations Overview">
+    <!-- Active Loans Currently Out -->
+    <article class="sw-kpi-card sw-kpi-primary sw-stagger-1">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Active Loans Out</span>
+            <div class="sw-kpi-icon sw-icon-terracotta"><i class="bi bi-book"></i></div>
+        </div>
+        <div class="sw-kpi-value" data-count-up="@Model.ActiveLoans">@Model.ActiveLoans.ToString("N0")</div>
+        <div class="sw-kpi-footer">
+            <a class="text-decoration-none text-sand" asp-controller="AdminCirculation" asp-action="Index">
+                View all active loans <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </article>
+
+    <!-- Available Inventory on Shelves -->
+    <article class="sw-kpi-card sw-stagger-2">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Available Copies</span>
+            <div class="sw-kpi-icon sw-icon-sage"><i class="bi bi-check2-circle"></i></div>
+        </div>
+        <div class="sw-kpi-value" data-count-up="@Model.AvailableCopies">@Model.AvailableCopies.ToString("N0")</div>
+        <div class="sw-kpi-footer">
+            <span>Ready for immediate checkout</span>
+        </div>
+    </article>
+
+    <!-- Overdue Loans to Follow Up -->
+    <article class="sw-kpi-card @(Model.OverdueLoans > 0 ? "border-danger" : "") sw-stagger-3">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Overdue Books</span>
+            <div class="sw-kpi-icon sw-icon-danger"><i class="bi bi-clock-history"></i></div>
+        </div>
+        <div class="sw-kpi-value @(Model.OverdueLoans > 0 ? "text-danger" : "")" data-count-up="@Model.OverdueLoans">@Model.OverdueLoans.ToString("00")</div>
+        <div class="sw-kpi-footer">
+            <a class="text-danger fw-semibold text-decoration-none" asp-controller="AdminCirculation" asp-action="Overdue">
+                Process overdue returns <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </article>
+
+    <!-- Outstanding Fines Ledger -->
+    <article class="sw-kpi-card sw-stagger-4">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Unpaid Fines</span>
+            <div class="sw-kpi-icon sw-icon-warning"><i class="bi bi-cash-stack"></i></div>
+        </div>
+        <div class="sw-kpi-value">@Model.OutstandingFines.ToString("C")</div>
+        <div class="sw-kpi-footer">
+            <a class="text-decoration-none text-muted" asp-controller="AdminCirculation" asp-action="Payments">
+                Collect payments <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </article>
+</section>
+
+<!-- Quick Operations Desk Bar -->
+<section class="sw-quick-actions-bar" aria-label="Staff Quick Actions">
+    <a class="sw-quick-action-tile" asp-controller="AdminCirculation" asp-action="Issue">
+        <div class="sw-tile-icon"><i class="bi bi-plus-circle"></i></div>
+        <div class="sw-tile-info">
+            <span class="sw-tile-title">Issue Book</span>
+            <span class="sw-tile-subtitle">Scan &amp; check out to member</span>
+        </div>
+    </a>
+    <a class="sw-quick-action-tile" asp-controller="AdminCirculation" asp-action="Index">
+        <div class="sw-tile-icon"><i class="bi bi-arrow-return-left"></i></div>
+        <div class="sw-tile-info">
+            <span class="sw-tile-title">Return Book</span>
+            <span class="sw-tile-subtitle">Check in returned volumes</span>
+        </div>
+    </a>
+    <a class="sw-quick-action-tile" asp-controller="AdminMembers" asp-action="Index">
+        <div class="sw-tile-icon"><i class="bi bi-person-bounding-box"></i></div>
+        <div class="sw-tile-info">
+            <span class="sw-tile-title">Member Lookup</span>
+            <span class="sw-tile-subtitle">Search cardholders &amp; history</span>
+        </div>
+    </a>
+    <a class="sw-quick-action-tile" asp-controller="AdminCirculation" asp-action="Payments">
+        <div class="sw-tile-icon"><i class="bi bi-receipt"></i></div>
+        <div class="sw-tile-info">
+            <span class="sw-tile-title">Collect Fines</span>
+            <span class="sw-tile-subtitle">Record cash or UPI payment</span>
+        </div>
+    </a>
+    <a class="sw-quick-action-tile" asp-controller="AdminMembers" asp-action="RegisterCustomer">
+        <div class="sw-tile-icon"><i class="bi bi-person-plus"></i></div>
+        <div class="sw-tile-info">
+            <span class="sw-tile-title">New Member</span>
+            <span class="sw-tile-subtitle">Enroll cardholder at desk</span>
+        </div>
+    </a>
+    <a class="sw-quick-action-tile" asp-controller="AdminMembers" asp-action="BulkImport">
+        <div class="sw-tile-icon"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+        <div class="sw-tile-info">
+            <span class="sw-tile-title">Bulk Import</span>
+            <span class="sw-tile-subtitle">Batch enroll from Excel</span>
+        </div>
+    </a>
+</section>
+
+<!-- Circulation Activity & Today's Overview -->
+<div class="sw-grid-asymmetric">
+    <section class="sw-table-card sw-fade-in-up" aria-labelledby="circulation-heading">
+        <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <span class="sw-kicker">Live Feed</span>
+                <h3 class="sw-h3 mb-0" id="circulation-heading">Recent Circulation Activity</h3>
+            </div>
+            <a class="sw-btn sw-btn-outline sw-btn-sm" asp-controller="AdminCirculation" asp-action="Index">
+                Full Log <i class="bi bi-arrow-up-right ms-1"></i>
+            </a>
+        </div>
+
+        @if (Model.RecentIssues.Count == 0)
+        {
+            <div class="sw-empty-state">
+                <div class="sw-empty-icon"><i class="bi bi-inbox"></i></div>
+                <h4 class="sw-empty-title">Desk is ready</h4>
+                <p class="sw-empty-text">No loans recorded yet today. Check out books to readers to start the circulation feed.</p>
+                <a class="sw-btn sw-btn-primary sw-btn-sm" asp-controller="AdminCirculation" asp-action="Issue">Issue a Book Now</a>
+            </div>
+        }
+        else
+        {
+            <div class="sw-table-responsive">
+                <table class="sw-table">
+                    <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Borrower</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.RecentIssues)
+                        {
+                            var isLate = item.Status == IssueStatus.Active && item.DueDateUtc.Date < DateTime.UtcNow.Date;
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-truncate" style="max-width:240px">@item.Book.Title</div>
+                                    <span class="sw-mono small text-muted">ISBN: @(item.Book.Isbn ?? "N/A")</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@item.Member.FullName</div>
+                                    <span class="sw-badge-id">#MB-@item.Member.Id.ToString("D4")</span>
+                                </td>
+                                <td>
+                                    <span class="sw-mono @(isLate ? "text-danger fw-bold" : "")">
+                                        @item.DueDateUtc.ToString("dd MMM yyyy")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.Status == IssueStatus.Active)
+                                    {
+                                        if (isLate)
+                                        {
+                                            <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span>Overdue</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span>Active</span>
+                                        }
+                                    }
+                                    else if (item.Status == IssueStatus.Returned)
+                                    {
+                                        <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span>Returned</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="sw-badge sw-badge-warning"><span class="sw-badge-dot"></span>Lost</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <!-- Right Side: Weekly Rhythm & Fast Lookup -->
+    <aside class="d-flex flex-column gap-4">
+        <section class="sw-analytics-panel sw-fade-in-up">
+            <span class="sw-kicker">7-Day Trajectory</span>
+            <h4 class="sw-h4 mb-3">Circulation Rhythm</h4>
+            @if (Model.WeeklyIssueActivity.Count > 0 && Model.WeeklyIssueActivity.Sum(d => d.IssueCount) > 0)
+            {
+                <div class="sw-chart-bars" role="img" aria-label="Daily issues">
+                    @foreach (var day in Model.WeeklyIssueActivity)
+                    {
+                        var barPercent = Math.Max(10, (int)Math.Round(day.IssueCount * 100.0 / maxWeekly));
+                        <div class="sw-chart-col">
+                            <span class="sw-mono" style="font-size:0.68rem">@day.IssueCount</span>
+                            <div class="sw-chart-bar-wrap">
+                                <div class="sw-chart-bar-fill accent" data-height="@barPercent%" style="height:@barPercent%"></div>
+                            </div>
+                            <span class="sw-chart-day-label">@day.Date.ToString("ddd").Substring(0, 2)</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="small text-muted py-4 text-center">No issues recorded this week.</p>
+            }
+        </section>
+
+        <!-- Collection Health -->
+        <section class="sw-kpi-card">
+            <span class="sw-kicker">Collection Readiness</span>
+            <div class="d-flex align-items-baseline gap-2 my-2">
+                <span class="sw-stat-number fs-2">@Model.AvailableCopies.ToString("N0")</span>
+                <span class="small text-muted">copies available across shelves</span>
+            </div>
+            <p class="small text-muted mb-3">
+                Total titles: <strong>@Model.TotalBooks.ToString("N0")</strong>. Ensure returned books are reshelved promptly.
+            </p>
+            <a class="sw-btn sw-btn-outline sw-btn-sm" asp-controller="AdminBooks" asp-action="Index">
+                <i class="bi bi-search me-1"></i> Check Inventory
+            </a>
+        </section>
+    </aside>
+</div>

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagementSystem.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Staff")]
 public sealed class AdminProfileController(
     UserManager<ApplicationUser> userManager) : Controller
 {

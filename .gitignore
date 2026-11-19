@@ -7,6 +7,8 @@
 *.suo
 *.cache
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.bak
 *.publishsettings
@@ -15,3 +17,7 @@ secrets.json
 .env
 .env.*
 !.env.example
+App_Data/MarketplacePapers/*
+App_Data/DigitalLibrary/*
+!App_Data/MarketplacePapers/.gitkeep
+!App_Data/DigitalLibrary/.gitkeep

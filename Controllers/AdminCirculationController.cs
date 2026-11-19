@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Staff")]
 public sealed class AdminCirculationController(
     ApplicationDbContext db,
     CirculationService circulation,
@@ -50,10 +50,10 @@ public sealed class AdminCirculationController(
         return View(history);
     }
 
-    public async Task<IActionResult> Issue(CancellationToken cancellationToken)
+    public async Task<IActionResult> Issue(int? bookId, CancellationToken cancellationToken)
     {
         await PopulateIssueListsAsync(cancellationToken);
-        return View(new IssueBookViewModel());
+        return View(new IssueBookViewModel { BookId = bookId ?? 0 });
     }
 
     [HttpPost]

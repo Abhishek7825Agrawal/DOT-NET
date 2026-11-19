@@ -21,7 +21,7 @@ public sealed class DbInitializer(
             await db.Database.MigrateAsync(cancellationToken);
         }
 
-        foreach (var role in new[] { "Admin", "Member" })
+        foreach (var role in new[] { "Admin", "Staff", "Member" })
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
@@ -41,6 +41,19 @@ public sealed class DbInitializer(
                 LostBookPenaltyFee = 250.00m,
                 GracePeriodDays = 0,
                 TimeZoneId = "Asia/Kolkata",
+                UpdatedAtUtc = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        if (!await db.MarketplaceSettings.AnyAsync(cancellationToken))
+        {
+            db.MarketplaceSettings.Add(new MarketplaceSettings
+            {
+                PlatformCommissionRate = 15.00m,
+                RequireAdminApproval = true,
+                MinimumListingPrice = 0.00m,
+                MaximumListingPrice = 25000.00m,
                 UpdatedAtUtc = DateTime.UtcNow
             });
             await db.SaveChangesAsync(cancellationToken);
@@ -84,6 +97,24 @@ public sealed class DbInitializer(
             var assigned = await userManager.AddToRoleAsync(admin, "Admin");
             if (!assigned.Succeeded)
                 throw new InvalidOperationException(string.Join("; ", assigned.Errors.Select(error => error.Description)));
+        }
+
+        // Provision library staff account for operations desk
+        var staffEmail = "staff@shelfwise.local";
+        var staffUser = await userManager.FindByEmailAsync(staffEmail);
+        if (staffUser is null)
+        {
+            staffUser = new ApplicationUser { UserName = staffEmail, Email = staffEmail, EmailConfirmed = true };
+            var staffPass = Environment.GetEnvironmentVariable("LIBRARY_STAFF_PASSWORD") ?? "Staff@12345!";
+            var created = await userManager.CreateAsync(staffUser, staffPass);
+            if (created.Succeeded)
+            {
+                await userManager.AddToRoleAsync(staffUser, "Staff");
+            }
+        }
+        else if (!await userManager.IsInRoleAsync(staffUser, "Staff"))
+        {
+            await userManager.AddToRoleAsync(staffUser, "Staff");
         }
 
         // Provision sample member for demonstrations

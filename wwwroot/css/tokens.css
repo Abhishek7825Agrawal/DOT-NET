@@ -1,0 +1,138 @@
+/* ==========================================================================
+   SHELFWISE — THE ART OF READING
+   Design Tokens & Variable Architecture
+   ========================================================================== */
+
+:root {
+    /* 1. Core Palette Tokens */
+    --sw-paper: #F5F1E8;
+    --sw-navy: #17243A;
+    --sw-terracotta: #D96C45;
+    --sw-sage: #A6B39B;
+    --sw-sand: #E5DFD2;
+    --sw-charcoal: #252525;
+    --sw-white: #FFFFFF;
+
+    /* Secondary / Accent Tints & Shades */
+    --sw-navy-dark: #0F1725;
+    --sw-navy-light: #243550;
+    --sw-terracotta-dark: #B85330;
+    --sw-terracotta-light: #FCECE6;
+    --sw-sage-dark: #6C7D61;
+    --sw-sage-light: #F0F4ED;
+    --sw-sand-dark: #C9C1B2;
+    --sw-sand-light: #FAF8F4;
+    --sw-gold: #DFB15B;
+    --sw-crimson: #C84630;
+    --sw-crimson-light: #FBEBE8;
+
+    /* 2. Typography Stacks */
+    --sw-font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --sw-font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --sw-font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    --sw-font-mono: 'DM Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Type Scale */
+    --sw-text-2xs: 0.6875rem; /* 11px */
+    --sw-text-xs:  0.75rem;   /* 12px */
+    --sw-text-sm:  0.875rem;  /* 14px */
+    --sw-text-base: 1rem;     /* 16px */
+    --sw-text-md:  1.125rem;  /* 18px */
+    --sw-text-lg:  1.25rem;   /* 20px */
+    --sw-text-xl:  1.5rem;    /* 24px */
+    --sw-text-2xl: 1.875rem;  /* 30px */
+    --sw-text-3xl: 2.25rem;   /* 36px */
+    --sw-text-4xl: 2.75rem;   /* 44px */
+    --sw-text-5xl: 3.5rem;    /* 56px */
+
+    /* Spacing Scale */
+    --sw-space-1: 0.25rem;   /* 4px */
+    --sw-space-2: 0.5rem;    /* 8px */
+    --sw-space-3: 0.75rem;   /* 12px */
+    --sw-space-4: 1rem;      /* 16px */
+    --sw-space-5: 1.25rem;   /* 20px */
+    --sw-space-6: 1.5rem;    /* 24px */
+    --sw-space-8: 2rem;      /* 32px */
+    --sw-space-10: 2.5rem;   /* 40px */
+    --sw-space-12: 3rem;     /* 48px */
+    --sw-space-16: 4rem;     /* 64px */
+
+    /* Border Radii */
+    --sw-radius-xs: 3px;
+    --sw-radius-sm: 6px;
+    --sw-radius-md: 10px;
+    --sw-radius-lg: 14px;
+    --sw-radius-xl: 20px;
+    --sw-radius-pill: 9999px;
+
+    /* Transitions & Motion */
+    --sw-transition-fast: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+    --sw-transition-smooth: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    --sw-transition-editorial: 360ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Z-Index Hierarchy */
+    --sw-z-base: 1;
+    --sw-z-elevated: 10;
+    --sw-z-sticky: 100;
+    --sw-z-dropdown: 500;
+    --sw-z-drawer: 900;
+    --sw-z-modal: 1000;
+    --sw-z-toast: 1100;
+
+    /* 3. Semantic Theme Variables (Light Mode Default) */
+    --sw-bg: #F5F1E8;
+    --sw-bg-alt: #EFE9DD;
+    --sw-surface: #FFFFFF;
+    --sw-surface-alt: #FAF8F4;
+    --sw-surface-elevated: #FFFFFF;
+    --sw-surface-dark: #17243A;
+
+    --sw-text: #17243A;
+    --sw-text-muted: #566479;
+    --sw-text-subtle: #8491A2;
+    --sw-text-inverse: #FFFFFF;
+    --sw-text-on-accent: #FFFFFF;
+
+    --sw-border: #E5DFD2;
+    --sw-border-strong: #17243A;
+    --sw-border-subtle: #EDE7DC;
+
+    --sw-primary: #17243A;
+    --sw-primary-hover: #243550;
+    --sw-accent: #D96C45;
+    --sw-accent-hover: #B85330;
+    --sw-accent-subtle: #FCECE6;
+
+    --sw-status-success: #527A4B;
+    --sw-status-success-bg: #EFF5ED;
+    --sw-status-success-border: #C8DEBF;
+
+    --sw-status-warning: #B37D20;
+    --sw-status-warning-bg: #FCF6EA;
+    --sw-status-warning-border: #F0DDB3;
+
+    --sw-status-danger: #C84630;
+    --sw-status-danger-bg: #FBEBE8;
+    --sw-status-danger-border: #F1C3BA;
+
+    --sw-status-info: #355E94;
+    --sw-status-info-bg: #EEF3FA;
+    --sw-status-info-border: #C0D3EB;
+
+    /* Editorial Shadows */
+    --sw-shadow-sm: 0 1px 3px rgba(23, 36, 58, 0.05);
+    --sw-shadow-md: 0 4px 12px rgba(23, 36, 58, 0.07);
+    --sw-shadow-lg: 0 12px 28px rgba(23, 36, 58, 0.10);
+    --sw-shadow-editorial: 3px 3px 0 var(--sw-border-strong);
+    --sw-shadow-editorial-hover: 4px 5px 0 var(--sw-border-strong);
+    --sw-shadow-book: 4px 6px 14px rgba(23, 36, 58, 0.16), 1px 2px 4px rgba(23, 36, 58, 0.08);
+
+    /* Form & Input Tokens */
+    --sw-input-bg: #FFFFFF;
+    --sw-input-border: #D5CEBE;
+    --sw-input-focus-border: #17243A;
+    --sw-input-focus-ring: rgba(23, 36, 58, 0.12);
+
+    /* Navigation Height */
+    --sw-nav-height: 72px;
+}

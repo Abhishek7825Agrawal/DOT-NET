@@ -1,87 +1,95 @@
 @model BookFormViewModel
-@{ ViewData["Title"] = Model.Id == 0 ? "Add Book Title" : "Edit Book Title"; }
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Add Book Title" : "Edit Book Title";
+}
 
-<div class="page-heading">
-    <div>
-        <div class="eyebrow">Collection Management</div>
-        <h1>@ViewData["Title"]</h1>
-        <p class="text-secondary mb-0 mt-1">Configure metadata, cataloguing category, and available copies.</p>
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Collection Management</div>
+        <h1 class="sw-title-display">@ViewData["Title"]</h1>
+        <p class="sw-page-subtitle">Configure book metadata, cataloguing category, and total inventory copies.</p>
     </div>
-    <a class="btn btn-outline-secondary" asp-action="Index">
-        <i class="bi bi-arrow-left me-1"></i> Back to Collection
-    </a>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i> Return to Collection
+        </a>
+    </div>
 </div>
 
-<div class="panel" style="max-width:880px">
-    <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" novalidate>
-        <input asp-for="Id" type="hidden" />
-        <input asp-for="RowVersion" type="hidden" />
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        <div class="sw-table-card p-4 p-md-5 sw-fade-in-up">
+            <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" novalidate>
+                <input asp-for="Id" type="hidden" />
+                <input asp-for="RowVersion" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="sw-alert sw-alert-danger mb-4"></div>
 
-        <div class="row g-3">
-            <div class="col-md-8">
-                <label asp-for="Title" class="form-label">Book Title <span class="text-danger">*</span></label>
-                <input asp-for="Title" class="form-control" placeholder="e.g. Clean Code: A Handbook of Agile Software Craftsmanship" required />
-                <span asp-validation-for="Title" class="text-danger small"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="Author" class="form-label">Author <span class="text-danger">*</span></label>
-                <input asp-for="Author" class="form-control" placeholder="e.g. Robert C. Martin" required />
-                <span asp-validation-for="Author" class="text-danger small"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="Isbn" class="form-label">ISBN-10 or ISBN-13</label>
-                <input asp-for="Isbn" class="form-control" placeholder="e.g. 9780132350884" />
-                <span asp-validation-for="Isbn" class="text-danger small"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="Category" class="form-label">Category / Genre <span class="text-danger">*</span></label>
-                <input asp-for="Category" class="form-control" list="categorySuggestions" placeholder="Select or enter category" required />
-                <datalist id="categorySuggestions">
-                    @if (ViewBag.CategoryOptions is List<SelectListItem> options)
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <label asp-for="Title" class="sw-form-label">Book Title <span class="text-danger">*</span></label>
+                        <input asp-for="Title" class="form-control sw-input" placeholder="e.g. Clean Code: A Handbook of Agile Software Craftsmanship" required />
+                        <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Author" class="sw-form-label">Author <span class="text-danger">*</span></label>
+                        <input asp-for="Author" class="form-control sw-input" placeholder="e.g. Robert C. Martin" required />
+                        <span asp-validation-for="Author" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Isbn" class="sw-form-label">ISBN-10 or ISBN-13</label>
+                        <input asp-for="Isbn" class="form-control sw-input" placeholder="e.g. 9780132350884" />
+                        <span asp-validation-for="Isbn" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Category" class="sw-form-label">Category / Genre <span class="text-danger">*</span></label>
+                        <input asp-for="Category" class="form-control sw-input" list="categorySuggestions" placeholder="Select or enter category" required />
+                        <datalist id="categorySuggestions">
+                            @if (ViewBag.CategoryOptions is List<SelectListItem> options)
+                            {
+                                foreach (var opt in options)
+                                {
+                                    <option value="@opt.Value">@opt.Text</option>
+                                }
+                            }
+                        </datalist>
+                        <span asp-validation-for="Category" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Publisher" class="sw-form-label">Publisher</label>
+                        <input asp-for="Publisher" class="form-control sw-input" placeholder="e.g. Prentice Hall" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PublicationYear" class="sw-form-label">Publication Year</label>
+                        <input asp-for="PublicationYear" class="form-control sw-input" type="number" min="1450" max="2100" placeholder="e.g. 2008" />
+                        <span asp-validation-for="PublicationYear" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="TotalQuantity" class="sw-form-label">Total Copies in Inventory <span class="text-danger">*</span></label>
+                        <input asp-for="TotalQuantity" class="form-control sw-input" type="number" min="0" max="10000" required />
+                        <span asp-validation-for="TotalQuantity" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    @if (Model.Id != 0)
                     {
-                        foreach (var opt in options)
-                        {
-                            <option value="@opt.Value">@opt.Text</option>
-                        }
+                        <div class="col-md-4 d-flex align-items-center">
+                            <div class="form-check mt-3">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <label asp-for="IsActive" class="form-check-label fw-semibold">Active in Public Catalogue</label>
+                            </div>
+                        </div>
                     }
-                </datalist>
-                <span asp-validation-for="Category" class="text-danger small"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="Publisher" class="form-label">Publisher</label>
-                <input asp-for="Publisher" class="form-control" placeholder="e.g. Prentice Hall" />
-            </div>
-            <div class="col-md-4">
-                <label asp-for="PublicationYear" class="form-label">Publication Year</label>
-                <input asp-for="PublicationYear" class="form-control" type="number" min="1450" max="2100" placeholder="e.g. 2008" />
-                <span asp-validation-for="PublicationYear" class="text-danger small"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="TotalQuantity" class="form-label">Total Copies in Inventory <span class="text-danger">*</span></label>
-                <input asp-for="TotalQuantity" class="form-control" type="number" min="0" max="10000" required />
-                <span asp-validation-for="TotalQuantity" class="text-danger small"></span>
-            </div>
-            @if (Model.Id != 0)
-            {
-                <div class="col-md-4 d-flex align-items-center">
-                    <div class="form-check mt-3">
-                        <input asp-for="IsActive" class="form-check-input" />
-                        <label asp-for="IsActive" class="form-check-label fw-semibold">Active in Public Catalogue</label>
+                    <div class="col-12">
+                        <label asp-for="Description" class="sw-form-label">Synopsis / Description</label>
+                        <textarea asp-for="Description" class="form-control sw-input" rows="4" style="height: auto;" placeholder="Brief overview, subject topics, or special edition notes..."></textarea>
                     </div>
                 </div>
-            }
-            <div class="col-12">
-                <label asp-for="Description" class="form-label">Synopsis / Description</label>
-                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Brief summary, edition details, or library remarks..."></textarea>
-            </div>
-        </div>
 
-        <div class="d-flex gap-2 mt-4 pt-2 border-top">
-            <button class="btn btn-primary" type="submit">
-                <i class="bi bi-check-lg me-1"></i> Save Title
-            </button>
-            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+                <div class="d-flex align-items-center gap-3 mt-4 pt-4 border-top" style="border-color: var(--sw-border) !important;">
+                    <button class="sw-btn sw-btn-primary sw-btn-lg" type="submit">
+                        <i class="bi bi-check-lg me-1"></i> Save Title Record
+                    </button>
+                    <a class="sw-btn sw-btn-outline sw-btn-lg" asp-action="Index">Cancel</a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>

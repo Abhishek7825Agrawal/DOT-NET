@@ -1,0 +1,134 @@
+@model PaperEditViewModel
+@{
+    ViewData["Title"] = "Revise & Resubmit Manuscript";
+}
+
+<div class="sw-editorial-container py-4 pb-5">
+    <nav class="pb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Marketplace" asp-action="Index" class="text-decoration-none">Research Marketplace</a></li>
+            <li class="breadcrumb-item"><a asp-action="AuthorDesk" class="text-decoration-none">Author Desk</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Revise Manuscript</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="sw-table-card p-4 p-md-5 mb-4">
+                <span class="sw-kicker sw-kicker-navy">Version @Model.CurrentVersion Revision</span>
+                <h1 class="h3 fw-bold mb-2" style="font-family: var(--sw-font-serif); color: var(--sw-navy);">
+                    Revise Manuscript for Editorial Review<span class="text-primary">.</span>
+                </h1>
+                <p class="text-muted small mb-4">
+                    Address editorial comments and upload updated manuscript files. Submitting revisions will generate an immutable version record (Version @(Model.CurrentVersion + 1)) and return your manuscript to the peer-review queue.
+                </p>
+
+                <!-- Editorial Comments Box -->
+                @if (!string.IsNullOrEmpty(Model.EditorialFeedback) || !string.IsNullOrEmpty(Model.RejectionReason))
+                {
+                    <div class="alert alert-warning border mb-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="bi bi-chat-left-dots-fill fs-4 text-warning"></i>
+                            <div>
+                                <h3 class="h6 fw-bold mb-1">Editorial Peer-Review Comments:</h3>
+                                <div class="small text-dark font-monospace" style="white-space: pre-wrap;">
+                                    @(string.IsNullOrEmpty(Model.EditorialFeedback) ? Model.RejectionReason : Model.EditorialFeedback)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="CurrentVersion" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                    <!-- Metadata Fields -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            1. Revised Metadata
+                        </h2>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Manuscript Title *</label>
+                            <input asp-for="Title" class="form-control sw-input" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Authors" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Author(s) *</label>
+                                <input asp-for="Authors" class="form-control sw-input" />
+                                <span asp-validation-for="Authors" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Affiliation" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Affiliation *</label>
+                                <input asp-for="Affiliation" class="form-control sw-input" />
+                                <span asp-validation-for="Affiliation" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Category" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Subject Domain *</label>
+                                <input asp-for="Category" class="form-control sw-input" />
+                                <span asp-validation-for="Category" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Keywords" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Keywords *</label>
+                                <input asp-for="Keywords" class="form-control sw-input" />
+                                <span asp-validation-for="Keywords" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Abstract" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Academic Abstract *</label>
+                            <textarea asp-for="Abstract" rows="6" class="form-control sw-input"></textarea>
+                            <span asp-validation-for="Abstract" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- PDF Replacement -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            2. Updated Manuscript Document (Optional)
+                        </h2>
+                        <div class="mb-3">
+                            <label asp-for="NewPdfFile" class="form-label fw-bold small text-muted">Upload a new PDF file to replace the document for Version @(Model.CurrentVersion + 1). Leave empty to retain current manuscript file.</label>
+                            <input asp-for="NewPdfFile" type="file" accept="application/pdf,.pdf" class="form-control sw-input" />
+                            <span asp-validation-for="NewPdfFile" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Change Summary -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            3. Revision Log &amp; Summary of Changes
+                        </h2>
+                        <div class="mb-3">
+                            <label asp-for="ChangeSummary" class="form-label fw-bold small text-muted">Briefly explain changes made in this revision for the editorial review board and historical version audit.</label>
+                            <textarea asp-for="ChangeSummary" rows="3" class="form-control sw-input" placeholder="e.g., Addressed reviewer comments in Section 3; updated benchmark comparative tables; improved bibliography."></textarea>
+                            <span asp-validation-for="ChangeSummary" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top" style="border-color: var(--sw-border) !important;">
+                        <a asp-action="AuthorDesk" class="sw-btn sw-btn-outline">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="sw-btn sw-btn-primary px-4 py-2">
+                            <i class="bi bi-send-check me-1"></i> Submit Revision (v@(Model.CurrentVersion + 1))
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

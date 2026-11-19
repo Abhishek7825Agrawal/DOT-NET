@@ -1,60 +1,261 @@
 @model MemberDashboardData
-@{ ViewData["Title"] = "My Library"; var overdueCount = Model.ActiveLoans.Count(issue => issue.DueDateUtc.Date < Model.Today); }
+@{
+    ViewData["Title"] = "My Reading Room";
+    var overdueCount = Model.ActiveLoans.Count(issue => issue.DueDateUtc.Date < Model.Today);
+}
 
-<section class="member-welcome" aria-labelledby="member-title">
-    <div class="member-welcome-copy">
-        <div class="eyebrow"><span class="eyebrow-mark"></span> YOUR READING ROOM</div>
-        <h1 id="member-title">Welcome back,<br /><span>@(Model.Profile?.FullName ?? User.Identity?.Name)</span></h1>
-        <p>Your next chapter is waiting. Here’s your library at a glance.</p>
-        <div class="member-welcome-actions">
-            <a class="btn btn-ink" asp-controller="Books" asp-action="Index"><i class="bi bi-search me-2"></i>Explore the catalogue</a>
-            <a class="member-profile-link" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-circle me-1"></i> My profile</a>
+<!-- Editorial Reading Room Welcome Hero -->
+<section class="sw-editorial-hero sw-fade-in-up" aria-labelledby="member-hero-title">
+    <div class="sw-hero-content">
+        <div class="sw-hero-meta">
+            <span class="sw-kicker">Personal Stacks</span>
+            <span class="sw-volume-tag">Member Reading Room</span>
+            <span>·</span>
+            <span><i class="bi bi-person-vcard me-1"></i>#MB-@(Model.Profile?.Id.ToString("D4") ?? "0000")</span>
+        </div>
+        <h1 class="sw-hero-title" id="member-hero-title">
+            Welcome back,<br />
+            <em>@(Model.Profile?.FullName ?? User.Identity?.Name).</em>
+        </h1>
+        <p class="sw-hero-desc">
+            Your personal literary sanctuary. Track active loans, discover upcoming due dates, and explore fresh volumes waiting on library shelves.
+        </p>
+        <div class="sw-hero-actions">
+            <a class="sw-btn sw-btn-accent" asp-controller="Books" asp-action="Index">
+                <i class="bi bi-compass"></i> Discover Books Catalogue
+            </a>
+            <a class="sw-btn sw-btn-outline" asp-controller="Profile" asp-action="Index">
+                <i class="bi bi-person-vcard"></i> View Library Card
+            </a>
+            <div class="sw-badge sw-badge-success d-inline-flex align-items-center">
+                <span class="sw-badge-dot"></span> Active Reader Account
+            </div>
         </div>
     </div>
-    <div class="member-welcome-art" aria-hidden="true"><span class="member-art-circle"></span><span class="member-art-book"></span><i class="bi bi-book-half"></i><span class="member-art-spark">✳</span></div>
-    <div class="member-id"><i class="bi bi-person-vcard me-2"></i> MEMBER #MB-@(Model.Profile?.Id.ToString("D4") ?? "0000") <span class="member-status"><i></i> Active account</span></div>
+    <div class="sw-hero-artwork" aria-hidden="true">
+        <div class="sw-hero-art-circle"></div>
+        <i class="bi bi-book-half sw-hero-art-icon"></i>
+    </div>
 </section>
 
-<section class="member-stats" aria-label="Your account summary">
-    <article class="member-stat member-stat-yellow"><span class="member-stat-icon"><i class="bi bi-book-half"></i></span><span class="member-stat-label">Currently borrowed</span><strong>@Model.ActiveLoans.Count.ToString("00")</strong><small>Active loans on your card</small></article>
-    <article class="member-stat"><span class="member-stat-icon blue"><i class="bi bi-calendar2-check"></i></span><span class="member-stat-label">Due dates to watch</span><strong class="@(overdueCount > 0 ? "member-danger" : "")">@overdueCount.ToString("00")</strong><small>@(overdueCount == 0 ? "All your books are on time" : "Books past their due date")</small></article>
-    <article class="member-stat"><span class="member-stat-icon coral"><i class="bi bi-receipt"></i></span><span class="member-stat-label">Outstanding balance</span><strong class="@(Model.OutstandingFines > 0 ? "member-danger" : "")">@Model.OutstandingFines.ToString("C")</strong><small>Unpaid overdue fines and fees</small></article>
-    <article class="member-stat"><span class="member-stat-icon sage"><i class="bi bi-journal-check"></i></span><span class="member-stat-label">Reading history</span><strong>@Model.History.Count.ToString("00")</strong><small>Titles checked out so far</small></article>
+<!-- Account Summary KPIs -->
+<section class="sw-grid-kpi" aria-label="Reading Room Summary">
+    <!-- Currently Borrowed Titles -->
+    <article class="sw-kpi-card sw-kpi-primary sw-stagger-1">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Currently Borrowed</span>
+            <div class="sw-kpi-icon sw-icon-terracotta"><i class="bi bi-book-half"></i></div>
+        </div>
+        <div class="sw-kpi-value" data-count-up="@Model.ActiveLoans.Count">@Model.ActiveLoans.Count.ToString("00")</div>
+        <div class="sw-kpi-footer">
+            <span>Volumes currently on your card</span>
+        </div>
+    </article>
+
+    <!-- Due Dates to Watch -->
+    <article class="sw-kpi-card @(overdueCount > 0 ? "border-danger" : "") sw-stagger-2">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Due Dates to Watch</span>
+            <div class="sw-kpi-icon @(overdueCount > 0 ? "sw-icon-danger" : "sw-icon-sage")">
+                <i class="bi bi-calendar2-check"></i>
+            </div>
+        </div>
+        <div class="sw-kpi-value @(overdueCount > 0 ? "text-danger" : "")" data-count-up="@overdueCount">@overdueCount.ToString("00")</div>
+        <div class="sw-kpi-footer">
+            @if (overdueCount > 0)
+            {
+                <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle me-1"></i>Please return to avoid fines</span>
+            }
+            else
+            {
+                <span class="text-success"><i class="bi bi-check-circle me-1"></i>All titles on schedule</span>
+            }
+        </div>
+    </article>
+
+    <!-- Outstanding Fines Balance -->
+    <article class="sw-kpi-card @(Model.OutstandingFines > 0 ? "border-danger" : "") sw-stagger-3">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Outstanding Balance</span>
+            <div class="sw-kpi-icon sw-icon-warning"><i class="bi bi-receipt"></i></div>
+        </div>
+        <div class="sw-kpi-value @(Model.OutstandingFines > 0 ? "text-danger" : "")">@Model.OutstandingFines.ToString("C")</div>
+        <div class="sw-kpi-footer">
+            <span>@(Model.OutstandingFines > 0 ? "Payable at circulation desk" : "Account fully cleared")</span>
+        </div>
+    </article>
+
+    <!-- Total Reading History -->
+    <article class="sw-kpi-card sw-stagger-4">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Reading Journey</span>
+            <div class="sw-kpi-icon sw-icon-navy"><i class="bi bi-journal-check"></i></div>
+        </div>
+        <div class="sw-kpi-value" data-count-up="@Model.History.Count">@Model.History.Count.ToString("00")</div>
+        <div class="sw-kpi-footer">
+            <span>Titles borrowed to date</span>
+        </div>
+    </article>
 </section>
 
-<section class="member-panel mb-4">
-    <div class="member-panel-heading"><div><div class="eyebrow">ON YOUR LIBRARY CARD</div><h2>Currently issued titles</h2></div><span class="member-count-pill">@Model.ActiveLoans.Count Active</span></div>
+<!-- Active Books On Loan Section -->
+<section class="sw-table-card mb-5 sw-fade-in-up" aria-labelledby="active-loans-heading">
+    <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <span class="sw-kicker">On Your Library Card</span>
+            <h3 class="sw-h3 mb-0" id="active-loans-heading">Currently Borrowed Volumes</h3>
+        </div>
+        <span class="sw-badge sw-badge-info">@Model.ActiveLoans.Count Active Loans</span>
+    </div>
+
     @if (Model.ActiveLoans.Count == 0)
     {
-        <div class="member-empty"><span class="member-empty-icon"><i class="bi bi-book"></i></span><h3>Room for a new story?</h3><p>You have no active loans right now. Explore the catalogue and find something you’ll love.</p><a class="btn btn-ink btn-sm" asp-controller="Books" asp-action="Index">Explore the catalogue <i class="bi bi-arrow-right ms-1"></i></a></div>
+        <div class="sw-empty-state">
+            <div class="sw-empty-icon"><i class="bi bi-book"></i></div>
+            <h4 class="sw-empty-title">Room for a new story?</h4>
+            <p class="sw-empty-text">You have no active loans right now. Explore the library catalogue to discover your next favourite volume.</p>
+            <a class="sw-btn sw-btn-accent sw-btn-sm" asp-controller="Books" asp-action="Index">
+                Explore the Catalogue <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
     }
     else
     {
-        <div class="table-responsive"><table class="table member-table mb-0 align-middle"><thead><tr><th>Book title</th><th>Category</th><th>Borrowed</th><th>Due date</th><th>Fine</th><th>Loan status</th></tr></thead><tbody>
-        @foreach (var issue in Model.ActiveLoans)
-        {
-            var isLate = issue.DueDateUtc.Date < Model.Today;
-            var accrued = FineCalculator.CalculateAccruedFine(issue, Model.Today);
-            <tr class="@(isLate ? "member-row-late" : "")"><td><div class="member-book-cell"><span class="member-mini-book"><i class="bi bi-book"></i></span><span><strong>@issue.Book.Title</strong><small>by @issue.Book.Author</small></span></div></td><td><span class="member-category">@issue.Book.Category</span></td><td>@issue.IssueDateUtc.ToString("dd MMM yyyy")</td><td><span class="@(isLate ? "member-danger fw-bold" : "fw-semibold")">@issue.DueDateUtc.ToString("dd MMM yyyy")@(isLate ? " · Overdue" : "")</span></td><td><span class="@(accrued > 0 ? "member-danger fw-bold" : "text-muted")">@accrued.ToString("C")</span></td><td>@if (isLate){<span class="member-loan-status late"><i></i> Please return</span>}else{<span class="member-loan-status"><i></i> On schedule</span>}</td></tr>
-        }
-        </tbody></table></div>
+        <div class="sw-table-responsive">
+            <table class="sw-table">
+                <thead>
+                    <tr>
+                        <th>Book Title &amp; Author</th>
+                        <th>Category</th>
+                        <th>Borrowed On</th>
+                        <th>Due Date</th>
+                        <th>Accrued Fine</th>
+                        <th>Loan Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var issue in Model.ActiveLoans)
+                    {
+                        var isLate = issue.DueDateUtc.Date < Model.Today;
+                        var accrued = FineCalculator.CalculateAccruedFine(issue, Model.Today);
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="sw-kpi-icon sw-icon-sage" style="width:34px;height:34px;font-size:.9rem">
+                                        <i class="bi bi-book"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-truncate" style="max-width:260px">@issue.Book.Title</div>
+                                        <div class="sw-mono small text-muted">by @issue.Book.Author</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="sw-badge sw-badge-neutral">@issue.Book.Category</span></td>
+                            <td class="sw-mono">@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <span class="sw-mono @(isLate ? "text-danger fw-bold" : "")">
+                                    @issue.DueDateUtc.ToString("dd MMM yyyy")@(isLate ? " · Overdue" : "")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="sw-mono @(accrued > 0 ? "text-danger fw-bold" : "text-muted")">
+                                    @accrued.ToString("C")
+                                </span>
+                            </td>
+                            <td>
+                                @if (isLate)
+                                {
+                                    <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span>Please Return</span>
+                                }
+                                else
+                                {
+                                    <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span>On Schedule</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </section>
 
-<section class="member-panel">
-    <div class="member-panel-heading"><div><div class="eyebrow">THE STORIES YOU’VE CARRIED</div><h2>Borrowing history</h2></div><span class="member-history-total">@Model.History.Count loans on record</span></div>
+<!-- Borrowing History Ledger Section -->
+<section class="sw-table-card sw-fade-in-up" aria-labelledby="history-heading">
+    <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <span class="sw-kicker">Reading Ledger</span>
+            <h3 class="sw-h3 mb-0" id="history-heading">Borrowing History</h3>
+        </div>
+        <span class="sw-mono small text-muted">@Model.History.Count total loans recorded</span>
+    </div>
+
     @if (Model.History.Count == 0)
     {
-        <div class="member-empty compact"><span class="member-empty-icon"><i class="bi bi-journal"></i></span><p>Your borrowing history will appear here after your first book loan.</p></div>
+        <div class="sw-empty-state">
+            <div class="sw-empty-icon"><i class="bi bi-journal"></i></div>
+            <h4 class="sw-empty-title">Your bookshelf awaits</h4>
+            <p class="sw-empty-text">Your reading history will appear here once you check out your first book.</p>
+        </div>
     }
     else
     {
-        <div class="table-responsive"><table class="table member-table mb-0 align-middle"><thead><tr><th>Book title</th><th>Issued date</th><th>Returned date</th><th>Fine assessed</th><th>Payment status</th><th>Status</th></tr></thead><tbody>
-        @foreach (var issue in Model.History)
-        {
-            var balance = Math.Max(0m, issue.FineAmount - issue.FinePaidAmount);
-            <tr><td><div class="member-book-cell"><span class="member-mini-book"><i class="bi bi-book"></i></span><span><strong>@issue.Book.Title</strong><small>by @issue.Book.Author</small></span></div></td><td>@issue.IssueDateUtc.ToString("dd MMM yyyy")</td><td>@(issue.ReturnDateUtc?.ToString("dd MMM yyyy") ?? "—")</td><td>@issue.FineAmount.ToString("C")</td><td>@if(issue.FineAmount == 0){<span class="member-muted-label">No fines</span>}else if(balance == 0){<span class="member-loan-status"><i></i> Cleared</span>}else{<span class="member-loan-status late">Due: @balance.ToString("C")</span>}</td><td>@if(issue.Status == IssueStatus.Active){<span class="member-loan-status"><i></i> Borrowed</span>}else if(issue.Status == IssueStatus.Returned){<span class="member-loan-status neutral"><i></i> Returned</span>}else if(issue.Status == IssueStatus.Lost){<span class="member-loan-status neutral"><i></i> Settled as lost</span>}</td></tr>
-        }
-        </tbody></table></div>
+        <div class="sw-table-responsive">
+            <table class="sw-table">
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Issued Date</th>
+                        <th>Returned Date</th>
+                        <th>Fine Assessed</th>
+                        <th>Payment Status</th>
+                        <th>Record Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var issue in Model.History)
+                    {
+                        var balance = Math.Max(0m, issue.FineAmount - issue.FinePaidAmount);
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-truncate" style="max-width:260px">@issue.Book.Title</div>
+                                <span class="small text-muted">@issue.Book.Author</span>
+                            </td>
+                            <td class="sw-mono">@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
+                            <td class="sw-mono">@(issue.ReturnDateUtc?.ToString("dd MMM yyyy") ?? "—")</td>
+                            <td class="sw-mono">@issue.FineAmount.ToString("C")</td>
+                            <td>
+                                @if (issue.FineAmount == 0)
+                                {
+                                    <span class="sw-badge sw-badge-neutral">No Fines</span>
+                                }
+                                else if (balance == 0)
+                                {
+                                    <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span>Settled</span>
+                                }
+                                else
+                                {
+                                    <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span>Due: @balance.ToString("C")</span>
+                                }
+                            </td>
+                            <td>
+                                @if (issue.Status == IssueStatus.Active)
+                                {
+                                    <span class="sw-badge sw-badge-info"><span class="sw-badge-dot"></span>Borrowed</span>
+                                }
+                                else if (issue.Status == IssueStatus.Returned)
+                                {
+                                    <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span>Returned</span>
+                                }
+                                else
+                                {
+                                    <span class="sw-badge sw-badge-warning"><span class="sw-badge-dot"></span>Lost</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </section>

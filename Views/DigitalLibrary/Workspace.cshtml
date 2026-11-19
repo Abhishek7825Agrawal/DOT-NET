@@ -1,0 +1,277 @@
+@model WorkspaceViewModel
+@{
+    Layout = null; // Independent full-bleed workspace layout
+    var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase };
+    var initialNotesJson = System.Text.Json.JsonSerializer.Serialize(Model.InitialNotes, jsonOptions);
+    var initialBookmarksJson = System.Text.Json.JsonSerializer.Serialize(Model.InitialBookmarks, jsonOptions);
+    var initialAnnotationsJson = System.Text.Json.JsonSerializer.Serialize(Model.InitialAnnotations, jsonOptions);
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@Model.Title · Shelfwise Reading &amp; Notes Workspace</title>
+
+    <!-- Theme Flash Prevention -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('shelfwise-theme') || 'auto';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch(e) {}
+        })();
+    </script>
+
+    <!-- Typography: Playfair Display, DM Sans, Space Grotesk, DM Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@400..700&display=swap" rel="stylesheet">
+
+    <!-- Framework & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Quill Editor Theme -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+
+    <!-- Shelfwise Core Tokens & Workspace Styles -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/workspace.css" asp-append-version="true" />
+</head>
+<body class="sw-workspace-shell">
+    @Html.AntiForgeryToken()
+
+    <!-- Top Workspace Header -->
+    <header class="sw-workspace-header">
+        <div class="sw-workspace-title-group">
+            <a asp-action="Index" class="sw-btn sw-btn-sm sw-btn-outline" title="Return to Digital Library">
+                <i class="bi bi-chevron-left"></i> Library
+            </a>
+            <div class="vr mx-1 text-muted" style="height: 20px;"></div>
+            <div class="sw-workspace-book-title" title="@Model.Title">@Model.Title</div>
+            <span class="sw-workspace-author d-none d-md-inline">&bull; @Model.Author</span>
+            <span class="sw-badge sw-badge-neutral d-none d-lg-inline">@Model.Category</span>
+        </div>
+
+        <div class="sw-workspace-actions">
+            <!-- Bookmarks Drawer Toggle -->
+            <button type="button" class="sw-btn sw-btn-sm sw-btn-outline" id="drawerBookmarksBtn" title="Inspect Bookmarks">
+                <i class="bi bi-bookmarks"></i> <span class="d-none d-sm-inline">Bookmarks</span>
+            </button>
+
+            <!-- Fullscreen Reading -->
+            <button type="button" class="sw-btn sw-btn-sm sw-btn-outline" id="fullscreenBtn" title="Toggle Fullscreen">
+                <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+
+            <!-- Theme Toggle -->
+            <button type="button" class="sw-btn sw-btn-sm sw-btn-outline" id="themeToggleBtn" title="Toggle Hybrid Theme" onclick="toggleWorkspaceTheme()">
+                <i class="bi bi-circle-half"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Screen Tab Bar (< 992px) -->
+    <div class="sw-workspace-mobile-nav">
+        <button type="button" class="sw-btn sw-btn-sm sw-btn-outline flex-fill active" id="mobileTabPdf">
+            <i class="bi bi-book-half me-1"></i> Document Reader
+        </button>
+        <button type="button" class="sw-btn sw-btn-sm sw-btn-outline flex-fill" id="mobileTabNotes">
+            <i class="bi bi-pencil-square me-1"></i> My Notes
+        </button>
+    </div>
+
+    <!-- Main Side-by-Side Body -->
+    <div class="sw-workspace-body" id="workspaceBody">
+
+        <!-- LEFT PANE: PDF.JS READER -->
+        <section class="sw-pane-pdf" id="panePdf" aria-label="PDF Document Reader">
+
+            <!-- Reader Persistent Toolbar -->
+            <div class="sw-reader-toolbar">
+                <div class="sw-reader-tools-left">
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0" id="prevPageBtn" title="Previous Page (Left Arrow)">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <div class="sw-page-indicator">
+                        <input type="number" class="sw-page-input font-monospace rounded-0" id="pageNumberInput" value="@Model.InitialPage" min="1" max="@Model.PageCount" aria-label="Current page" />
+                        <span class="text-muted">/ <span id="totalPagesLabel">@Model.PageCount</span></span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0" id="nextPageBtn" title="Next Page (Right Arrow)">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="sw-reader-tools-center">
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0" id="zoomOutBtn" title="Zoom Out (-)">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+                    <span class="font-monospace small px-1" id="zoomPercentageLabel">125%</span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0" id="zoomInBtn" title="Zoom In (+)">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0 d-none d-md-inline" id="fitWidthBtn" title="Fit to Width">
+                        <i class="bi bi-arrows-expand"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0 d-none d-md-inline" id="fitPageBtn" title="Fit Entire Page">
+                        <i class="bi bi-aspect-ratio"></i>
+                    </button>
+                </div>
+
+                <div class="sw-reader-tools-right">
+                    <!-- Bookmark Page Toggle -->
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0" id="bookmarkToggleBtn" title="Bookmark This Page">
+                        <i class="bi bi-bookmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bookmarks Sidebar Drawer -->
+            <div class="sw-sidebar-drawer" id="bookmarksDrawer">
+                <div class="sw-drawer-header">
+                    <span><i class="bi bi-bookmarks me-1"></i> Saved Bookmarks</span>
+                    <button type="button" class="btn-close btn-sm" id="closeBookmarksDrawerBtn" aria-label="Close bookmarks"></button>
+                </div>
+                @if (Model.ArchivedAnnotationCount > 0)
+                {
+                    <div class="p-2 m-2 small bg-warning bg-opacity-10 border border-warning rounded text-muted">
+                        <i class="bi bi-info-circle text-warning me-1"></i>
+                        <span>@Model.ArchivedAnnotationCount annotation(s) from earlier document version(s) remain safely preserved in your research notes.</span>
+                    </div>
+                }
+                <div class="sw-drawer-content" id="bookmarksList">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- PDF Scrollable Viewport -->
+            <div class="sw-reader-viewport" id="pdfViewport">
+                <div id="readerLoadingOverlay" class="d-flex align-items-center justify-content-center p-5 text-muted">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    <span>Streaming digital manuscript...</span>
+                </div>
+
+                <!-- Pages Container -->
+                <div id="pdfPagesContainer"></div>
+            </div>
+
+            <!-- Contextual Floating Selection Toolbar -->
+            <div class="sw-selection-toolbar" id="selectionToolbar" role="toolbar" aria-label="Annotation Actions">
+                <span class="small fw-semibold me-1">Highlight:</span>
+                <div class="sw-color-swatch sw-color-yellow" data-color="yellow" title="Highlight Yellow"></div>
+                <div class="sw-color-swatch sw-color-sage" data-color="sage" title="Highlight Sage Green"></div>
+                <div class="sw-color-swatch sw-color-blue" data-color="blue" title="Highlight Blue"></div>
+                <div class="sw-color-swatch sw-color-terracotta" data-color="terracotta" title="Highlight Terracotta"></div>
+
+                <div class="vr bg-secondary mx-1" style="height: 16px;"></div>
+
+                <button type="button" class="btn btn-sm btn-link text-white text-decoration-none p-0 d-flex align-items-center gap-1" id="addToNotesBtn">
+                    <i class="bi bi-journal-plus"></i> Add to Notes
+                </button>
+
+                <div class="vr bg-secondary mx-1" style="height: 16px;"></div>
+
+                <button type="button" class="btn btn-sm btn-link text-white text-decoration-none p-0" id="copySelectionBtn">
+                    <i class="bi bi-clipboard"></i> Copy
+                </button>
+            </div>
+        </section>
+
+        <!-- RESIZABLE SPLIT DIVIDER -->
+        <div class="sw-workspace-resizer" id="workspaceResizer" title="Drag to adjust split panel width"></div>
+
+        <!-- RIGHT PANE: QUILL PERSONAL NOTES WORKSPACE -->
+        <section class="sw-pane-notes d-none-mobile" id="paneNotes" aria-label="Personal Notes Workspace">
+
+            <!-- Notes Header Toolbar -->
+            <div class="sw-notes-header">
+                <div class="d-flex align-items-center gap-2 flex-fill" style="min-width: 0;">
+                    <!-- Note Title Input -->
+                    <input type="text" class="sw-notes-title-input" id="noteTitleInput" value="Reading Notes" placeholder="Note Title..." aria-label="Note title" />
+
+                    <!-- Multi-Note Selector -->
+                    <select class="form-select form-select-sm border-0 bg-transparent text-muted" id="notesSelector" style="width: auto; max-width: 150px; font-size: 0.82rem;" aria-label="Switch notebook">
+                        <!-- Populated by JS -->
+                    </select>
+
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0 p-1" id="newNoteBtn" title="Create New Note">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Autosave Indicator -->
+                    <div class="sw-notes-save-status">
+                        <div class="sw-status-dot" id="saveStatusDot"></div>
+                        <span id="saveStatusText">Saved</span>
+                    </div>
+
+                    <!-- Note Actions -->
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0 p-1" id="exportNoteBtn" title="Print / Export Note">
+                        <i class="bi bi-printer"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary border-0 p-1 text-danger" id="deleteNoteBtn" title="Delete Active Note">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quill Rich Text Editor Container -->
+            <div class="sw-quill-container">
+                <div id="quillEditor"></div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Scripts: Mozilla PDF.js & Quill Rich Text Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+
+    <!-- Modular Workspace Controllers -->
+    <script src="~/js/pdf-workspace.js" asp-append-version="true"></script>
+    <script src="~/js/pdf-annotations.js" asp-append-version="true"></script>
+    <script src="~/js/notes-workspace.js" asp-append-version="true"></script>
+
+    <!-- Workspace Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const initialNotes = @Html.Raw(initialNotesJson);
+            const initialBookmarks = @Html.Raw(initialBookmarksJson);
+            const initialAnnotations = @Html.Raw(initialAnnotationsJson);
+
+            // 1. Initialize PDF.js Split Workspace
+            window.ShelfwiseWorkspace.init({
+                streamUrl: '@Model.StreamUrl',
+                digitalBookId: @Model.DigitalBookId,
+                bookId: @Model.BookId,
+                documentVersion: @Model.DocumentVersion,
+                initialPage: @Model.InitialPage
+            });
+
+            // 2. Initialize Annotations & Highlights Engine
+            window.ShelfwiseAnnotations.init(initialAnnotations, initialBookmarks);
+
+            // 3. Initialize Quill Rich Text Notes Workspace
+            window.ShelfwiseNotes.init(initialNotes, @Model.BookId);
+
+            // Bookmarks Drawer Toggle
+            const bookmarksDrawer = document.getElementById('bookmarksDrawer');
+            document.getElementById('drawerBookmarksBtn').addEventListener('click', () => {
+                bookmarksDrawer.classList.toggle('open');
+            });
+            document.getElementById('closeBookmarksDrawerBtn').addEventListener('click', () => {
+                bookmarksDrawer.classList.remove('open');
+            });
+        });
+
+        function toggleWorkspaceTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('shelfwise-theme', next);
+        }
+    </script>
+</body>
+</html>

@@ -6,7 +6,9 @@ namespace LibraryManagementSystem.Tests;
 
 public static class SqlServerQueryTranslationTests
 {
-    public static bool Run()
+    public static bool Run() => Run(out _, out _);
+
+    public static bool Run(out int passedCount, out int failedCount)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=ShelfwiseTranslationOnly;Trusted_Connection=True;TrustServerCertificate=True")
@@ -24,7 +26,8 @@ public static class SqlServerQueryTranslationTests
             ("Report daily return counts", ReportingService.GetReturnCountsByDayQuery(db, start, end))
         };
 
-        var passed = true;
+        var passed = 0;
+        var failed = 0;
         foreach (var (name, query) in queries)
         {
             try
@@ -39,16 +42,32 @@ public static class SqlServerQueryTranslationTests
                 if (name.Contains("borrowers", StringComparison.OrdinalIgnoreCase))
                     translated &= sql.Contains("AspNetUsers", StringComparison.OrdinalIgnoreCase);
 
-                Console.WriteLine($"[{(translated ? "PASS" : "FAIL")}] SQL Server translation: {name}");
-                passed &= translated;
+                if (translated)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"[PASS] SQL Server translation: {name}");
+                    Console.ResetColor();
+                    passed++;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"[FAIL] SQL Server translation: {name}");
+                    Console.ResetColor();
+                    failed++;
+                }
             }
             catch (InvalidOperationException exception)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"[FAIL] SQL Server translation: {name} ({exception.GetType().Name})");
-                passed = false;
+                Console.ResetColor();
+                failed++;
             }
         }
 
-        return passed;
+        passedCount = passed;
+        failedCount = failed;
+        return failed == 0;
     }
 }

@@ -1,0 +1,255 @@
+@model ExcelImportPreviewViewModel
+@{
+    ViewData["Title"] = $"Batch Preview · {Model.BatchReference}";
+}
+
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Import Staging Matrix &bull; @Model.BatchReference</div>
+        <h1 class="sw-title-display">Staged Records Preview</h1>
+        <p class="sw-page-subtitle">File: <span class="font-monospace fw-bold">@Model.FileName</span> &bull; Audited on @Model.CreatedAtUtc.ToString("dd MMM yyyy HH:mm:ss") UTC. Review the validation classification below before committing records to the library directory.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="BulkImport">
+            <i class="bi bi-arrow-left me-1"></i> Upload Another File
+        </a>
+        @if (Model.InvalidCount > 0 || Model.DuplicateCount > 0)
+        {
+            <a class="sw-btn sw-btn-outline" asp-action="DownloadErrorReport" asp-route-batchId="@Model.BatchId">
+                <i class="bi bi-file-earmark-excel text-danger me-1"></i> Download Error Audit (.xlsx)
+            </a>
+        }
+        @if (Model.ValidCount > 0)
+        {
+            <form asp-action="ConfirmImport" method="post" class="d-inline">
+                <input type="hidden" name="batchId" value="@Model.BatchId" />
+                <button type="submit" class="sw-btn sw-btn-accent" onclick="return confirm('Commit @Model.ValidCount valid member accounts to the database?');">
+                    <i class="bi bi-check2-circle me-1"></i> Confirm &amp; Commit Import (@Model.ValidCount Valid)
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<!-- KPI Summary Cards -->
+<div class="row g-3 mb-4">
+    <!-- Total Rows -->
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label">Total Rows Parsed</span>
+                <div class="sw-kpi-icon sw-icon-navy"><i class="bi bi-list-check"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2">@Model.TotalRows.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Spreadsheet records</div>
+        </div>
+    </div>
+
+    <!-- Valid Rows -->
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3" style="border-left: 4px solid #198754;">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label text-success">Valid Records</span>
+                <div class="sw-kpi-icon sw-icon-sage"><i class="bi bi-check-circle-fill"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2 text-success">@Model.ValidCount.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Ready to enroll</div>
+        </div>
+    </div>
+
+    <!-- Duplicate Rows -->
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3" style="border-left: 4px solid #ffc107;">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label text-warning">Duplicates</span>
+                <div class="sw-kpi-icon sw-icon-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2 text-warning">@Model.DuplicateCount.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Already registered</div>
+        </div>
+    </div>
+
+    <!-- Invalid Rows -->
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3" style="border-left: 4px solid #dc3545;">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label text-danger">Invalid Rows</span>
+                <div class="sw-kpi-icon sw-icon-danger"><i class="bi bi-x-circle-fill"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2 text-danger">@Model.InvalidCount.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Format &amp; schema errors</div>
+        </div>
+    </div>
+</div>
+
+<!-- Notice Banner -->
+@if (Model.InvalidCount > 0 || Model.DuplicateCount > 0)
+{
+    <div class="p-3 mb-4 rounded-0 border-start border-4 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background-color: rgba(200, 90, 50, 0.08); border-color: var(--sw-terracotta) !important;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle-fill fs-5" style="color: var(--sw-terracotta);"></i>
+            <div>
+                <strong>Selective Commitment Standard:</strong> Only the <span class="text-success fw-bold">@Model.ValidCount valid records</span> will be imported. Rejected rows (@(Model.InvalidCount + Model.DuplicateCount)) are preserved for download in the audit report.
+            </div>
+        </div>
+        <a asp-action="DownloadErrorReport" asp-route-batchId="@Model.BatchId" class="sw-btn sw-btn-sm sw-btn-outline">
+            <i class="bi bi-download me-1"></i> Download Rejected Rows (.xlsx)
+        </a>
+    </div>
+}
+
+<!-- Table Card & Filter Tabs -->
+<div class="sw-table-card">
+    <div class="p-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2" style="border-color: var(--sw-border) !important;">
+        <!-- Filter Tabs -->
+        <div class="btn-group" role="group" aria-label="Filter Matrix">
+            <button type="button" class="btn btn-sm btn-outline-secondary active filter-btn" data-filter="all">
+                All Rows (@Model.TotalRows)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-success filter-btn" data-filter="valid">
+                <i class="bi bi-check-circle me-1"></i> Valid (@Model.ValidCount)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-warning filter-btn" data-filter="duplicate">
+                <i class="bi bi-exclamation-triangle me-1"></i> Duplicates (@Model.DuplicateCount)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger filter-btn" data-filter="invalid">
+                <i class="bi bi-x-circle me-1"></i> Invalid (@Model.InvalidCount)
+            </button>
+        </div>
+
+        <div class="text-muted small">
+            Displaying @Model.Rows.Count row(s) from staged workbook
+        </div>
+    </div>
+
+    @if (Model.Rows.Count == 0)
+    {
+        <div class="sw-empty-state py-5">
+            <div class="sw-empty-icon"><i class="bi bi-file-earmark-x"></i></div>
+            <h3 class="sw-empty-title">No readable rows found</h3>
+            <p class="sw-empty-text">The uploaded spreadsheet did not contain valid data rows below the header.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sw-table mb-0" id="previewTable">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">Row #</th>
+                        <th>Full Legal Name</th>
+                        <th>Email Address</th>
+                        <th>Phone Number</th>
+                        <th>Address</th>
+                        <th>Audit Status</th>
+                        <th>Validation Audit Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        var statusClass = row.Status switch
+                        {
+                            ImportRowStatus.Valid => "row-valid",
+                            ImportRowStatus.Duplicate => "row-duplicate",
+                            ImportRowStatus.Invalid => "row-invalid",
+                            _ => ""
+                        };
+
+                        <tr class="preview-row @statusClass" data-status="@row.Status.ToString().ToLowerInvariant()">
+                            <td class="font-monospace fw-bold text-muted">@row.RowNumber</td>
+                            <td>
+                                <strong style="color: var(--sw-navy);">@(string.IsNullOrWhiteSpace(row.FullName) ? "—" : row.FullName)</strong>
+                            </td>
+                            <td>
+                                <span class="font-monospace small">@(string.IsNullOrWhiteSpace(row.Email) ? "—" : row.Email)</span>
+                            </td>
+                            <td>@(row.PhoneNumber ?? "—")</td>
+                            <td><small class="text-muted">@(row.Address ?? "—")</small></td>
+                            <td>
+                                @switch (row.Status)
+                                {
+                                    case ImportRowStatus.Valid:
+                                        <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span> Valid</span>
+                                        break;
+                                    case ImportRowStatus.Duplicate:
+                                        <span class="sw-badge sw-badge-warning"><span class="sw-badge-dot"></span> Duplicate</span>
+                                        break;
+                                    case ImportRowStatus.Invalid:
+                                        <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span> Invalid</span>
+                                        break;
+                                    default:
+                                        <span class="sw-badge sw-badge-neutral">@row.Status</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (row.Status == ImportRowStatus.Valid)
+                                {
+                                    <span class="text-success small"><i class="bi bi-check2 me-1"></i> Passed all schema &amp; uniqueness checks</span>
+                                }
+                                else if (row.Status == ImportRowStatus.Duplicate)
+                                {
+                                    <span class="text-warning small fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> @row.ValidationMessage</span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger small fw-semibold"><i class="bi bi-x-circle me-1"></i> @row.ValidationMessage</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <!-- Bottom Action Footer -->
+    <div class="p-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2" style="border-color: var(--sw-border) !important;">
+        <a asp-action="BulkImport" class="sw-btn sw-btn-outline">
+            <i class="bi bi-x-circle me-1"></i> Discard Batch &amp; Re-upload
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            @if (Model.InvalidCount > 0 || Model.DuplicateCount > 0)
+            {
+                <a class="sw-btn sw-btn-outline" asp-action="DownloadErrorReport" asp-route-batchId="@Model.BatchId">
+                    <i class="bi bi-download me-1"></i> Download Error Report
+                </a>
+            }
+            @if (Model.ValidCount > 0)
+            {
+                <form asp-action="ConfirmImport" method="post" class="d-inline">
+                    <input type="hidden" name="batchId" value="@Model.BatchId" />
+                    <button type="submit" class="sw-btn sw-btn-accent" onclick="return confirm('Commit @Model.ValidCount valid member accounts to the database?');">
+                        <i class="bi bi-check2-circle me-1"></i> Confirm &amp; Commit Import (@Model.ValidCount Valid)
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const rows = document.querySelectorAll('.preview-row');
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.getAttribute('data-filter');
+
+                rows.forEach(row => {
+                    const status = row.getAttribute('data-status');
+                    if (filter === 'all' || status === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>

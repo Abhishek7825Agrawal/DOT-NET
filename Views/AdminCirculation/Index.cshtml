@@ -1,71 +1,75 @@
 @model IReadOnlyList<IssueRecord>
 @inject LibraryCalendar LibraryCalendar
-@{ ViewData["Title"] = (bool)ViewBag.Overdue ? "Overdue Loans Register" : "Circulation Desk"; }
+@{
+    ViewData["Title"] = (bool)ViewBag.Overdue ? "Overdue Loans Register" : "Circulation Desk";
+}
 
-<div class="page-heading">
-    <div>
-        <div class="eyebrow">Circulation & Borrowing</div>
-        <h1>@ViewData["Title"]</h1>
-        <p class="text-secondary mb-0 mt-1">Track loans, process book returns, collect fine settlements, and manage lost titles.</p>
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Circulation &amp; Borrowing</div>
+        <h1 class="sw-title-display">@ViewData["Title"]</h1>
+        <p class="sw-page-subtitle">Track active loans, process returns, collect fine settlements, and manage inventory exceptions.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-secondary" asp-action="Payments">
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="Payments">
             <i class="bi bi-receipt me-1"></i> Payment Ledger
         </a>
-        <a class="btn btn-primary" asp-action="Issue">
+        <a class="sw-btn sw-btn-primary" asp-action="Issue">
             <i class="bi bi-plus-lg me-1"></i> Issue a Book
         </a>
     </div>
 </div>
 
-<form method="get" class="panel mb-3">
+<!-- Search & Status Filter Panel -->
+<form method="get" class="sw-table-card p-3 mb-4">
     <div class="row g-2 align-items-center">
-        <div class="col-md-5">
+        <div class="col-lg-5 col-md-12">
             <div class="input-group">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input class="form-control border-start-0 ps-0" name="q" value="@ViewBag.Query" placeholder="Search member name, email, book title or ISBN..." aria-label="Search circulation" />
+                <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--sw-input-border);"><i class="bi bi-search text-muted"></i></span>
+                <input class="form-control border-start-0 ps-0 sw-input" name="q" value="@ViewBag.Query" placeholder="Search borrower, email, book title or ISBN..." aria-label="Search circulation" />
             </div>
         </div>
-        <div class="col-md-3">
-            <select class="form-select" name="status" aria-label="Filter by loan status">
-                <option value="">All Statuses</option>
+        <div class="col-lg-3 col-md-6">
+            <select class="form-select sw-input" name="status" aria-label="Filter by loan status">
+                <option value="">All Loan Statuses</option>
                 <option value="0" selected="@(ViewBag.Status is IssueStatus s && s == IssueStatus.Active)">Active Loans Only</option>
                 <option value="1" selected="@(ViewBag.Status is IssueStatus s1 && s1 == IssueStatus.Returned)">Returned Only</option>
                 <option value="2" selected="@(ViewBag.Status is IssueStatus s2 && s2 == IssueStatus.Lost)">Lost Books Only</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <div class="form-check pt-1">
+        <div class="col-lg-2 col-md-3">
+            <div class="form-check pt-1 ms-2">
                 <input class="form-check-input" type="checkbox" name="overdue" value="true" id="overdueCheck" checked="@((bool)ViewBag.Overdue)" />
-                <label class="form-check-label fw-semibold" for="overdueCheck">Overdue only</label>
+                <label class="form-check-label fw-semibold small" for="overdueCheck">Overdue only</label>
             </div>
         </div>
-        <div class="col-md-2 d-grid">
-            <button class="btn btn-outline-secondary" type="submit">Filter Desk</button>
+        <div class="col-lg-2 col-md-3 d-grid">
+            <button class="sw-btn sw-btn-outline" type="submit">Filter Desk</button>
         </div>
     </div>
 </form>
 
-<div class="panel">
+<!-- Circulation Table Card -->
+<div class="sw-table-card">
     @if (Model.Count == 0)
     {
-        <div class="empty-state">
-            <i class="bi bi-arrow-left-right"></i>
-            <h3 class="h6 mt-3">No circulation records found</h3>
-            <p class="mb-0 text-muted">No loans match the selected filter criteria.</p>
+        <div class="sw-empty-state py-5">
+            <div class="sw-empty-icon"><i class="bi bi-arrow-left-right"></i></div>
+            <h3 class="sw-empty-title">No circulation records found</h3>
+            <p class="sw-empty-text">No lending records match the selected filter criteria.</p>
         </div>
     }
     else
     {
         <div class="table-responsive">
-            <table class="table mb-0 align-middle">
+            <table class="sw-table mb-0">
                 <thead>
                     <tr>
                         <th>Book Title</th>
                         <th>Borrower</th>
-                        <th>Issued</th>
+                        <th>Issued Date</th>
                         <th>Due Date</th>
-                        <th>Fines & Dues</th>
+                        <th>Fines &amp; Dues</th>
                         <th>Status</th>
                         <th class="text-end">Desk Action</th>
                     </tr>
@@ -78,10 +82,10 @@
                     var accruedFine = FineCalculator.CalculateAccruedFine(issue, today);
                     var outstandingBalance = FineCalculator.CalculateOutstandingBalance(issue, today);
 
-                    <tr class="@(isOverdue ? "table-light" : "")">
+                    <tr class="@(isOverdue ? "table-warning-subtle" : "")">
                         <td>
-                            <div class="fw-semibold">@issue.Book.Title</div>
-                            <small class="text-secondary">ISBN: @(issue.Book.Isbn ?? "—")</small>
+                            <div class="fw-semibold text-dark">@issue.Book.Title</div>
+                            <small class="text-muted font-monospace">ISBN: @(issue.Book.Isbn ?? "—")</small>
                             @if (!string.IsNullOrWhiteSpace(issue.Remarks))
                             {
                                 <div class="small text-muted fst-italic mt-1"><i class="bi bi-info-circle me-1"></i>@issue.Remarks</div>
@@ -89,37 +93,37 @@
                         </td>
                         <td>
                             <div class="fw-semibold">@issue.Member.FullName</div>
-                            <small class="text-secondary">@issue.Member.User.Email</small>
+                            <small class="text-muted font-monospace">@issue.Member.User.Email</small>
                         </td>
-                        <td>@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
-                        <td>
-                            <span class="@(isOverdue ? "text-danger fw-bold" : "")">
+                        <td class="font-monospace text-nowrap">@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
+                        <td class="text-nowrap">
+                            <span class="@(isOverdue ? "text-danger fw-bold" : "font-monospace")">
                                 @issue.DueDateUtc.ToString("dd MMM yyyy")
                                 @if (isOverdue)
                                 {
-                                    <span class="d-block badge text-bg-danger" style="font-size:.65rem">@((today - issue.DueDateUtc.Date).Days) days late</span>
+                                    <span class="d-block sw-badge sw-badge-danger mt-1">@((today - issue.DueDateUtc.Date).Days) days late</span>
                                 }
                             </span>
                         </td>
                         <td>
                             <div>
-                                <span class="fw-bold @(outstandingBalance > 0 ? "text-danger" : "text-muted")">
+                                <span class="fw-bold @(outstandingBalance > 0 ? "text-danger" : "text-muted") font-monospace">
                                     @accruedFine.ToString("C")
                                 </span>
                                 @if (issue.Status != IssueStatus.Active && issue.FinePaidAmount > 0)
                                 {
-                                    <small class="text-success d-block">Paid: @issue.FinePaidAmount.ToString("C")</small>
+                                    <small class="text-success d-block font-monospace">Paid: @issue.FinePaidAmount.ToString("C")</small>
                                 }
                                 @if (outstandingBalance > 0)
                                 {
-                                    <small class="text-danger fw-semibold d-block">Due: @outstandingBalance.ToString("C")</small>
+                                    <small class="text-danger fw-semibold d-block font-monospace">Due: @outstandingBalance.ToString("C")</small>
                                 }
                             </div>
                             @if (issue.FinePayments.Count > 0)
                             {
-                                <details class="small mt-1 text-secondary">
-                                    <summary>Payments (@issue.FinePayments.Count)</summary>
-                                    <div class="p-2 border rounded bg-light mt-1" style="font-size:.78rem">
+                                <details class="small mt-1 text-muted">
+                                    <summary class="cursor-pointer">Payments (@issue.FinePayments.Count)</summary>
+                                    <div class="p-2 border rounded mt-1 bg-surface" style="font-size:.78rem; border-color: var(--sw-border) !important;">
                                         @foreach (var p in issue.FinePayments.OrderByDescending(x => x.PaymentDateUtc))
                                         {
                                             <div>
@@ -134,19 +138,19 @@
                         <td>
                             @if (isOverdue)
                             {
-                                <span class="badge rounded-pill text-bg-danger">Overdue</span>
+                                <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span> Overdue</span>
                             }
                             else if (issue.Status == IssueStatus.Active)
                             {
-                                <span class="badge rounded-pill badge-soft">Active Loan</span>
+                                <span class="sw-badge sw-badge-info"><span class="sw-badge-dot"></span> Active Loan</span>
                             }
                             else if (issue.Status == IssueStatus.Returned)
                             {
-                                <span class="badge rounded-pill text-bg-light border">Returned</span>
+                                <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span> Returned</span>
                             }
                             else if (issue.Status == IssueStatus.Lost)
                             {
-                                <span class="badge rounded-pill text-bg-dark">Declared Lost</span>
+                                <span class="sw-badge sw-badge-neutral" style="background-color: var(--sw-navy); color: var(--sw-paper);"><span class="sw-badge-dot"></span> Declared Lost</span>
                             }
                         </td>
                         <td class="text-end text-nowrap">
@@ -155,14 +159,14 @@
                                 <div class="d-flex gap-1 justify-content-end">
                                     <!-- Return Form -->
                                     <form asp-action="Return" asp-route-id="@issue.Id" method="post" class="d-inline" data-confirm="Confirm receipt and return of '@issue.Book.Title'?">
-                                        <button class="btn btn-sm btn-outline-primary" type="submit" title="Record Return">
+                                        <button class="sw-btn sw-btn-sm sw-btn-outline" type="submit" title="Record Return">
                                             <i class="bi bi-box-arrow-in-down me-1"></i> Return
                                         </button>
                                     </form>
 
                                     <!-- Mark Lost Form -->
                                     <form asp-action="MarkLost" asp-route-id="@issue.Id" method="post" class="d-inline" data-confirm="Declare this title as LOST by the borrower? Total book inventory will be adjusted and penalty recorded.">
-                                        <button class="btn btn-sm btn-outline-dark" type="submit" title="Mark as Lost">
+                                        <button class="sw-btn sw-btn-sm sw-btn-outline text-danger" type="submit" title="Mark as Lost">
                                             <i class="bi bi-x-octagon me-1"></i> Lost
                                         </button>
                                     </form>
@@ -171,18 +175,18 @@
                             else if (outstandingBalance > 0)
                             {
                                 <!-- Record Fine Payment Form -->
-                                <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#payForm_@issue.Id" aria-expanded="false" aria-controls="payForm_@issue.Id">
-                                    <i class="bi bi-cash me-1"></i> Record Payment
+                                <button class="sw-btn sw-btn-sm sw-btn-accent" type="button" data-bs-toggle="collapse" data-bs-target="#payForm_@issue.Id" aria-expanded="false" aria-controls="payForm_@issue.Id">
+                                    <i class="bi bi-cash me-1"></i> Collect Fine
                                 </button>
                                 <div class="collapse mt-2 text-start" id="payForm_@issue.Id">
-                                    <form asp-action="PayFine" asp-route-id="@issue.Id" method="post" class="p-2 border rounded bg-white shadow-sm" style="min-width:240px">
+                                    <form asp-action="PayFine" asp-route-id="@issue.Id" method="post" class="p-3 border rounded shadow-sm" style="min-width:260px; background-color: var(--sw-surface); border-color: var(--sw-border) !important;">
                                         <div class="mb-2">
-                                            <label class="form-label small mb-1" for="amt_@issue.Id">Amount (₹)</label>
-                                            <input id="amt_@issue.Id" name="Amount" type="number" min="0.01" max="@outstandingBalance" step="0.01" value="@outstandingBalance" class="form-control form-control-sm" required />
+                                            <label class="form-label small fw-semibold mb-1" for="amt_@issue.Id">Amount (₹)</label>
+                                            <input id="amt_@issue.Id" name="Amount" type="number" min="0.01" max="@outstandingBalance" step="0.01" value="@outstandingBalance" class="form-control form-control-sm sw-input" required />
                                         </div>
                                         <div class="mb-2">
-                                            <label class="form-label small mb-1" for="method_@issue.Id">Payment Method</label>
-                                            <select id="method_@issue.Id" name="PaymentMethod" class="form-select form-select-sm">
+                                            <label class="form-label small fw-semibold mb-1" for="method_@issue.Id">Payment Method</label>
+                                            <select id="method_@issue.Id" name="PaymentMethod" class="form-select form-select-sm sw-input">
                                                 <option value="0">Cash</option>
                                                 <option value="1">Bank Transfer (UPI / IMPS)</option>
                                                 <option value="2">Card</option>
@@ -190,10 +194,10 @@
                                             </select>
                                         </div>
                                         <div class="mb-2">
-                                            <label class="form-label small mb-1" for="ref_@issue.Id">Transaction Reference</label>
-                                            <input id="ref_@issue.Id" name="ReferenceNumber" maxlength="120" placeholder="Optional Receipt / UPI ID" class="form-control form-control-sm" />
+                                            <label class="form-label small fw-semibold mb-1" for="ref_@issue.Id">Reference / Receipt No.</label>
+                                            <input id="ref_@issue.Id" name="ReferenceNumber" maxlength="120" placeholder="Optional Receipt / UPI ID" class="form-control form-control-sm sw-input" />
                                         </div>
-                                        <button class="btn btn-success btn-sm w-100" type="submit">Submit Payment</button>
+                                        <button class="sw-btn sw-btn-primary sw-btn-sm w-100" type="submit">Submit Payment</button>
                                     </form>
                                 </div>
                             }
@@ -212,23 +216,23 @@
 
 @if ((int)ViewBag.TotalPages > 1)
 {
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <span class="small text-secondary">Page @ViewBag.Page of @ViewBag.TotalPages</span>
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <span class="small text-muted font-monospace">Page @ViewBag.Page of @ViewBag.TotalPages</span>
         <nav aria-label="Circulation pagination">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item @((int)ViewBag.Page <= 1 ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page - 1)" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">Previous</a>
-                </li>
+            <div class="d-flex gap-1">
+                @if ((int)ViewBag.Page > 1)
+                {
+                    <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index" asp-route-page="@((int)ViewBag.Page - 1)" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">&larr; Prev</a>
+                }
                 @for (var p = Math.Max(1, (int)ViewBag.Page - 2); p <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.Page + 2); p++)
                 {
-                    <li class="page-item @(p == (int)ViewBag.Page ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">@p</a>
-                    </li>
+                    <a class="sw-btn sw-btn-sm @(p == (int)ViewBag.Page ? "sw-btn-primary" : "sw-btn-outline")" asp-action="Index" asp-route-page="@p" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">@p</a>
                 }
-                <li class="page-item @((int)ViewBag.Page >= (int)ViewBag.TotalPages ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page + 1)" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">Next</a>
-                </li>
-            </ul>
+                @if ((int)ViewBag.Page < (int)ViewBag.TotalPages)
+                {
+                    <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index" asp-route-page="@((int)ViewBag.Page + 1)" asp-route-q="@ViewBag.Query" asp-route-overdue="@ViewBag.Overdue" asp-route-status="@ViewBag.Status">Next &rarr;</a>
+                }
+            </div>
         </nav>
     </div>
 }

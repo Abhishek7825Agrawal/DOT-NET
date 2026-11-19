@@ -134,6 +134,69 @@ public sealed class AccountController(
         return RedirectToAction("Index", "Home");
     }
 
+    [HttpGet, AllowAnonymous]
+    public async Task<IActionResult> SetupPassword(string? userId, string? token, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+        {
+            TempData["Error"] = "Invalid or expired activation link.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            TempData["Error"] = "User account not found.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var member = await db.Members.AsNoTracking().FirstOrDefaultAsync(m => m.UserId == userId, cancellationToken);
+
+        var model = new SetupPasswordViewModel
+        {
+            UserId = userId,
+            Token = token,
+            Email = user.Email ?? string.Empty,
+            FullName = member?.FullName ?? user.UserName ?? "Member"
+        };
+
+        return View(model);
+    }
+
+    [HttpPost, AllowAnonymous]
+    public async Task<IActionResult> SetupPassword(SetupPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            ModelState.AddModelError(string.Empty, $"Validation error: {errors}");
+            return View(model);
+        }
+
+        var user = await userManager.FindByIdAsync(model.UserId);
+        if (user is null)
+        {
+            ModelState.AddModelError(string.Empty, "User account not found.");
+            return View(model);
+        }
+
+        var resetResult = await userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+        if (!resetResult.Succeeded)
+        {
+            foreach (var error in resetResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
+
+        user.EmailConfirmed = true;
+        await userManager.UpdateAsync(user);
+
+        TempData["Success"] = "Your account has been activated and your password set successfully. You can now log in.";
+        return RedirectToAction(nameof(Login));
+    }
+
     [AllowAnonymous]
     public IActionResult AccessDenied() => View();
 }

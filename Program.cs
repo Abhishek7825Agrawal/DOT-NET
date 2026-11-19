@@ -25,10 +25,11 @@ var dbProvider = builder.Configuration.GetValue<string>("DatabaseProvider");
 
 if (string.Equals(dbProvider, "SqlServer", StringComparison.OrdinalIgnoreCase))
 {
-    var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+    var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+        ?? builder.Configuration.GetConnectionString("DefaultConnection");
     if (string.IsNullOrWhiteSpace(connectionString))
         throw new InvalidOperationException(
-            "DatabaseProvider is SqlServer but ConnectionStrings__DefaultConnection is not set in the environment.");
+            "DatabaseProvider is SqlServer but connection string is not set in environment or configuration.");
 
     builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 }
@@ -82,6 +83,10 @@ builder.Services.AddScoped<CirculationService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<SettingsService>();
 builder.Services.AddScoped<ReportingService>();
+builder.Services.AddScoped<CustomerImportService>();
+builder.Services.AddScoped<DigitalDocumentService>();
+builder.Services.AddScoped<PaperStorageService>();
+builder.Services.AddScoped<MarketplaceService>();
 builder.Services.AddSingleton<LibraryCalendar>();
 
 var app = builder.Build();
@@ -139,10 +144,86 @@ if (args.Contains("--recover-admin-account", StringComparer.Ordinal))
     return;
 }
 
+if (args.Contains("--recover-member-account", StringComparer.Ordinal))
+{
+    var recoveryPassword = Environment.GetEnvironmentVariable("SHELFWISE_MEMBER_RECOVERY_PASSWORD") ?? "Member@12345!";
+    await using var recoveryScope = app.Services.CreateAsyncScope();
+    var users = recoveryScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var memberUser = await users.FindByEmailAsync("member@shelfwise.local");
+    if (memberUser is not null)
+    {
+        var token = await users.GeneratePasswordResetTokenAsync(memberUser);
+        var result = await users.ResetPasswordAsync(memberUser, token, recoveryPassword);
+        if (result.Succeeded)
+        {
+            await users.SetLockoutEndDateAsync(memberUser, null);
+            await users.ResetAccessFailedCountAsync(memberUser);
+            Console.WriteLine($"[MEMBER RECOVERY SUCCESS] Password successfully set to {recoveryPassword}");
+            Environment.Exit(0);
+        }
+        else
+        {
+            Console.WriteLine($"[MEMBER RECOVERY FAILED] {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            Environment.Exit(1);
+        }
+    }
+    else
+    {
+        Console.WriteLine("[MEMBER RECOVERY FAILED] member@shelfwise.local not found.");
+        Environment.Exit(1);
+    }
+    return;
+}
+
 if (args.Contains("--run-sqlserver-smoke", StringComparer.Ordinal))
 {
     var passed = await LibraryManagementSystem.Tests.SqlServerIntegrationSmokeTests.RunAsync(app.Services);
     Environment.Exit(passed ? 0 : 1);
+    return;
+}
+
+if (args.Contains("--generate-test-excel", StringComparer.Ordinal))
+{
+    var outputPath = args.SkipWhile(a => a != "--generate-test-excel").Skip(1).FirstOrDefault()
+        ?? "test_bulk_upload.xlsx";
+    using var wb = new ClosedXML.Excel.XLWorkbook();
+    var ws = wb.Worksheets.Add("Members");
+    ws.Cell(1, 1).Value = "Full Name *";
+    ws.Cell(1, 2).Value = "Email Address *";
+    ws.Cell(1, 3).Value = "Phone Number";
+    ws.Cell(1, 4).Value = "Residential Address";
+    ws.Cell(1, 5).Value = "Notes";
+
+    var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    ws.Cell(2, 1).Value = "Dr. Alan Turing";
+    ws.Cell(2, 2).Value = $"alan.turing.{ts}@bletchley.test";
+    ws.Cell(2, 3).Value = "+44 1908 640404";
+    ws.Cell(2, 4).Value = "The Mansion, Bletchley Park";
+
+    ws.Cell(3, 1).Value = "Countess Ada Lovelace";
+    ws.Cell(3, 2).Value = $"ada.lovelace.{ts}@analytical.test";
+    ws.Cell(3, 3).Value = "+44 20 7123 4567";
+    ws.Cell(3, 4).Value = "12 St. James's Square, London";
+
+    ws.Cell(4, 1).Value = "Alan Turing Clone";
+    ws.Cell(4, 2).Value = $"alan.turing.{ts}@bletchley.test";
+    ws.Cell(4, 3).Value = "+44 1908 640405";
+
+    ws.Cell(5, 1).Value = "Existing Admin";
+    ws.Cell(5, 2).Value = "admin@shelfwise.local";
+
+    ws.Cell(6, 1).Value = "";
+    ws.Cell(6, 2).Value = $"noname.{ts}@test.com";
+
+    ws.Cell(7, 1).Value = "Bad Email Guy";
+    ws.Cell(7, 2).Value = "notanemail";
+
+    ws.Cell(8, 1).Value = "=SUM(1+1)";
+    ws.Cell(8, 2).Value = $"formula.{ts}@test.com";
+
+    wb.SaveAs(outputPath);
+    Console.WriteLine($"[GENERATED TEST EXCEL] File written to {outputPath}");
+    Environment.Exit(0);
     return;
 }
 
@@ -168,6 +249,7 @@ if (args.Contains("--initialize-database", StringComparer.Ordinal))
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     await using var devInitScope = app.Services.CreateAsyncScope();
     await devInitScope.ServiceProvider.GetRequiredService<DbInitializer>().InitializeAsync();
 }
@@ -177,6 +259,8 @@ else
     app.UseHsts();
     app.UseHttpsRedirection();
 }
+
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 
 app.UseStaticFiles();
 app.UseRouting();

@@ -9,7 +9,7 @@ Install the **.NET 10 SDK**, then run the launcher for your operating system fro
 - **Windows:** double-click `start.bat`.
 - **macOS / Linux:** run `./start.sh` in Terminal. If needed, make it executable once with `chmod +x start.sh`.
 
-Both launchers initialize the existing database in Development mode and start the site at <http://localhost:5180>. If `ConnectionStrings__DefaultConnection` is supplied in the environment, they use SQL Server; otherwise they use the local SQLite fallback (`library.db`). If Shelfwise is already running, the launcher reuses that instance instead of trying to bind the same port again. Stop the app with `Ctrl+C` in the terminal.
+Both launchers initialize the existing database in Development mode and start the site at <http://localhost:5000>. If `ConnectionStrings__DefaultConnection` is supplied in the environment, they use SQL Server; otherwise they use the local SQLite fallback (`library.db`). If Shelfwise is already running, the launcher reuses that instance instead of trying to bind the same port again. Stop the app with `Ctrl+C` in the terminal.
 
 On a fresh database, set `LIBRARY_ADMIN_PASSWORD` before starting the app to create the initial Admin account. The default email is `admin@shelfwise.local`. Existing Admin passwords are never replaced by startup initialization. Sample member creation is optional and requires `LIBRARY_SAMPLE_MEMBER_PASSWORD`.
 
@@ -144,7 +144,7 @@ dotnet run -- --run-tests
    ```bash
    dotnet watch run
    ```
-   Open <http://localhost:5180> in your web browser.
+   Open <http://localhost:5000> in your web browser.
 
 ### Local Admin Recovery
 

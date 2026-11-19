@@ -1,0 +1,366 @@
+@model MemberDetailsViewModel
+@inject LibraryCalendar Calendar
+@{
+    ViewData["Title"] = $"{Model.Member.FullName} · Member Details";
+}
+
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Member Dossier &bull; #MB-@Model.Member.Id.ToString("D4")</div>
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="sw-title-display mb-0">@Model.Member.FullName</h1>
+            @if (Model.Member.IsActive)
+            {
+                <span class="sw-badge sw-badge-success fs-6 px-3 py-1">
+                    <span class="sw-badge-dot"></span> Active Borrower
+                </span>
+            }
+            else
+            {
+                <span class="sw-badge sw-badge-neutral fs-6 px-3 py-1">
+                    <span class="sw-badge-dot"></span> Suspended
+                </span>
+            }
+        </div>
+        <p class="sw-page-subtitle">Review borrower standing, verified contact identity, loan history, and fine payment audit trail.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i> Member Directory
+        </a>
+        @if (Model.Member.IsActive)
+        {
+            <a class="sw-btn sw-btn-primary" asp-controller="AdminCirculation" asp-action="Issue">
+                <i class="bi bi-plus-lg me-1"></i> Issue a Book
+            </a>
+        }
+        @if (User.IsInRole("Admin"))
+        {
+            <form asp-action="SetStatus" method="post" class="d-inline" data-confirm="@(Model.Member.IsActive ? "Suspend this member's borrowing rights? Active loans will remain on record." : "Reactivate this member's borrowing privileges?")">
+                <input type="hidden" name="id" value="@Model.Member.Id" />
+                <input type="hidden" name="active" value="@(!Model.Member.IsActive)" />
+                <input type="hidden" name="returnToDetails" value="true" />
+                <button class="sw-btn sw-btn-outline @(Model.Member.IsActive ? "text-danger" : "text-success")" type="submit">
+                    <i class="bi @(Model.Member.IsActive ? "bi-person-x" : "bi-person-check") me-1"></i>
+                    @(Model.Member.IsActive ? "Suspend Account" : "Activate Account")
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<!-- Profile & Statistics Summary: Asymmetric Grid -->
+<div class="sw-grid-asymmetric mb-5">
+    <!-- Left: Identity & Contact Card -->
+    <div class="sw-table-card p-4">
+        <div class="d-flex align-items-center gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--sw-border) !important;">
+            <div class="sw-kpi-icon sw-icon-navy" style="width: 48px; height: 48px; font-size: 1.5rem;">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div>
+                <h2 class="h5 mb-0 fw-bold">@Model.Member.FullName</h2>
+                <div class="text-muted font-monospace small">Borrower ID: <code>#MB-@Model.Member.Id.ToString("D4")</code></div>
+            </div>
+        </div>
+
+        <dl class="row mb-0 g-3 small">
+            <dt class="col-sm-4 text-muted">Email Address</dt>
+            <dd class="col-sm-8 fw-semibold font-monospace">
+                <a href="mailto:@Model.Member.User.Email" class="text-decoration-none" style="color: var(--sw-navy);">
+                    @Model.Member.User.Email
+                </a>
+            </dd>
+
+            <dt class="col-sm-4 text-muted">Phone Number</dt>
+            <dd class="col-sm-8 fw-semibold font-monospace">
+                @if (!string.IsNullOrWhiteSpace(Model.Member.PhoneNumber))
+                {
+                    <a href="tel:@Model.Member.PhoneNumber" class="text-decoration-none" style="color: var(--sw-navy);">
+                        @Model.Member.PhoneNumber
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted fst-italic">Not recorded</span>
+                }
+            </dd>
+
+            <dt class="col-sm-4 text-muted">Residential Address</dt>
+            <dd class="col-sm-8">
+                @(string.IsNullOrWhiteSpace(Model.Member.Address) ? "No postal address recorded" : Model.Member.Address)
+            </dd>
+
+            <dt class="col-sm-4 text-muted">Registration Date</dt>
+            <dd class="col-sm-8 font-monospace">
+                @Model.Member.RegisteredAtUtc.ToString("dd MMMM yyyy")
+            </dd>
+
+            <dt class="col-sm-4 text-muted">Borrowing Standing</dt>
+            <dd class="col-sm-8">
+                @if (!Model.Member.IsActive)
+                {
+                    <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span> Account Suspended</span>
+                }
+                else if (Model.OverdueLoansCount > 0)
+                {
+                    <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span> Overdue Hold</span>
+                }
+                else if (Model.OutstandingFines > 0)
+                {
+                    <span class="sw-badge sw-badge-warning"><span class="sw-badge-dot"></span> Fines Pending</span>
+                }
+                else
+                {
+                    <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span> Good Standing</span>
+                }
+            </dd>
+        </dl>
+    </div>
+
+    <!-- Right: Metric Blocks -->
+    <div class="row g-3">
+        <div class="col-sm-6">
+            <div class="sw-kpi-card p-3 h-100">
+                <div class="sw-kpi-label">Total Borrowed</div>
+                <div class="sw-kpi-value my-1 font-monospace" data-count-up="@Model.TotalLoans">@Model.TotalLoans.ToString("00")</div>
+                <div class="sw-kpi-footer text-muted">Lifetime loans recorded</div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="sw-kpi-card p-3 h-100">
+                <div class="sw-kpi-label">Active Loans</div>
+                <div class="sw-kpi-value my-1 font-monospace text-primary" data-count-up="@Model.ActiveLoansCount">@Model.ActiveLoansCount.ToString("00")</div>
+                <div class="sw-kpi-footer text-muted">Books currently in hand</div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="sw-kpi-card p-3 h-100">
+                <div class="sw-kpi-label">Returned Titles</div>
+                <div class="sw-kpi-value my-1 font-monospace text-success" data-count-up="@Model.ReturnedBooksCount">@Model.ReturnedBooksCount.ToString("00")</div>
+                <div class="sw-kpi-footer text-muted">Successfully settled</div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="sw-kpi-card p-3 h-100 @(Model.OverdueLoansCount > 0 ? "border-danger" : "")">
+                <div class="sw-kpi-label">Overdue Loans</div>
+                <div class="sw-kpi-value my-1 font-monospace @(Model.OverdueLoansCount > 0 ? "text-danger" : "text-muted")" data-count-up="@Model.OverdueLoansCount">@Model.OverdueLoansCount.ToString("00")</div>
+                <div class="sw-kpi-footer @(Model.OverdueLoansCount > 0 ? "text-danger fw-semibold" : "text-muted")">
+                    @(Model.OverdueLoansCount == 0 ? "No active overdues" : "Requires return")
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="sw-kpi-card p-3 h-100 @(Model.OutstandingFines > 0 ? "border-danger" : "")">
+                <div class="sw-kpi-label">Outstanding Dues</div>
+                <div class="sw-kpi-value my-1 font-monospace @(Model.OutstandingFines > 0 ? "text-danger" : "text-muted")" style="font-size: 1.6rem;">@Model.OutstandingFines.ToString("C")</div>
+                <div class="sw-kpi-footer @(Model.OutstandingFines > 0 ? "text-danger fw-semibold" : "text-muted")">
+                    @(Model.OutstandingFines == 0 ? "Zero pending fees" : "Unpaid penalties")
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="sw-kpi-card p-3 h-100">
+                <div class="sw-kpi-label">Fines Settled</div>
+                <div class="sw-kpi-value my-1 font-monospace text-success" style="font-size: 1.6rem;">@Model.TotalFinesPaid.ToString("C")</div>
+                <div class="sw-kpi-footer text-muted">Total fines collected</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Circulation History Table -->
+<div class="sw-table-card mb-5">
+    <div class="p-3 border-bottom d-flex align-items-center justify-content-between" style="border-color: var(--sw-border) !important;">
+        <div>
+            <div class="sw-kicker mb-0">Loan History</div>
+            <h2 class="h6 mb-0 fw-bold">Circulation &amp; Borrowing History</h2>
+        </div>
+        <span class="sw-badge sw-badge-neutral font-monospace">@Model.CirculationHistory.Count total loans</span>
+    </div>
+
+    @if (Model.CirculationHistory.Count == 0)
+    {
+        <div class="sw-empty-state py-5 border-0">
+            <div class="sw-empty-icon"><i class="bi bi-journal-x"></i></div>
+            <h3 class="sw-empty-title">No Borrowing Activity on File</h3>
+            <p class="sw-empty-text">This member has not checked out any volumes from the library collection yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sw-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Issued</th>
+                        <th>Due Date</th>
+                        <th>Returned</th>
+                        <th>Status</th>
+                        <th>Fine Assessed</th>
+                        <th>Outstanding</th>
+                        <th class="text-end">Desk Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var issue in Model.CirculationHistory)
+                    {
+                        var isLate = issue.Status == IssueStatus.Active && issue.DueDateUtc.Date < Model.Today;
+                        var accrued = FineCalculator.CalculateAccruedFine(issue, Model.Today);
+                        var balance = FineCalculator.CalculateOutstandingBalance(issue, Model.Today);
+
+                        <tr class="@(isLate ? "table-danger-subtle" : "")">
+                            <td>
+                                <div class="fw-bold text-dark">@issue.Book.Title</div>
+                                <small class="text-muted">@issue.Book.Category &bull; ISBN: @(issue.Book.Isbn ?? "—")</small>
+                                @if (!string.IsNullOrWhiteSpace(issue.Remarks))
+                                {
+                                    <div class="small text-muted fst-italic mt-1"><i class="bi bi-info-circle me-1"></i>@issue.Remarks</div>
+                                }
+                            </td>
+                            <td class="font-monospace text-nowrap">@issue.IssueDateUtc.ToString("dd MMM yyyy")</td>
+                            <td class="text-nowrap">
+                                <span class="@(isLate ? "text-danger fw-bold font-monospace" : "font-monospace")">
+                                    @issue.DueDateUtc.ToString("dd MMM yyyy")
+                                    @if (isLate)
+                                    {
+                                        <span class="sw-badge sw-badge-danger d-block mt-1">
+                                            @((Model.Today - issue.DueDateUtc.Date).Days) days late
+                                        </span>
+                                    }
+                                </span>
+                            </td>
+                            <td class="font-monospace text-nowrap">
+                                @(issue.ReturnDateUtc?.ToString("dd MMM yyyy") ?? "—")
+                            </td>
+                            <td>
+                                @if (isLate)
+                                {
+                                    <span class="sw-badge sw-badge-danger"><span class="sw-badge-dot"></span> Overdue</span>
+                                }
+                                else if (issue.Status == IssueStatus.Active)
+                                {
+                                    <span class="sw-badge sw-badge-info"><span class="sw-badge-dot"></span> Active</span>
+                                }
+                                else if (issue.Status == IssueStatus.Returned)
+                                {
+                                    <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span> Returned</span>
+                                }
+                                else if (issue.Status == IssueStatus.Lost)
+                                {
+                                    <span class="sw-badge sw-badge-neutral" style="background-color: var(--sw-navy); color: var(--sw-paper);"><span class="sw-badge-dot"></span> Declared Lost</span>
+                                }
+                            </td>
+                            <td class="font-monospace">
+                                <span class="@(accrued > 0 ? "fw-bold text-dark" : "text-muted")">
+                                    @accrued.ToString("C")
+                                </span>
+                                @if (issue.FinePaidAmount > 0)
+                                {
+                                    <small class="text-success d-block">Paid: @issue.FinePaidAmount.ToString("C")</small>
+                                }
+                            </td>
+                            <td class="font-monospace">
+                                @if (balance > 0)
+                                {
+                                    <span class="sw-badge sw-badge-danger">Due: @balance.ToString("C")</span>
+                                }
+                                else if (accrued > 0)
+                                {
+                                    <span class="sw-badge sw-badge-success">Settled</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                            <td class="text-end text-nowrap">
+                                @if (issue.Status == IssueStatus.Active)
+                                {
+                                    <form asp-controller="AdminCirculation" asp-action="Return" asp-route-id="@issue.Id" method="post" class="d-inline" data-confirm="Confirm receipt and return of '@issue.Book.Title'?">
+                                        <button class="sw-btn sw-btn-sm sw-btn-outline" type="submit" title="Process Return">
+                                            <i class="bi bi-box-arrow-in-down me-1"></i> Return
+                                        </button>
+                                    </form>
+                                }
+                                else if (balance > 0)
+                                {
+                                    <a class="sw-btn sw-btn-sm sw-btn-accent" asp-controller="AdminCirculation" asp-action="Index" asp-route-q="@Model.Member.FullName" title="Record fine settlement at Circulation Desk">
+                                        <i class="bi bi-cash me-1"></i> Settle
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-success small fw-semibold"><i class="bi bi-check2-all"></i> Settled</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Fine Payment History Panel -->
+<div class="sw-table-card">
+    <div class="p-3 border-bottom d-flex align-items-center justify-content-between" style="border-color: var(--sw-border) !important;">
+        <div>
+            <div class="sw-kicker mb-0">Financial Audit</div>
+            <h2 class="h6 mb-0 fw-bold">Fine Payment &amp; Settlement History</h2>
+        </div>
+        <span class="sw-badge sw-badge-neutral font-monospace">@Model.PaymentHistory.Count receipts on file</span>
+    </div>
+
+    @if (Model.PaymentHistory.Count == 0)
+    {
+        <div class="sw-empty-state py-5 border-0">
+            <div class="sw-empty-icon"><i class="bi bi-receipt"></i></div>
+            <h3 class="sw-empty-title">No Fine Payment Records</h3>
+            <p class="sw-empty-text">No financial penalty or fine settlement transactions have been logged for this borrower.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sw-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Receipt ID</th>
+                        <th>Book Title</th>
+                        <th>Payment Date</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Method</th>
+                        <th>Reference / Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var payment in Model.PaymentHistory)
+                    {
+                        <tr>
+                            <td class="font-monospace fw-semibold" style="color: var(--sw-navy);">#FP-@payment.Id.ToString("D5")</td>
+                            <td>
+                                <div class="fw-bold text-dark">@payment.IssueRecord.Book.Title</div>
+                                <small class="text-muted">@payment.IssueRecord.Book.Category</small>
+                            </td>
+                            <td class="font-monospace small text-nowrap">
+                                @Calendar.ToLocal(payment.PaymentDateUtc).ToString("dd MMM yyyy, hh:mm tt")
+                            </td>
+                            <td class="fw-bold text-success font-monospace">
+                                @payment.Amount.ToString("C")
+                            </td>
+                            <td>
+                                <span class="sw-badge sw-badge-neutral">
+                                    @payment.PaymentMethod
+                                </span>
+                            </td>
+                            <td class="text-muted font-monospace small">
+                                @(string.IsNullOrWhiteSpace(payment.ReferenceNumber) ? "—" : payment.ReferenceNumber)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

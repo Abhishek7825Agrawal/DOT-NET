@@ -1,84 +1,86 @@
 @model IReadOnlyList<FinePayment>
 @inject LibraryCalendar LibraryCalendar
-@{ ViewData["Title"] = "Fine Payment History"; }
+@{
+    ViewData["Title"] = "Fine Payment Ledger";
+}
 
-<div class="page-heading">
-    <div>
-        <div class="eyebrow">Financial Audit</div>
-        <h1>Fine Payment Ledger</h1>
-        <p class="text-secondary mb-0 mt-1">Audit log of all collected fines, penalty settlements, and transaction reference numbers.</p>
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Financial Audit</div>
+        <h1 class="sw-title-display">Fine Payment Ledger</h1>
+        <p class="sw-page-subtitle">Historical audit trail of all collected penalties, settlement transactions, and payment receipts.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-secondary" asp-controller="AdminReports" asp-action="ExportPayments">
-            <i class="bi bi-download me-1"></i> Export Ledger to CSV
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-controller="AdminReports" asp-action="ExportPayments">
+            <i class="bi bi-download me-1"></i> Export to CSV
         </a>
-        <a class="btn btn-outline-secondary" asp-action="Index">
-            <i class="bi bi-arrow-left me-1"></i> Back to Desk
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i> Return to Desk
         </a>
     </div>
 </div>
 
-<form method="get" class="panel mb-3">
+<form method="get" class="sw-table-card p-3 mb-4">
     <div class="row g-2 align-items-center">
         <div class="col">
             <div class="input-group">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input class="form-control border-start-0 ps-0" name="q" value="@ViewBag.Query" placeholder="Search by member name, email, book title or receipt reference..." aria-label="Search payment history" />
+                <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--sw-input-border);"><i class="bi bi-search text-muted"></i></span>
+                <input class="form-control border-start-0 ps-0 sw-input" name="q" value="@ViewBag.Query" placeholder="Search by borrower name, email, book title or receipt reference..." aria-label="Search payment history" />
             </div>
         </div>
         <div class="col-auto">
-            <button class="btn btn-outline-secondary" type="submit">Filter Ledger</button>
+            <button class="sw-btn sw-btn-outline" type="submit">Filter Ledger</button>
         </div>
     </div>
 </form>
 
-<div class="panel">
+<div class="sw-table-card">
     @if (Model.Count == 0)
     {
-        <div class="empty-state">
-            <i class="bi bi-receipt"></i>
-            <h3 class="h6 mt-3">No payment records found</h3>
-            <p class="mb-0 text-muted">No fine payments match the search criteria.</p>
+        <div class="sw-empty-state py-5">
+            <div class="sw-empty-icon"><i class="bi bi-receipt"></i></div>
+            <h3 class="sw-empty-title">No payment records found</h3>
+            <p class="sw-empty-text">No fine settlement receipts match the filter query.</p>
         </div>
     }
     else
     {
         <div class="table-responsive">
-            <table class="table mb-0 align-middle">
+            <table class="sw-table mb-0">
                 <thead>
                     <tr>
                         <th>Receipt ID</th>
-                        <th>Member</th>
-                        <th>Related Book Title</th>
+                        <th>Borrower</th>
+                        <th>Book Title</th>
                         <th>Amount Paid</th>
-                        <th>Payment Method</th>
+                        <th>Method</th>
                         <th>Reference / Notes</th>
-                        <th>Recorded Date & Time</th>
+                        <th>Recorded Date &amp; Time</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var payment in Model)
                     {
                         <tr>
-                            <td><code>#FP-@payment.Id.ToString("D5")</code></td>
+                            <td class="font-monospace fw-semibold" style="color: var(--sw-navy);">#FP-@payment.Id.ToString("D5")</td>
                             <td>
                                 <div class="fw-semibold">@payment.IssueRecord.Member.FullName</div>
-                                <small class="text-secondary">@payment.IssueRecord.Member.User.Email</small>
+                                <small class="text-muted font-monospace">@payment.IssueRecord.Member.User.Email</small>
                             </td>
                             <td>
                                 <div class="fw-semibold text-truncate" style="max-width:240px">@payment.IssueRecord.Book.Title</div>
-                                <small class="text-secondary">Loan #@payment.IssueRecordId</small>
+                                <small class="text-muted font-monospace">Loan #@payment.IssueRecordId</small>
                             </td>
                             <td>
-                                <span class="fw-bold text-success fs-6">@payment.Amount.ToString("C")</span>
+                                <span class="fw-bold text-success font-monospace fs-6">@payment.Amount.ToString("C")</span>
                             </td>
                             <td>
-                                <span class="badge rounded-pill text-bg-light border">@payment.PaymentMethod</span>
+                                <span class="sw-badge sw-badge-neutral">@payment.PaymentMethod</span>
                             </td>
-                            <td>
+                            <td class="text-muted">
                                 @(string.IsNullOrWhiteSpace(payment.ReferenceNumber) ? "—" : payment.ReferenceNumber)
                             </td>
-                            <td>
+                            <td class="font-monospace small text-nowrap">
                                 @LibraryCalendar.ToLocal(payment.PaymentDateUtc).ToString("dd MMM yyyy, hh:mm tt")
                             </td>
                         </tr>
@@ -88,4 +90,3 @@
         </div>
     }
 </div>
-

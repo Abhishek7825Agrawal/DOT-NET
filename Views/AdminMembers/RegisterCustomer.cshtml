@@ -1,0 +1,125 @@
+@model StaffRegisterCustomerViewModel
+@{
+    ViewData["Title"] = "Staff-Assisted Member Registration";
+}
+
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Circulation Desk &bull; Member Onboarding</div>
+        <h1 class="sw-title-display">Register New Member</h1>
+        <p class="sw-page-subtitle">Add a verified cardholder account at the circulation desk. A secure, single-use account activation link will be generated automatically.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i> Member Directory
+        </a>
+        <a class="sw-btn sw-btn-outline" asp-action="BulkImport">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Excel Bulk Import
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="sw-table-card p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--sw-border) !important;">
+                <div class="sw-kpi-icon sw-icon-terracotta" style="width: 48px; height: 48px; font-size: 1.4rem;">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <div>
+                    <h3 class="h5 mb-0 fw-bold" style="font-family: var(--sw-font-serif);">Cardholder Dossier Information</h3>
+                    <small class="text-muted">Fields marked with an asterisk (<span class="text-danger">*</span>) are required.</small>
+                </div>
+            </div>
+
+            <form asp-action="RegisterCustomer" method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 px-3 mb-4 rounded-0" role="alert"></div>
+
+                <!-- Full Name -->
+                <div class="mb-4">
+                    <label asp-for="FullName" class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.05em; color: var(--sw-navy);">
+                        Full Legal Name <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--sw-input-border);">
+                            <i class="bi bi-person text-muted"></i>
+                        </span>
+                        <input asp-for="FullName" class="form-control border-start-0 ps-0 sw-input" placeholder="e.g. Dr. Eleanor Vance" autofocus />
+                    </div>
+                    <span asp-validation-for="FullName" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <!-- Email Address -->
+                <div class="mb-4">
+                    <label asp-for="Email" class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.05em; color: var(--sw-navy);">
+                        Verified Email Address <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--sw-input-border);">
+                            <i class="bi bi-envelope text-muted"></i>
+                        </span>
+                        <input asp-for="Email" type="email" class="form-control border-start-0 ps-0 sw-input" placeholder="e.g. e.vance@university.edu" />
+                    </div>
+                    <small class="text-muted d-block mt-1">This email serves as the member's login credential and receives library notices.</small>
+                    <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="mb-4">
+                    <label asp-for="PhoneNumber" class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.05em; color: var(--sw-navy);">
+                        Contact Phone Number
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--sw-input-border);">
+                            <i class="bi bi-telephone text-muted"></i>
+                        </span>
+                        <input asp-for="PhoneNumber" type="tel" class="form-control border-start-0 ps-0 sw-input" placeholder="e.g. +91 98765 43210 or (555) 019-2834" />
+                    </div>
+                    <span asp-validation-for="PhoneNumber" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <!-- Residential Address -->
+                <div class="mb-4">
+                    <label asp-for="Address" class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.05em; color: var(--sw-navy);">
+                        Residential / Department Address
+                    </label>
+                    <textarea asp-for="Address" rows="2" class="form-control sw-input" placeholder="e.g. Department of Literature, Room 402, North Campus"></textarea>
+                    <span asp-validation-for="Address" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <!-- Staff Remarks -->
+                <div class="mb-4">
+                    <label asp-for="Remarks" class="form-label fw-semibold small text-uppercase" style="letter-spacing: 0.05em; color: var(--sw-navy);">
+                        Desk Remarks / Notes <span class="text-muted fw-normal">(Optional)</span>
+                    </label>
+                    <input asp-for="Remarks" class="form-control sw-input" placeholder="e.g. Verified university ID #FAC-2026-8812" />
+                    <span asp-validation-for="Remarks" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <!-- Security Assurance Alert -->
+                <div class="p-3 mb-4 rounded-0 border-start border-4" style="background-color: rgba(22, 37, 33, 0.04); border-color: var(--sw-navy) !important;">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-shield-lock-fill text-muted mt-1"></i>
+                        <div class="small text-muted">
+                            <strong class="text-dark">Zero-Trust Credential Standard:</strong> Shelfwise does not ask staff to create or handle customer passwords. An encrypted, single-use activation token will be generated, allowing the member to set their private password securely.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex align-items-center justify-content-between pt-3 border-top" style="border-color: var(--sw-border) !important;">
+                    <a asp-action="Index" class="sw-btn sw-btn-outline">
+                        Cancel
+                    </a>
+                    <button type="submit" class="sw-btn sw-btn-primary">
+                        <i class="bi bi-check2-circle me-1"></i> Complete Registration &amp; Generate Activation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

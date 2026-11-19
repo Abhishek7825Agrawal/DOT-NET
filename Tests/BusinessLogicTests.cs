@@ -107,13 +107,31 @@ public static class BusinessLogicTests
         var lostBalance = FineCalculator.CalculateOutstandingBalance(issueLost, baseDate.AddDays(10));
         Assert(lostBalance == 0.00m, "Fully paid lost book balance is ₹0.00");
 
-        Assert(SqlServerQueryTranslationTests.Run(), "Affected dashboard and reporting LINQ queries translate with SQL Server EF Core");
+        var basePassed = passed;
+        var baseFailed = failed;
 
+        SqlServerQueryTranslationTests.Run(out var sqlPassed, out var sqlFailed);
+        ExcelImportTests.Run(out var excelPassed, out var excelFailed);
+        DigitalLibraryTests.Run(out var digitalPassed, out var digitalFailed);
+        MarketplaceTests.Run(out var marketPassed, out var marketFailed);
+
+        var totalPassed = basePassed + sqlPassed + excelPassed + digitalPassed + marketPassed;
+        var totalFailed = baseFailed + sqlFailed + excelFailed + digitalFailed + marketFailed;
+        var totalTests = totalPassed + totalFailed;
+
+        Console.WriteLine("==================================================");
+        Console.WriteLine("           COMPLETE TEST SUITE SUMMARY            ");
+        Console.WriteLine("==================================================");
+        Console.WriteLine($"  Core Business Rules (ISBN/Fines) : {basePassed} passed, {baseFailed} failed");
+        Console.WriteLine($"  SQL Server Query Translations    : {sqlPassed} passed, {sqlFailed} failed");
+        Console.WriteLine($"  Excel Bulk Import & Security     : {excelPassed} passed, {excelFailed} failed");
+        Console.WriteLine($"  Phase 5 Digital Library Tests    : {digitalPassed} passed, {digitalFailed} failed");
+        Console.WriteLine($"  Phase 6 Research Marketplace     : {marketPassed} passed, {marketFailed} failed");
         Console.WriteLine("--------------------------------------------------");
-        Console.WriteLine($"Total Tests: {passed + failed} | Passed: {passed} | Failed: {failed}");
+        Console.WriteLine($"  TOTAL SUITE TESTS: {totalTests} | PASSED: {totalPassed} | FAILED: {totalFailed}");
         Console.WriteLine("==================================================");
 
-        return failed == 0;
+        return totalFailed == 0;
     }
 }
 

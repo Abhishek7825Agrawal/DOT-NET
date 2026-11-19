@@ -1,0 +1,649 @@
+/* ==========================================================================
+   SHELFWISE — THE ART OF READING
+   Components: Complete Reusable Visual Component System
+   ========================================================================== */
+
+/* 1. Buttons with Tactile Feedback */
+.sw-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: var(--sw-radius-sm);
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-sm);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: transform var(--sw-transition-fast), box-shadow var(--sw-transition-fast), background-color var(--sw-transition-fast), color var(--sw-transition-fast);
+    position: relative;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.sw-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none !important;
+}
+
+.sw-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--sw-accent-subtle);
+}
+
+.sw-btn-primary {
+    background-color: var(--sw-primary);
+    color: var(--sw-text-inverse);
+    border-color: var(--sw-border-strong);
+    box-shadow: 2px 2px 0 var(--sw-border-strong);
+}
+
+.sw-btn-primary:hover {
+    background-color: var(--sw-primary-hover);
+    color: var(--sw-text-inverse);
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 var(--sw-border-strong);
+}
+
+.sw-btn-accent {
+    background-color: var(--sw-terracotta);
+    color: var(--sw-white);
+    border-color: var(--sw-border-strong);
+    box-shadow: 2px 2px 0 var(--sw-border-strong);
+}
+
+.sw-btn-accent:hover {
+    background-color: var(--sw-terracotta-dark);
+    color: var(--sw-white);
+    transform: translateY(-1px);
+    box-shadow: 3px 3px 0 var(--sw-border-strong);
+}
+
+.sw-btn-outline {
+    background-color: var(--sw-surface);
+    color: var(--sw-text);
+    border-color: var(--sw-border);
+}
+
+.sw-btn-outline:hover {
+    background-color: var(--sw-bg-alt);
+    border-color: var(--sw-border-strong);
+    color: var(--sw-text);
+}
+
+.sw-btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: var(--sw-text-xs);
+}
+
+.sw-btn-lg {
+    padding: 0.85rem 1.65rem;
+    font-size: var(--sw-text-base);
+}
+
+/* 2. Editorial Section Header */
+.sw-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sw-space-3);
+    margin-bottom: var(--sw-space-6);
+    padding-bottom: var(--sw-space-3);
+    border-bottom: 1.5px solid var(--sw-border);
+}
+
+.sw-section-header h2,
+.sw-section-header h3 {
+    margin: 0;
+}
+
+.sw-section-header .sw-section-action {
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-xs);
+    font-weight: 500;
+    color: var(--sw-terracotta);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: gap var(--sw-transition-fast);
+}
+
+.sw-section-header .sw-section-action:hover {
+    gap: 0.55rem;
+    color: var(--sw-terracotta-dark);
+}
+
+/* 3. Reusable KPI Blocks (Editorial Metrics) */
+.sw-kpi-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--sw-space-6);
+    background-color: var(--sw-surface);
+    border: 1.5px solid var(--sw-border);
+    border-radius: var(--sw-radius-md);
+    box-shadow: var(--sw-shadow-sm);
+    transition: transform var(--sw-transition-smooth), box-shadow var(--sw-transition-smooth), border-color var(--sw-transition-smooth);
+    overflow: hidden;
+}
+
+.sw-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sw-shadow-md);
+    border-color: var(--sw-border-strong);
+}
+
+.sw-kpi-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: var(--sw-space-3);
+}
+
+.sw-kpi-label {
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-2xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sw-text-muted);
+}
+
+.sw-kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--sw-radius-sm);
+    display: grid;
+    place-items: center;
+    background-color: var(--sw-bg-alt);
+    color: var(--sw-text);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.sw-kpi-icon.sw-icon-terracotta {
+    background-color: var(--sw-terracotta-light);
+    color: var(--sw-terracotta);
+}
+
+.sw-kpi-icon.sw-icon-sage {
+    background-color: var(--sw-sage-light);
+    color: var(--sw-sage-dark);
+}
+
+.sw-kpi-icon.sw-icon-navy {
+    background-color: var(--sw-navy-light);
+    color: var(--sw-white);
+}
+
+.sw-kpi-icon.sw-icon-danger {
+    background-color: var(--sw-status-danger-bg);
+    color: var(--sw-status-danger);
+}
+
+.sw-kpi-value {
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    color: var(--sw-text);
+    margin: var(--sw-space-2) 0;
+}
+
+.sw-kpi-footer {
+    margin-top: auto;
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-xs);
+    color: var(--sw-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+/* Feature/Primary Hero KPI Block */
+.sw-kpi-primary {
+    background-color: var(--sw-navy);
+    color: var(--sw-paper);
+    border-color: var(--sw-navy);
+}
+
+.sw-kpi-primary .sw-kpi-label,
+.sw-kpi-primary .sw-kpi-footer {
+    color: var(--sw-sand);
+}
+
+.sw-kpi-primary .sw-kpi-value {
+    color: var(--sw-paper);
+}
+
+.sw-kpi-primary .sw-kpi-icon {
+    background-color: rgba(245, 241, 232, 0.15);
+    color: var(--sw-paper);
+}
+
+/* 4. Editorial Book Cards (Consistent 3:4 Aspect Ratio) */
+.sw-book-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--sw-surface);
+    border: 1.5px solid var(--sw-border);
+    border-radius: var(--sw-radius-md);
+    overflow: hidden;
+    box-shadow: var(--sw-shadow-sm);
+    transition: transform var(--sw-transition-smooth), box-shadow var(--sw-transition-smooth), border-color var(--sw-transition-smooth);
+    height: 100%;
+}
+
+.sw-book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sw-shadow-lg);
+    border-color: var(--sw-border-strong);
+}
+
+.sw-book-cover-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background-color: var(--sw-bg-alt);
+    display: grid;
+    place-items: center;
+}
+
+.sw-book-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--sw-transition-editorial);
+}
+
+.sw-book-card:hover .sw-book-cover-img {
+    transform: scale(1.04);
+}
+
+/* CSS-Based Editorial Cover Placeholder */
+.sw-book-cover-placeholder {
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(145deg, var(--sw-bg-alt) 0%, var(--sw-sand) 100%);
+    border-bottom: 1.5px solid var(--sw-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.sw-book-cover-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 14px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.03) 100%);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.sw-placeholder-spine {
+    font-family: var(--sw-font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sw-text-subtle);
+}
+
+.sw-placeholder-title {
+    font-family: var(--sw-font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--sw-navy);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sw-placeholder-author {
+    font-family: var(--sw-font-body);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--sw-terracotta);
+    margin-top: auto;
+}
+
+.sw-book-card-body {
+    padding: var(--sw-space-4);
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+}
+
+.sw-book-meta-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: var(--sw-space-2);
+}
+
+.sw-book-title {
+    font-family: var(--sw-font-heading);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0 0 0.35rem;
+    color: var(--sw-text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sw-book-author {
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-xs);
+    color: var(--sw-text-muted);
+    margin-bottom: var(--sw-space-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sw-book-card-actions {
+    margin-top: auto;
+    padding-top: var(--sw-space-3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 1px solid var(--sw-border-subtle);
+}
+
+/* 5. Status Badges */
+.sw-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.22rem 0.55rem;
+    border-radius: var(--sw-radius-pill);
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    border: 1px solid transparent;
+}
+
+.sw-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+    flex-shrink: 0;
+}
+
+.sw-badge-success {
+    background-color: var(--sw-status-success-bg);
+    color: var(--sw-status-success);
+    border-color: var(--sw-status-success-border);
+}
+
+.sw-badge-warning {
+    background-color: var(--sw-status-warning-bg);
+    color: var(--sw-status-warning);
+    border-color: var(--sw-status-warning-border);
+}
+
+.sw-badge-danger {
+    background-color: var(--sw-status-danger-bg);
+    color: var(--sw-status-danger);
+    border-color: var(--sw-status-danger-border);
+}
+
+.sw-badge-info {
+    background-color: var(--sw-status-info-bg);
+    color: var(--sw-status-info);
+    border-color: var(--sw-status-info-border);
+}
+
+.sw-badge-neutral {
+    background-color: var(--sw-bg-alt);
+    color: var(--sw-text-muted);
+    border-color: var(--sw-border);
+}
+
+/* 6. Editorial Data Tables */
+.sw-table-card {
+    background-color: var(--sw-surface);
+    border: 1.5px solid var(--sw-border);
+    border-radius: var(--sw-radius-md);
+    overflow: hidden;
+    box-shadow: var(--sw-shadow-sm);
+}
+
+.sw-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-sm);
+    color: var(--sw-text);
+}
+
+.sw-table thead th {
+    background-color: var(--sw-bg-alt);
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-2xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--sw-text-muted);
+    padding: 0.85rem 1rem;
+    border-bottom: 1.5px solid var(--sw-border);
+    white-space: nowrap;
+}
+
+.sw-table tbody td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid var(--sw-border-subtle);
+    vertical-align: middle;
+    transition: background-color var(--sw-transition-fast);
+}
+
+.sw-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sw-table tbody tr:hover td {
+    background-color: var(--sw-bg-alt);
+}
+
+/* 7. Forms, Filters & Inputs */
+.sw-form-label {
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-xs);
+    font-weight: 600;
+    color: var(--sw-text);
+    margin-bottom: var(--sw-space-2);
+    display: block;
+}
+
+.sw-form-control,
+.sw-input {
+    width: 100%;
+    height: 44px;
+    padding: 0.55rem 0.95rem;
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-sm);
+    color: var(--sw-text);
+    background-color: var(--sw-input-bg);
+    border: 1.5px solid var(--sw-input-border);
+    border-radius: var(--sw-radius-sm);
+    transition: border-color var(--sw-transition-fast), box-shadow var(--sw-transition-fast);
+}
+
+.sw-form-control:focus,
+.sw-input:focus {
+    outline: none;
+    border-color: var(--sw-input-focus-border);
+    box-shadow: 0 0 0 3px var(--sw-input-focus-ring);
+}
+
+/* 8. Filter Chips */
+.sw-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: var(--sw-space-6);
+}
+
+.sw-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.95rem;
+    border-radius: var(--sw-radius-pill);
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-xs);
+    font-weight: 500;
+    color: var(--sw-text-muted);
+    background-color: var(--sw-surface);
+    border: 1.5px solid var(--sw-border);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--sw-transition-fast);
+}
+
+.sw-filter-chip:hover {
+    color: var(--sw-text);
+    border-color: var(--sw-border-strong);
+    background-color: var(--sw-bg-alt);
+}
+
+.sw-filter-chip.active {
+    background-color: var(--sw-primary);
+    color: var(--sw-text-inverse);
+    border-color: var(--sw-border-strong);
+}
+
+/* 9. Activity Timeline */
+.sw-timeline {
+    position: relative;
+    padding-left: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.sw-timeline::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 7px;
+    width: 2px;
+    background-color: var(--sw-border);
+}
+
+.sw-timeline-item {
+    position: relative;
+}
+
+.sw-timeline-dot {
+    position: absolute;
+    left: -2rem;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: var(--sw-surface);
+    border: 2px solid var(--sw-terracotta);
+}
+
+.sw-timeline-time {
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-2xs);
+    color: var(--sw-text-subtle);
+    margin-bottom: 0.2rem;
+}
+
+.sw-timeline-title {
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-sm);
+    font-weight: 600;
+    color: var(--sw-text);
+}
+
+/* 10. Alert Banners */
+.sw-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--sw-radius-md);
+    border: 1.5px solid transparent;
+    margin-bottom: var(--sw-space-6);
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-sm);
+    line-height: 1.5;
+}
+
+.sw-alert-success {
+    background-color: var(--sw-status-success-bg);
+    color: var(--sw-status-success);
+    border-color: var(--sw-status-success-border);
+}
+
+.sw-alert-danger {
+    background-color: var(--sw-status-danger-bg);
+    color: var(--sw-status-danger);
+    border-color: var(--sw-status-danger-border);
+}
+
+.sw-alert-warning {
+    background-color: var(--sw-status-warning-bg);
+    color: var(--sw-status-warning);
+    border-color: var(--sw-status-warning-border);
+}
+
+/* 11. Empty States */
+.sw-empty-state {
+    text-align: center;
+    padding: var(--sw-space-12) var(--sw-space-6);
+    background-color: var(--sw-surface);
+    border: 1.5px dashed var(--sw-border);
+    border-radius: var(--sw-radius-md);
+}
+
+.sw-empty-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto var(--sw-space-4);
+    display: grid;
+    place-items: center;
+    border-radius: var(--sw-radius-md);
+    background-color: var(--sw-bg-alt);
+    color: var(--sw-terracotta);
+    font-size: 1.75rem;
+}
+
+.sw-empty-title {
+    font-family: var(--sw-font-heading);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: var(--sw-space-2);
+}
+
+.sw-empty-text {
+    max-width: 440px;
+    margin: 0 auto var(--sw-space-6);
+    font-size: var(--sw-text-sm);
+    color: var(--sw-text-muted);
+}

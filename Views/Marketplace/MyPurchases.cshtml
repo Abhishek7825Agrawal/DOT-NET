@@ -1,0 +1,114 @@
+@model MyPurchasesViewModel
+@{
+    ViewData["Title"] = "My Acquired Research Papers";
+}
+
+<div class="sw-editorial-container pb-5">
+    <!-- Header Section -->
+    <section class="sw-page-header py-4 py-md-5 border-bottom mb-4" style="border-color: var(--sw-border) !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <span class="sw-kicker sw-kicker-navy">Personal Scholarly Repository</span>
+                <h1 class="sw-h1 display-5 mb-2" style="font-family: var(--sw-font-serif); font-weight: 700; color: var(--sw-navy);">
+                    My Acquired Papers<span class="text-primary">.</span>
+                </h1>
+                <p class="text-muted mb-0 fs-6">
+                    Research manuscripts, conference proceedings, and scholarly papers licensed to your account.
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a asp-action="Index" class="sw-btn sw-btn-outline">
+                    <i class="bi bi-search me-1"></i> Browse Marketplace
+                </a>
+                <a asp-controller="AuthorMarketplace" asp-action="AuthorDesk" class="sw-btn sw-btn-primary">
+                    <i class="bi bi-pencil-square me-1"></i> Author Desk
+                </a>
+            </div>
+        </div>
+    </section>
+
+    @if (TempData["Success"] is string successMsg)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@successMsg
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Purchases.Any())
+    {
+        <div class="sw-table-card text-center py-5 px-4">
+            <div class="sw-kpi-icon sw-icon-teal mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <h3 class="h4 fw-bold mb-2" style="font-family: var(--sw-font-serif);">No Manuscripts in Your Library Yet</h3>
+            <p class="text-muted mb-4" style="max-width: 480px; margin: 0 auto;">
+                Explore thousands of peer-reviewed papers across Computer Science, Physics, Economics, and Medicine. Free open-access papers can be acquired instantly.
+            </p>
+            <a asp-action="Index" class="sw-btn sw-btn-primary px-4 py-2">
+                <i class="bi bi-search me-1"></i> Explore Marketplace Catalogue
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="sw-table-card p-0 overflow-hidden mb-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-uppercase small" style="letter-spacing: 0.05em; font-size: 0.75rem;">
+                        <tr>
+                            <th class="ps-4">Manuscript &amp; Author</th>
+                            <th>Domain</th>
+                            <th>Acquired Date</th>
+                            <th>License Price</th>
+                            <th>Order Ref</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Purchases)
+                        {
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <a asp-action="Details" asp-route-id="@item.PaperId" class="fw-bold text-decoration-none d-block text-navy" style="font-family: var(--sw-font-serif); font-size: 1.05rem;">
+                                        @item.Title
+                                    </a>
+                                    <small class="text-muted"><i class="bi bi-person me-1"></i>@item.Authors &bull; @item.PageCount pages</small>
+                                </td>
+                                <td>
+                                    <span class="sw-badge sw-badge-neutral">@item.Category</span>
+                                </td>
+                                <td class="text-muted small">
+                                    @item.OrderDateUtc.ToLocalTime().ToString("MMM dd, yyyy")
+                                </td>
+                                <td>
+                                    @if (item.PricePaid <= 0m)
+                                    {
+                                        <span class="sw-badge sw-badge-success font-monospace">Open Access</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="font-monospace fw-bold text-primary">₹@item.PricePaid.ToString("F2")</span>
+                                    }
+                                </td>
+                                <td>
+                                    <code class="small text-muted font-monospace">@item.OrderNumber</code>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex gap-2">
+                                        <a asp-action="Stream" asp-route-id="@item.PaperId" target="_blank" class="sw-btn sw-btn-outline sw-btn-sm" title="Read manuscript in full screen PDF reader">
+                                            <i class="bi bi-eye me-1"></i> Read Online
+                                        </a>
+                                        <a asp-action="Download" asp-route-id="@item.PaperId" class="sw-btn sw-btn-primary sw-btn-sm" title="Download secure PDF copy">
+                                            <i class="bi bi-download me-1"></i> Download
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

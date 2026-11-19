@@ -1,0 +1,89 @@
+@model CopyrightReportInputModel
+@{
+    ViewData["Title"] = "Report Copyright Infringement (DMCA Notice)";
+}
+
+<div class="sw-editorial-container py-4 pb-5">
+    <nav class="pb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Research Marketplace</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.PaperId" class="text-decoration-none">@Model.PaperTitle</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Copyright Notice</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="sw-table-card p-4 p-md-5 mb-4">
+                <span class="sw-kicker sw-kicker-crimson">Academic Integrity &amp; IP Protection</span>
+                <h1 class="h3 fw-bold mb-3" style="font-family: var(--sw-font-serif); color: var(--sw-navy);">
+                    Submit Copyright Infringement Notice<span class="text-danger">.</span>
+                </h1>
+                <p class="text-muted small mb-4">
+                    Shelfwise respects intellectual property rights and adheres to the Digital Millennium Copyright Act (DMCA) and international scholarly publication ethics. If you believe this work infringes your copyright, please complete the formal notice below.
+                </p>
+
+                <!-- Manuscript Info Banner -->
+                <div class="p-3 rounded mb-4" style="background-color: var(--sw-bg-alt, #f8f9fa); border: 1px solid var(--sw-border);">
+                    <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 0.05em;">Challenged Manuscript:</small>
+                    <h2 class="h5 fw-bold mb-0 mt-1" style="font-family: var(--sw-font-serif);">@Model.PaperTitle</h2>
+                </div>
+
+                <form asp-action="ReportCopyright" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="PaperId" />
+                    <input type="hidden" asp-for="PaperTitle" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ReporterName" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Your Legal Name / Organization *</label>
+                            <input asp-for="ReporterName" class="form-control sw-input" placeholder="e.g., Dr. Eleanor Vance / Oxford University Press" />
+                            <span asp-validation-for="ReporterName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="ReporterEmail" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Contact Email Address *</label>
+                            <input asp-for="ReporterEmail" type="email" class="form-control sw-input" placeholder="author@institution.edu" />
+                            <span asp-validation-for="ReporterEmail" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="InfringedWorkTitle" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Original Copyrighted Work or Citation *</label>
+                        <input asp-for="InfringedWorkTitle" class="form-control sw-input" placeholder="Title of the copyrighted work, DOI, ISBN, or journal publication" />
+                        <span asp-validation-for="InfringedWorkTitle" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="InfringementDescription" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Description of Alleged Infringement *</label>
+                        <textarea asp-for="InfringementDescription" rows="5" class="form-control sw-input" placeholder="Provide specific details regarding the infringement (e.g., verbatim reproduction of Section 3.2, unauthorized figure reuse, plagiarism of proof lemma, etc.)."></textarea>
+                        <span asp-validation-for="InfringementDescription" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check p-3 rounded mb-4" style="background-color: var(--sw-bg-alt, #f8f9fa); border: 1px solid var(--sw-border);">
+                        <input asp-for="GoodFaithDeclaration" class="form-check-input ms-0 me-2" type="checkbox" id="goodFaithCheck" />
+                        <label class="form-check-label small" for="goodFaithCheck">
+                            <strong>Good Faith Declaration:</strong> I swear under penalty of perjury that I am the copyright owner or authorized to act on behalf of the owner of an exclusive right that is allegedly infringed, and that the information in this notification is accurate.
+                        </label>
+                        <div><span asp-validation-for="GoodFaithDeclaration" class="text-danger small"></span></div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <a asp-action="Details" asp-route-id="@Model.PaperId" class="sw-btn sw-btn-outline">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="sw-btn sw-btn-primary bg-danger border-danger px-4 py-2">
+                            <i class="bi bi-shield-fill-exclamation me-1"></i> Submit Infringement Claim
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

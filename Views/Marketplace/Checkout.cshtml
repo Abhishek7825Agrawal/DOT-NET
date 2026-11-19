@@ -1,0 +1,145 @@
+@model OrderCheckoutViewModel
+@{
+    ViewData["Title"] = "Order Checkout & Acquisition - " + Model.Title;
+}
+
+<div class="sw-editorial-container py-4 pb-5">
+    <!-- Breadcrumb -->
+    <nav class="pb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Research Marketplace</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.PaperId" class="text-decoration-none">@Model.Title</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Acquisition Confirmation</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="sw-table-card p-4 p-md-5 mb-4">
+                <span class="sw-kicker sw-kicker-navy">Order Acquisition &amp; Licensing</span>
+                <h1 class="h3 fw-bold mb-3" style="font-family: var(--sw-font-serif); color: var(--sw-navy);">
+                    Confirm Manuscript Acquisition<span class="text-primary">.</span>
+                </h1>
+                <p class="text-muted small mb-4">
+                    Please review your acquisition details. Upon completion, an immutable order ledger entry is generated and persistent reading rights are granted to your account.
+                </p>
+
+                @if (!Model.CanPurchase)
+                {
+                    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        <div>
+                            <strong>Acquisition Blocked:</strong> @Model.BlockedReason
+                        </div>
+                    </div>
+                }
+
+                <!-- Manuscript Summary Box -->
+                <div class="p-3 rounded mb-4" style="background-color: var(--sw-bg-alt, #f8f9fa); border: 1px solid var(--sw-border);">
+                    <div class="d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                            <span class="sw-badge sw-badge-neutral mb-2">@Model.Category</span>
+                            <h2 class="h5 fw-bold mb-1" style="font-family: var(--sw-font-serif);">@Model.Title</h2>
+                            <p class="text-muted small mb-0"><i class="bi bi-person me-1"></i>@Model.Authors</p>
+                        </div>
+                        <div class="text-end">
+                            @if (Model.IsFree)
+                            {
+                                <span class="sw-badge sw-badge-success fs-6">FREE ACCESS</span>
+                            }
+                            else
+                            {
+                                <div class="fs-4 fw-bold font-monospace text-primary">₹@Model.Price.ToString("F2")</div>
+                                <span class="badge bg-light text-muted border">Tier: Paid</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Breakdown -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            <tr class="border-bottom" style="border-color: var(--sw-border) !important;">
+                                <td class="text-muted">Item Subtotal</td>
+                                <td class="text-end font-monospace">₹@Model.Price.ToString("F2")</td>
+                            </tr>
+                            <tr class="border-bottom" style="border-color: var(--sw-border) !important;">
+                                <td class="text-muted">Digital Access &amp; Archival License Fee</td>
+                                <td class="text-end font-monospace">₹0.00</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold fs-5">Total Payable</td>
+                                <td class="text-end fw-bold fs-5 font-monospace text-navy">
+                                    @(Model.IsFree ? "₹0.00" : $"₹{Model.Price:F2}")
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.IsFree)
+                {
+                    <div class="alert alert-info d-flex align-items-center gap-3 mb-4">
+                        <i class="bi bi-info-circle-fill fs-4 text-info"></i>
+                        <div>
+                            <strong>Open Access Publication:</strong>
+                            <div class="small">This scholarly work has been published by the author under an Open Access license. Immediate reading and document downloading will be enabled at zero financial cost.</div>
+                        </div>
+                    </div>
+
+                    @if (Model.CanPurchase)
+                    {
+                        <form asp-action="AcquireFree" method="post" class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="paperId" value="@Model.PaperId" />
+
+                            <a asp-action="Details" asp-route-id="@Model.PaperId" class="sw-btn sw-btn-outline">
+                                <i class="bi bi-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="sw-btn sw-btn-primary px-4 py-2">
+                                <i class="bi bi-check2-circle me-1"></i> Confirm &amp; Add to My Research Papers
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Details" asp-route-id="@Model.PaperId" class="sw-btn sw-btn-outline">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Details
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <!-- Paid Manuscript Gateway Notice -->
+                    <div class="alert alert-warning border mb-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <i class="bi bi-credit-card-2-front-fill fs-3 text-warning"></i>
+                            <div>
+                                <h3 class="h6 fw-bold mb-1">Online Payment Gateway Integration Notice</h3>
+                                <p class="small text-muted mb-2">
+                                    In strict accordance with the Shelfwise Architecture and Platform Security specifications, external payment gateway processing (Razorpay) is scheduled for <strong>Phase 7 (Digital Wallet and Payment Platform)</strong>.
+                                </p>
+                                <p class="small text-muted mb-0">
+                                    Paid research paper purchases require cryptographic payment authorization. Under platform governance, <strong>no mock transactions or fabricated payment completions</strong> are permitted. Paid manuscript orders remain in <code>PaymentStatus.Pending</code> until gateway verification is finalized in Phase 7.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <a asp-action="Details" asp-route-id="@Model.PaperId" class="sw-btn sw-btn-outline">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Details
+                        </a>
+                        <button type="button" class="sw-btn sw-btn-primary disabled opacity-75" title="Awaiting Phase 7 Payment Gateway Integration">
+                            <i class="bi bi-lock me-1"></i> Payment Gateway Available in Phase 7
+                        </button>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>

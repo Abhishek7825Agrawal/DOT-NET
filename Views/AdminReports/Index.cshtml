@@ -1,79 +1,98 @@
 @model ReportsDashboardDto
-@{ ViewData["Title"] = "Reports & Analytics"; }
+@{
+    ViewData["Title"] = "Reports & Analytics";
+}
 
-<div class="page-heading">
-    <div>
-        <div class="eyebrow">Executive Intelligence</div>
-        <h1>Reports & Library Analytics</h1>
-        <p class="text-secondary mb-0 mt-1">Operational metrics, circulation volume trends, borrowing leaderboards, and CSV data exports.</p>
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Executive Intelligence</div>
+        <h1 class="sw-title-display">Reports &amp; Analytics</h1>
+        <p class="sw-page-subtitle">Operational metrics, circulation volume trends, borrowing leaderboards, and verified data exports.</p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <a class="btn btn-outline-secondary" asp-action="ExportBooks">
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="ExportBooks">
             <i class="bi bi-filetype-csv me-1"></i> Books CSV
         </a>
-        <a class="btn btn-outline-secondary" asp-action="ExportCirculation">
+        <a class="sw-btn sw-btn-outline" asp-action="ExportCirculation">
             <i class="bi bi-filetype-csv me-1"></i> Loans CSV
         </a>
-        <a class="btn btn-outline-secondary" asp-action="ExportPayments">
+        <a class="sw-btn sw-btn-outline" asp-action="ExportPayments">
             <i class="bi bi-filetype-csv me-1"></i> Fines CSV
         </a>
     </div>
 </div>
 
-<!-- Primary Metric Counters -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="icon"><i class="bi bi-journal-album"></i></div>
-            <div class="stat-label">Total Inventory Copies</div>
-            <div class="stat-value">@Model.TotalCopies</div>
-            <div class="small text-secondary mt-1">
-                <span class="text-success fw-semibold">@Model.AvailableCopies</span> available · <span class="text-primary fw-semibold">@Model.CheckedOutCopies</span> on loan
+<!-- Primary Metric Counters (4-Col Grid) -->
+<div class="sw-grid-4-col mb-4">
+    <div class="sw-kpi-card sw-fade-in-up">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Inventory Copies</span>
+            <div class="sw-kpi-icon sw-icon-navy">
+                <i class="bi bi-journal-album"></i>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="icon" style="background:#e8f4fd;color:#0d6efd"><i class="bi bi-people"></i></div>
-            <div class="stat-label">Borrower Registry</div>
-            <div class="stat-value">@Model.TotalMembers</div>
-            <div class="small text-secondary mt-1">
-                <span class="text-success fw-semibold">@Model.ActiveMembers</span> active · <span class="text-muted">@Model.InactiveMembers</span> suspended
-            </div>
+        <div class="sw-kpi-value" data-count-up="@Model.TotalCopies">@Model.TotalCopies</div>
+        <div class="sw-kpi-footer">
+            <span class="text-success fw-semibold">@Model.AvailableCopies</span> available &bull; <span class="text-primary fw-semibold">@Model.CheckedOutCopies</span> on loan
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="icon" style="background:#fef7ea;color:#b87d18"><i class="bi bi-cash-stack"></i></div>
-            <div class="stat-label">Total Collected Fines</div>
-            <div class="stat-value text-success">@Model.TotalFinesCollected.ToString("C")</div>
-            <div class="small text-secondary mt-1">
-                Total levied: @Model.TotalFinesLevied.ToString("C")
+
+    <div class="sw-kpi-card sw-fade-in-up sw-delay-1">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Borrower Registry</span>
+            <div class="sw-kpi-icon sw-icon-terracotta">
+                <i class="bi bi-people"></i>
             </div>
         </div>
+        <div class="sw-kpi-value" data-count-up="@Model.TotalMembers">@Model.TotalMembers</div>
+        <div class="sw-kpi-footer">
+            <span class="text-success fw-semibold">@Model.ActiveMembers</span> active &bull; <span class="text-muted">@Model.InactiveMembers</span> suspended
+        </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="icon" style="background:#fbeeee;color:#c93b3b"><i class="bi bi-exclamation-triangle"></i></div>
-            <div class="stat-label">Outstanding Balances</div>
-            <div class="stat-value text-danger">@Model.OutstandingBalance.ToString("C")</div>
-            <div class="small text-secondary mt-1">
-                <span class="text-danger fw-semibold">@Model.OverdueLoans</span> loans currently overdue
+
+    <div class="sw-kpi-card sw-fade-in-up sw-delay-2">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Collected Fines</span>
+            <div class="sw-kpi-icon sw-icon-sage">
+                <i class="bi bi-cash-stack"></i>
             </div>
+        </div>
+        <div class="sw-kpi-value text-success">@Model.TotalFinesCollected.ToString("C")</div>
+        <div class="sw-kpi-footer">
+            Total levied: @Model.TotalFinesLevied.ToString("C")
+        </div>
+    </div>
+
+    <div class="sw-kpi-card sw-fade-in-up sw-delay-3">
+        <div class="sw-kpi-header">
+            <span class="sw-kpi-label">Outstanding Dues</span>
+            <div class="sw-kpi-icon sw-icon-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+        </div>
+        <div class="sw-kpi-value text-danger">@Model.OutstandingBalance.ToString("C")</div>
+        <div class="sw-kpi-footer">
+            <span class="text-danger fw-semibold">@Model.OverdueLoans</span> loans currently overdue
         </div>
     </div>
 </div>
 
-<!-- Circulation Trends & Activity -->
-<div class="panel mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<!-- 7-Day Circulation Rhythm Chart -->
+<div class="sw-table-card p-4 mb-5 sw-fade-in-up">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
-            <h2 class="panel-title"><i class="bi bi-graph-up text-primary me-2"></i>7-Day Circulation Activity</h2>
-            <small class="text-secondary">Comparative volume of book loans and returns over the past week</small>
+            <h2 class="h5 mb-1 fw-bold"><i class="bi bi-graph-up text-primary me-2"></i>7-Day Circulation Activity</h2>
+            <p class="text-muted small mb-0">Comparative daily rhythm of book issues and returns over the past week.</p>
         </div>
-        <div class="d-flex gap-3 small">
-            <div><span class="d-inline-block rounded me-1" style="width:12px;height:12px;background:var(--brand)"></span> Issues</div>
-            <div><span class="d-inline-block rounded me-1" style="width:12px;height:12px;background:#8fb9a8"></span> Returns</div>
+        <div class="d-flex align-items-center gap-3 small">
+            <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-block rounded-circle" style="width:10px;height:10px;background:var(--sw-navy);"></span>
+                <span class="fw-medium">Issues</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="d-inline-block rounded-circle" style="width:10px;height:10px;background:var(--sw-sage);"></span>
+                <span class="fw-medium">Returns</span>
+            </div>
         </div>
     </div>
 
@@ -82,38 +101,50 @@
         if (maxActivity == 0) maxActivity = 1;
     }
 
-    <div class="chart-bar-wrap">
+    <div class="d-flex align-items-end justify-content-between gap-2 pt-4 px-2" style="min-height:160px; border-bottom: 1.5px solid var(--sw-border);">
         @foreach (var day in Model.TrendDays)
         {
-            var issueHeight = (int)Math.Max(6, (day.Issues / (double)maxActivity) * 90);
-            var returnHeight = (int)Math.Max(6, (day.Returns / (double)maxActivity) * 90);
+            var issueHeight = (int)Math.Max(8, (day.Issues / (double)maxActivity) * 120);
+            var returnHeight = (int)Math.Max(8, (day.Returns / (double)maxActivity) * 120);
 
-            <div class="chart-col">
-                <div class="d-flex align-items-flex-end gap-1 w-100 justify-content-center" style="height:90px">
-                    <div class="chart-bar" style="height:@issueHeight% !important" title="@day.Issues issues on @day.Label"></div>
-                    <div class="chart-bar secondary" style="height:@returnHeight% !important" title="@day.Returns returns on @day.Label"></div>
+            <div class="d-flex flex-column align-items-center flex-grow-1 text-center" style="min-width: 48px;">
+                <div class="d-flex align-items-end justify-content-center gap-1 w-100" style="height: 120px;">
+                    <div class="sw-chart-bar" style="width: 14px; height: @issueHeight% !important; background-color: var(--sw-navy); border-radius: var(--sw-radius-sm) var(--sw-radius-sm) 0 0; transition: height 0.6s ease;" title="@day.Issues issues on @day.Label"></div>
+                    <div class="sw-chart-bar" style="width: 14px; height: @returnHeight% !important; background-color: var(--sw-sage); border-radius: var(--sw-radius-sm) var(--sw-radius-sm) 0 0; transition: height 0.6s ease;" title="@day.Returns returns on @day.Label"></div>
                 </div>
-                <span class="chart-bar-label">@day.Label</span>
-                <span class="text-muted" style="font-size:.65rem">@day.Issues / @day.Returns</span>
+                <div class="mt-2 text-uppercase fw-semibold" style="font-family: var(--sw-font-mono); font-size: 0.72rem; color: var(--sw-text-muted);">@day.Label</div>
+                <div class="text-muted" style="font-size: 0.68rem; font-family: var(--sw-font-mono);">@day.Issues / @day.Returns</div>
             </div>
         }
     </div>
 </div>
 
-<!-- Leaderboards -->
-<div class="row g-4 mb-4">
-    <div class="col-md-6">
-        <div class="panel h-100">
-            <h2 class="panel-title mb-3"><i class="bi bi-trophy text-warning me-2"></i>Most Borrowed Titles</h2>
+<!-- Leaderboards: Asymmetric Grid -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-6">
+        <div class="sw-table-card h-100">
+            <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                <h2 class="h6 mb-0 fw-bold"><i class="bi bi-trophy text-warning me-2"></i>Most Borrowed Titles</h2>
+                <span class="badge bg-light text-dark border">All Time</span>
+            </div>
             @if (Model.TopBooks.Count == 0)
             {
-                <div class="empty-state py-4"><i class="bi bi-book"></i><p class="mb-0 mt-2">No borrowing records available yet.</p></div>
+                <div class="sw-empty-state py-4 border-0">
+                    <i class="bi bi-book fs-3 text-muted"></i>
+                    <p class="mb-0 mt-2 small text-muted">No borrowing records available yet.</p>
+                </div>
             }
             else
             {
                 <div class="table-responsive">
-                    <table class="table mb-0 align-middle">
-                        <thead><tr><th>Rank & Title</th><th>Category</th><th class="text-end">Times Borrowed</th></tr></thead>
+                    <table class="sw-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Rank &amp; Title</th>
+                                <th>Category</th>
+                                <th class="text-end">Times Borrowed</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             @{ var rank = 1; }
                             @foreach (var book in Model.TopBooks)
@@ -121,15 +152,15 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="badge text-bg-light border rounded-circle">@rank</span>
+                                            <span class="sw-badge sw-badge-neutral" style="width: 24px; height: 24px; display: inline-grid; place-items: center; border-radius: 50%;">@rank</span>
                                             <div>
                                                 <div class="fw-semibold">@book.Title</div>
-                                                <small class="text-secondary">by @book.Author</small>
+                                                <small class="text-muted">by @book.Author</small>
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span class="badge rounded-pill badge-soft">@book.Category</span></td>
-                                    <td class="text-end fw-bold text-primary">@book.BorrowCount</td>
+                                    <td><span class="sw-badge sw-badge-neutral">@book.Category</span></td>
+                                    <td class="text-end fw-bold text-primary font-monospace">@book.BorrowCount</td>
                                 </tr>
                                 rank++;
                             }
@@ -140,27 +171,38 @@
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="panel h-100">
-            <h2 class="panel-title mb-3"><i class="bi bi-star text-primary me-2"></i>Top Active Borrowers</h2>
+    <div class="col-lg-6">
+        <div class="sw-table-card h-100">
+            <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                <h2 class="h6 mb-0 fw-bold"><i class="bi bi-star text-primary me-2"></i>Top Active Borrowers</h2>
+                <span class="badge bg-light text-dark border">Active Registry</span>
+            </div>
             @if (Model.TopBorrowers.Count == 0)
             {
-                <div class="empty-state py-4"><i class="bi bi-people"></i><p class="mb-0 mt-2">No borrower activity recorded yet.</p></div>
+                <div class="sw-empty-state py-4 border-0">
+                    <i class="bi bi-people fs-3 text-muted"></i>
+                    <p class="mb-0 mt-2 small text-muted">No borrower activity recorded yet.</p>
+                </div>
             }
             else
             {
                 <div class="table-responsive">
-                    <table class="table mb-0 align-middle">
-                        <thead><tr><th>Member</th><th class="text-end">Total Loans</th></tr></thead>
+                    <table class="sw-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th class="text-end">Total Loans</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             @foreach (var member in Model.TopBorrowers)
                             {
                                 <tr>
                                     <td>
                                         <div class="fw-semibold">@member.MemberName</div>
-                                        <small class="text-secondary">@member.Email</small>
+                                        <small class="text-muted font-monospace">@member.Email</small>
                                     </td>
-                                    <td class="text-end fw-bold text-success">@member.TotalLoans loans</td>
+                                    <td class="text-end fw-bold text-success font-monospace">@member.TotalLoans loans</td>
                                 </tr>
                             }
                         </tbody>
@@ -172,30 +214,39 @@
 </div>
 
 <!-- Data Export Hub -->
-<div class="panel">
-    <h2 class="panel-title mb-3"><i class="bi bi-cloud-arrow-down text-secondary me-2"></i>Data Export & Reporting Hub</h2>
+<div class="sw-table-card p-4">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-cloud-arrow-down fs-5 text-primary"></i>
+        <h2 class="h5 mb-0 fw-bold">Data Export &amp; Reporting Hub</h2>
+    </div>
+    <p class="text-muted small mb-4">Export raw library records to RFC-4180 standard CSV files for external audit and compliance.</p>
     <div class="row g-3">
         <div class="col-md-4">
-            <div class="p-3 border rounded bg-light">
-                <div class="fw-bold mb-1"><i class="bi bi-journal-text text-primary me-1"></i> Books Catalogue CSV</div>
-                <p class="small text-secondary mb-3">Download complete list of books, ISBNs, categories, and inventory counts.</p>
-                <a class="btn btn-outline-primary btn-sm w-100" asp-action="ExportBooks">Download Inventory CSV</a>
+            <div class="p-4 border rounded bg-surface h-100 d-flex flex-column justify-content-between" style="border-color: var(--sw-border) !important; background-color: var(--sw-bg-alt);">
+                <div>
+                    <div class="fw-bold mb-1"><i class="bi bi-journal-text text-primary me-1"></i> Books Catalogue CSV</div>
+                    <p class="small text-muted mb-3">Complete list of book titles, ISBNs, categories, and inventory stock counts.</p>
+                </div>
+                <a class="sw-btn sw-btn-outline sw-btn-sm w-100" asp-action="ExportBooks">Download Inventory CSV</a>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="p-3 border rounded bg-light">
-                <div class="fw-bold mb-1"><i class="bi bi-arrow-repeat text-success me-1"></i> Circulation History CSV</div>
-                <p class="small text-secondary mb-3">Download historical loan logs, due dates, return dates, and fine amounts.</p>
-                <a class="btn btn-outline-success btn-sm w-100" asp-action="ExportCirculation">Download Circulation CSV</a>
+            <div class="p-4 border rounded bg-surface h-100 d-flex flex-column justify-content-between" style="border-color: var(--sw-border) !important; background-color: var(--sw-bg-alt);">
+                <div>
+                    <div class="fw-bold mb-1"><i class="bi bi-arrow-repeat text-success me-1"></i> Circulation History CSV</div>
+                    <p class="small text-muted mb-3">Historical loan records, due dates, return dates, and fine amounts.</p>
+                </div>
+                <a class="sw-btn sw-btn-outline sw-btn-sm w-100" asp-action="ExportCirculation">Download Circulation CSV</a>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="p-3 border rounded bg-light">
-                <div class="fw-bold mb-1"><i class="bi bi-cash-coin text-warning me-1"></i> Fine Settlements CSV</div>
-                <p class="small text-secondary mb-3">Download comprehensive receipt logs with dates, amounts, and transaction IDs.</p>
-                <a class="btn btn-outline-secondary btn-sm w-100" asp-action="ExportPayments">Download Payments CSV</a>
+            <div class="p-4 border rounded bg-surface h-100 d-flex flex-column justify-content-between" style="border-color: var(--sw-border) !important; background-color: var(--sw-bg-alt);">
+                <div>
+                    <div class="fw-bold mb-1"><i class="bi bi-cash-coin text-warning me-1"></i> Fine Settlements CSV</div>
+                    <p class="small text-muted mb-3">Comprehensive receipt logs with payment methods, dates, amounts, and reference IDs.</p>
+                </div>
+                <a class="sw-btn sw-btn-outline sw-btn-sm w-100" asp-action="ExportPayments">Download Payments CSV</a>
             </div>
         </div>
     </div>
 </div>
-

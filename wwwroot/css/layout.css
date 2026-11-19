@@ -1,0 +1,222 @@
+/* ==========================================================================
+   SHELFWISE — THE ART OF READING
+   Layout: Balanced Editorial Container Architecture
+   ========================================================================== */
+
+html {
+    box-sizing: border-box;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+.sw-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--sw-bg);
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.sw-main-content {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: clamp(1rem, 3vw, 2.5rem);
+    padding-right: clamp(1rem, 3vw, 2.5rem);
+    padding-top: var(--sw-space-6);
+    padding-bottom: var(--sw-space-12);
+    min-width: 0;
+}
+
+/* Page Header Block */
+.sw-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sw-space-4);
+    margin-bottom: var(--sw-space-8);
+    padding-bottom: var(--sw-space-6);
+    border-bottom: 1.5px solid var(--sw-border);
+}
+
+.sw-page-title-group {
+    max-width: 760px;
+}
+
+.sw-page-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sw-space-3);
+    flex-wrap: wrap;
+}
+
+/* Breadcrumbs */
+.sw-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-xs);
+    color: var(--sw-text-muted);
+    margin-bottom: var(--sw-space-2);
+}
+
+.sw-breadcrumbs a {
+    color: var(--sw-text-muted);
+    text-decoration: none;
+    transition: color var(--sw-transition-fast);
+}
+
+.sw-breadcrumbs a:hover {
+    color: var(--sw-terracotta);
+}
+
+.sw-breadcrumbs .sw-crumb-separator {
+    color: var(--sw-text-subtle);
+    font-size: 0.7rem;
+}
+
+.sw-breadcrumbs .sw-crumb-current {
+    color: var(--sw-text);
+    font-weight: 500;
+}
+
+/* Editorial Grid Layouts */
+.sw-grid-asymmetric {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--sw-space-8);
+    margin-bottom: var(--sw-space-8);
+}
+
+.sw-grid-3-col {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sw-space-6);
+    margin-bottom: var(--sw-space-8);
+}
+
+.sw-grid-4-col {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sw-space-6);
+    margin-bottom: var(--sw-space-8);
+}
+
+.sw-grid-kpi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--sw-space-5);
+    margin-bottom: var(--sw-space-8);
+}
+
+/* Call to Action Band */
+.sw-cta-card {
+    padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 3rem);
+    background-color: var(--sw-navy);
+    color: var(--sw-paper);
+    border-radius: var(--sw-radius-lg);
+    border: 1.5px solid var(--sw-border-strong);
+    box-shadow: var(--sw-shadow-sm);
+    overflow: hidden;
+    width: 100%;
+}
+
+.sw-cta-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--sw-space-4);
+    flex-wrap: wrap;
+}
+
+/* Editorial Footer */
+.sw-footer {
+    background-color: var(--sw-surface);
+    border-top: 1.5px solid var(--sw-border);
+    padding: var(--sw-space-8) clamp(1rem, 3vw, 2.5rem);
+    margin-top: auto;
+    font-family: var(--sw-font-body);
+    font-size: var(--sw-text-sm);
+    color: var(--sw-text-muted);
+}
+
+.sw-footer-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sw-space-4);
+}
+
+.sw-footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-family: var(--sw-font-heading);
+    font-weight: 700;
+    font-size: var(--sw-text-md);
+    color: var(--sw-text);
+}
+
+.sw-footer-tagline {
+    font-family: var(--sw-font-heading);
+    font-style: italic;
+    color: var(--sw-text-subtle);
+}
+
+.sw-footer-meta {
+    font-family: var(--sw-font-mono);
+    font-size: var(--sw-text-2xs);
+    letter-spacing: 0.06em;
+    color: var(--sw-text-subtle);
+}
+
+/* Responsive Overrides */
+@media (max-width: 1023px) {
+    .sw-grid-asymmetric {
+        grid-template-columns: 1fr;
+        gap: var(--sw-space-6);
+    }
+    .sw-grid-3-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .sw-grid-4-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .sw-grid-3-col,
+    .sw-grid-4-col {
+        grid-template-columns: 1fr;
+    }
+    .sw-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--sw-space-4);
+    }
+    .sw-footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--sw-space-3);
+    }
+}

@@ -1,0 +1,209 @@
+@model ManageDigitalBookViewModel
+@{
+    ViewData["Title"] = $"{Model.BookTitle} · Digital Edition Management";
+}
+
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Digital Asset Management &bull; Catalogue #BK-@Model.BookId.ToString("D4")</div>
+        <h1 class="sw-title-display">@Model.BookTitle</h1>
+        <p class="sw-page-subtitle">Curate digitized manuscript assets, inspect PDF versioning, toggle reader streaming access, and link secure storage files.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i> Titles Catalogue
+        </a>
+        <a class="sw-btn sw-btn-outline" asp-controller="Books" asp-action="Details" asp-route-id="@Model.BookId">
+            <i class="bi bi-eye me-1"></i> Reader Dossier
+        </a>
+        @if (Model.HasDigitalEdition && Model.DigitalBookId.HasValue)
+        {
+            <a class="sw-btn sw-btn-accent" asp-controller="DigitalLibrary" asp-action="Workspace" asp-route-id="@Model.DigitalBookId.Value" target="_blank">
+                <i class="bi bi-layout-split me-1"></i> Launch Reader Workspace
+            </a>
+        }
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Physical Catalog Identity Card -->
+    <div class="col-lg-5">
+        <div class="sw-table-card p-4 h-100">
+            <div class="d-flex align-items-center gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--sw-border) !important;">
+                <div class="sw-kpi-icon sw-icon-navy" style="width: 44px; height: 44px; font-size: 1.3rem;">
+                    <i class="bi bi-book-half"></i>
+                </div>
+                <div>
+                    <h3 class="h5 mb-0 fw-bold" style="font-family: var(--sw-font-serif);">Physical Volume Details</h3>
+                    <small class="text-muted">Master catalogue entry metadata.</small>
+                </div>
+            </div>
+
+            <dl class="row mb-0" style="line-height: 2;">
+                <dt class="col-sm-5 text-muted small text-uppercase" style="letter-spacing: 0.05em;">Author</dt>
+                <dd class="col-sm-7 fw-bold" style="color: var(--sw-navy);">@Model.Author</dd>
+
+                <dt class="col-sm-5 text-muted small text-uppercase" style="letter-spacing: 0.05em;">Category</dt>
+                <dd class="col-sm-7"><span class="sw-badge sw-badge-neutral">@Model.Category</span></dd>
+
+                <dt class="col-sm-5 text-muted small text-uppercase" style="letter-spacing: 0.05em;">ISBN</dt>
+                <dd class="col-sm-7 font-monospace">@(Model.Isbn ?? "—")</dd>
+
+                <dt class="col-sm-5 text-muted small text-uppercase" style="letter-spacing: 0.05em;">Physical Stacks</dt>
+                <dd class="col-sm-7">
+                    <span class="fw-bold">@Model.AvailablePhysicalCopies</span> of @Model.TotalPhysicalCopies copies on shelf
+                </dd>
+
+                <dt class="col-sm-5 text-muted small text-uppercase" style="letter-spacing: 0.05em;">Digital Status</dt>
+                <dd class="col-sm-7">
+                    @if (Model.HasDigitalEdition)
+                    {
+                        if (Model.IsDigitalAvailable)
+                        {
+                            <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span> Active in Digital Library</span>
+                        }
+                        else
+                        {
+                            <span class="sw-badge sw-badge-warning"><span class="sw-badge-dot"></span> Digital Access Suspended</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span> No Digital File Attached</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Digital Document Metadata Card -->
+    <div class="col-lg-7">
+        <div class="sw-table-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center justify-content-between pb-3 mb-4 border-bottom" style="border-color: var(--sw-border) !important;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="sw-kpi-icon sw-icon-terracotta" style="width: 44px; height: 44px; font-size: 1.3rem;">
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="h5 mb-0 fw-bold" style="font-family: var(--sw-font-serif);">Digital Document Metadata</h3>
+                            <small class="text-muted">Storage and reader runtime specification.</small>
+                        </div>
+                    </div>
+                    @if (Model.HasDigitalEdition)
+                    {
+                        <span class="badge font-monospace px-2 py-1" style="background-color: var(--sw-navy); color: #fff;">
+                            v@(Model.DocumentVersion).0 Document
+                        </span>
+                    }
+                </div>
+
+                @if (!Model.HasDigitalEdition)
+                {
+                    <div class="sw-empty-state py-4">
+                        <div class="sw-empty-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+                        <h4 class="sw-empty-title">No digital manuscript uploaded</h4>
+                        <p class="sw-empty-text">This title only exists as a physical shelf copy. Upload a PDF document below to enable digital reading, page search, annotations, and personal notes.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Original Filename</span>
+                            <span class="font-monospace fw-bold text-truncate d-block" title="@Model.OriginalFileName">@Model.OriginalFileName</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Page Count</span>
+                            <span class="fs-5 fw-bold" style="color: var(--sw-navy);"><i class="bi bi-files me-1"></i> @Model.PageCount pages</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">File Size</span>
+                            <span class="font-monospace">@((Model.FileSizeBytes / (1024.0 * 1024.0)).ToString("F2")) MB (@(Model.FileSizeBytes.ToString("N0")) bytes)</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Uploaded At (UTC)</span>
+                            <span class="font-monospace text-muted">@Model.UploadedAtUtc?.ToString("dd MMM yyyy HH:mm")</span>
+                        </div>
+                        <div class="col-12">
+                            <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">SHA-256 Integrity Hash</span>
+                            <code class="small text-muted text-break">@Model.ChecksumSha256</code>
+                        </div>
+                    </div>
+
+                    <!-- Digital Action Buttons -->
+                    <div class="pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2" style="border-color: var(--sw-border) !important;">
+                        <form asp-action="ToggleDigital" method="post" class="d-inline">
+                            <input type="hidden" name="bookId" value="@Model.BookId" />
+                            <button type="submit" class="sw-btn sw-btn-sm sw-btn-outline">
+                                <i class="bi @(Model.IsDigitalAvailable ? "bi-eye-slash" : "bi-eye") me-1"></i>
+                                @(Model.IsDigitalAvailable ? "Suspend Digital Access" : "Enable Digital Access")
+                            </button>
+                        </form>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <a class="sw-btn sw-btn-sm sw-btn-accent" asp-controller="DigitalLibrary" asp-action="Workspace" asp-route-id="@Model.DigitalBookId" target="_blank">
+                                <i class="bi bi-book-half me-1"></i> Test Reader
+                            </a>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <form asp-action="DeleteDigital" method="post" class="d-inline" onsubmit="return confirm('Permanently remove this digital PDF manuscript and delete file from storage?');">
+                                    <input type="hidden" name="bookId" value="@Model.BookId" />
+                                    <button type="submit" class="sw-btn sw-btn-sm sw-btn-outline text-danger">
+                                        <i class="bi bi-trash3 me-1"></i> Remove File
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Security note -->
+            <div class="pt-3 mt-3 border-top" style="border-color: var(--sw-border) !important;">
+                <div class="small text-muted d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-check text-muted"></i>
+                    <span>Storage isolated outside <code>wwwroot</code> with verified <code>%PDF-</code> signature and range request support.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload / Replace PDF Form -->
+<div class="sw-table-card p-4 p-md-5">
+    <div class="d-flex align-items-center gap-3 pb-3 mb-4 border-bottom" style="border-color: var(--sw-border) !important;">
+        <div class="sw-kpi-icon sw-icon-navy" style="width: 44px; height: 44px; font-size: 1.3rem;">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+        </div>
+        <div>
+            <h3 class="h5 mb-0 fw-bold" style="font-family: var(--sw-font-serif);">
+                @(Model.HasDigitalEdition ? "Replace Digital Document (Version Upgrade)" : "Upload Digital Document")
+            </h3>
+            <small class="text-muted">Select an official PDF file (up to 100 MB). Existing reader bookmarks and notes will safely migrate to the new version.</small>
+        </div>
+    </div>
+
+    <form asp-action="UploadDigital" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="bookId" value="@Model.BookId" />
+
+        <div class="mb-4">
+            <div class="p-4 text-center border border-2 border-dashed rounded-0" style="background-color: var(--sw-paper-warm, #fdfbf7); border-color: var(--sw-border) !important;">
+                <i class="bi bi-file-earmark-pdf display-4 text-muted mb-2 d-block"></i>
+                <input asp-for="PdfFile" type="file" accept=".pdf,application/pdf" class="form-control sw-input mb-2" required />
+                <small class="text-muted d-block">Supported formats: Adobe Portable Document Format (.pdf) &bull; Maximum file size: 100 MB</small>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between pt-3 border-top" style="border-color: var(--sw-border) !important;">
+            <a asp-action="Index" class="sw-btn sw-btn-outline">
+                Cancel
+            </a>
+            <button type="submit" class="sw-btn sw-btn-primary">
+                <i class="bi bi-upload me-1"></i>
+                @(Model.HasDigitalEdition ? "Upload & Increment Document Version" : "Upload Digital PDF Manuscript")
+            </button>
+        </div>
+    </form>
+</div>

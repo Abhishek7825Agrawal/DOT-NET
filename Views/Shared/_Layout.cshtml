@@ -1,229 +1,412 @@
 @using Microsoft.AspNetCore.Identity
 @using LibraryManagementSystem.Models
 @inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isAdmin = User.IsInRole("Admin");
+    var isStaff = User.IsInRole("Staff");
+    var isMember = User.IsInRole("Member");
+    var isSignedIn = SignInManager.IsSignedIn(User);
+    var roleLabel = isAdmin ? "Administrator" : isStaff ? "Library Staff" : isMember ? "Cardholder Member" : "Visitor";
 }
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] · Shelfwise Library</title>
+    <meta name="view-transition" content="same-origin" />
+    <title>@ViewData["Title"] · Shelfwise — The Art of Reading</title>
+    
+    <!-- Theme Flash Prevention -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('shelfwise-theme') || 'auto';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch(e) {}
+        })();
+    </script>
+
+    <!-- Typography Fonts: Playfair Display, DM Sans, Space Grotesk, DM Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@400..700&display=swap" rel="stylesheet">
+    
+    <!-- Framework Styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Shelfwise Design Tokens & Editorial Styles -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body>
+<body class="sw-shell">
 
-@if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
-{
-    <!-- Admin SaaS Shell with Professional Sidebar -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="app-shell">
-        <aside class="sidebar" id="appSidebar">
-            <div class="sidebar-header">
-                <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">
-                    <span class="brand-mark"><i class="bi bi-book-half"></i></span>
-                    <span class="brand-wordmark">Shelfwise<span class="brand-period">.</span><small>LIBRARY DESK</small></span>
-                </a>
-            </div>
-            <nav class="sidebar-nav">
-                <p class="nav-section-title">Overview</p>
-                <a class="sidebar-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index" aria-current="@(currentController == "Dashboard" ? "page" : null)">
-                    <i class="bi bi-grid-1x2"></i> <span>Dashboard</span>
-                </a>
-                <a class="sidebar-link @(currentController == "AdminReports" ? "active" : "")" asp-controller="AdminReports" asp-action="Index" aria-current="@(currentController == "AdminReports" ? "page" : null)">
-                    <i class="bi bi-bar-chart-line"></i> <span>Reports & Analytics</span>
-                </a>
+    <!-- Minimal Horizontal Top Navigation -->
+    <header class="sw-navbar">
+        <div class="sw-navbar-inner">
+            <!-- Brand -->
+            <a class="sw-brand" asp-controller="Home" asp-action="Index">
+                <span class="sw-brand-icon"><i class="bi bi-book-half"></i></span>
+                <span class="sw-brand-text">
+                    <span class="sw-brand-title">Shelfwise<span class="sw-brand-period">.</span></span>
+                    <span class="sw-brand-subtitle">The Art of Reading</span>
+                </span>
+            </a>
 
-                <p class="nav-section-title">Collection</p>
-                <a class="sidebar-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index" aria-current="@(currentController == "AdminBooks" ? "page" : null)">
-                    <i class="bi bi-journal-bookmark"></i> <span>Books Catalogue</span>
-                </a>
-                <a class="sidebar-link @(currentController == "AdminCategories" ? "active" : "")" asp-controller="AdminCategories" asp-action="Index" aria-current="@(currentController == "AdminCategories" ? "page" : null)">
-                    <i class="bi bi-tags"></i> <span>Categories</span>
-                </a>
+            <!-- Role-Specific Horizontal Navigation Menu (Desktop) -->
+            <nav class="sw-nav-menu" aria-label="Primary Navigation">
+                @if (isAdmin)
+                {
+                    <a class="sw-nav-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-grid-1x2"></i> Overview
+                    </a>
+                    <a class="sw-nav-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index">
+                        <i class="bi bi-journal-bookmark"></i> Catalogue
+                    </a>
+                    <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
+                        <i class="bi bi-file-earmark-pdf"></i> Digital Library
+                    </a>
 
-                <p class="nav-section-title">Borrowing Desk</p>
-                <a class="sidebar-link @(currentController == "AdminCirculation" && currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue" aria-current="@(currentAction == "Issue" ? "page" : null)">
-                    <i class="bi bi-plus-circle"></i> <span>Issue a Book</span>
-                </a>
-                <a class="sidebar-link @(currentController == "AdminCirculation" && currentAction == "Index" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Index" aria-current="@(currentAction == "Index" ? "page" : null)">
-                    <i class="bi bi-arrow-left-right"></i> <span>All Circulation</span>
-                </a>
-                <a class="sidebar-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue" aria-current="@(currentAction == "Overdue" ? "page" : null)">
-                    <i class="bi bi-clock-history"></i> <span>Overdue Loans</span>
-                </a>
-                <a class="sidebar-link @(currentAction == "Payments" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Payments" aria-current="@(currentAction == "Payments" ? "page" : null)">
-                    <i class="bi bi-cash-stack"></i> <span>Fine Payments</span>
-                </a>
-
-                <p class="nav-section-title">Administration</p>
-                <a class="sidebar-link @(currentController == "AdminMembers" ? "active" : "")" asp-controller="AdminMembers" asp-action="Index" aria-current="@(currentController == "AdminMembers" ? "page" : null)">
-                    <i class="bi bi-people"></i> <span>Member Accounts</span>
-                </a>
-                <a class="sidebar-link @(currentController == "AdminSettings" ? "active" : "")" asp-controller="AdminSettings" asp-action="Index" aria-current="@(currentController == "AdminSettings" ? "page" : null)">
-                    <i class="bi bi-sliders"></i> <span>Library Settings</span>
-                </a>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="user-avatar"><i class="bi bi-shield-check"></i></div>
-                        <div>
-                            <div class="fw-bold small text-truncate" style="max-width:110px">@User.Identity?.Name</div>
-                            <span class="badge text-bg-light" style="font-size:.65rem">Administrator</span>
-                        </div>
+                    <div class="dropdown d-inline-block">
+                        <a class="sw-nav-link dropdown-toggle @(currentController == "Marketplace" || currentController == "AuthorMarketplace" || currentController == "AdminMarketplace" ? "active" : "")" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-mortarboard"></i> Marketplace
+                        </a>
+                        <ul class="dropdown-menu sw-dropdown-menu">
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop me-2 text-primary"></i>Research Marketplace</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check me-2 text-danger"></i>Moderation Desk</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square me-2"></i>Author Desk</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check me-2 text-success"></i>My Acquired Papers</a></li>
+                        </ul>
                     </div>
-                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                        <button class="btn btn-outline-danger btn-sm p-1 px-2" title="Sign out" type="submit">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </aside>
 
-        <div class="main-wrapper">
-            <header class="topbar">
-                <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="appSidebar">
-                        <i class="bi bi-list fs-5"></i>
-                    </button>
-                    <span class="topbar-context"><span class="status-dot"></span> Library operations <span class="text-secondary">/ @ViewData["Title"]</span></span>
+                    <a class="sw-nav-link @(currentController == "AdminCategories" ? "active" : "")" asp-controller="AdminCategories" asp-action="Index">
+                        <i class="bi bi-tags"></i> Categories
+                    </a>
+                    
+                    <div class="dropdown d-inline-block">
+                        <a class="sw-nav-link dropdown-toggle @(currentController == "AdminCirculation" ? "active" : "")" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-arrow-left-right"></i> Circulation
+                        </a>
+                        <ul class="dropdown-menu sw-dropdown-menu">
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle me-2 text-primary"></i>Issue a Book</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Index"><i class="bi bi-arrow-left-right me-2"></i>Circulation Desk</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history me-2 text-danger"></i>Overdue Loans</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminCirculation" asp-action="Payments"><i class="bi bi-cash-stack me-2 text-success"></i>Fine Payments</a></li>
+                        </ul>
+                    </div>
+
+                    <a class="sw-nav-link @(currentController == "AdminMembers" ? "active" : "")" asp-controller="AdminMembers" asp-action="Index">
+                        <i class="bi bi-people"></i> Members
+                    </a>
+                    <a class="sw-nav-link @(currentController == "AdminReports" ? "active" : "")" asp-controller="AdminReports" asp-action="Index">
+                        <i class="bi bi-bar-chart-line"></i> Analytics
+                    </a>
+                    <a class="sw-nav-link @(currentController == "AdminSettings" ? "active" : "")" asp-controller="AdminSettings" asp-action="Index">
+                        <i class="bi bi-sliders"></i> Settings
+                    </a>
+                }
+                else if (isStaff)
+                {
+                    <a class="sw-nav-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-inboxes"></i> Operations Desk
+                    </a>
+                    <a class="sw-nav-link @(currentController == "AdminCirculation" && currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue">
+                        <i class="bi bi-plus-circle"></i> Quick Issue
+                    </a>
+                    <a class="sw-nav-link @(currentController == "AdminCirculation" && currentAction == "Index" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Index">
+                        <i class="bi bi-arrow-left-right"></i> Circulation
+                    </a>
+                    <a class="sw-nav-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue">
+                        <i class="bi bi-clock-history"></i> Overdue
+                    </a>
+                    <a class="sw-nav-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index">
+                        <i class="bi bi-journal-bookmark"></i> Books
+                    </a>
+                    <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
+                        <i class="bi bi-file-earmark-pdf"></i> Digital Library
+                    </a>
+
+                    <div class="dropdown d-inline-block">
+                        <a class="sw-nav-link dropdown-toggle @(currentController == "Marketplace" || currentController == "AuthorMarketplace" || currentController == "AdminMarketplace" ? "active" : "")" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-mortarboard"></i> Marketplace
+                        </a>
+                        <ul class="dropdown-menu sw-dropdown-menu">
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop me-2 text-primary"></i>Research Marketplace</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check me-2 text-danger"></i>Moderation Desk</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square me-2"></i>Author Desk</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check me-2 text-success"></i>My Acquired Papers</a></li>
+                        </ul>
+                    </div>
+
+                    <a class="sw-nav-link @(currentController == "AdminMembers" ? "active" : "")" asp-controller="AdminMembers" asp-action="Index">
+                        <i class="bi bi-people"></i> Members
+                    </a>
+                    <a class="sw-nav-link @(currentAction == "Payments" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Payments">
+                        <i class="bi bi-cash-stack"></i> Payments
+                    </a>
+                }
+                else if (isMember)
+                {
+                    <a class="sw-nav-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-book-half"></i> Reading Room
+                    </a>
+                    <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
+                        <i class="bi bi-file-earmark-pdf"></i> Digital Library
+                    </a>
+                    <a class="sw-nav-link @(currentController == "Marketplace" && currentAction == "Index" ? "active" : "")" asp-controller="Marketplace" asp-action="Index">
+                        <i class="bi bi-mortarboard"></i> Research Papers
+                    </a>
+                    <a class="sw-nav-link @(currentController == "AuthorMarketplace" ? "active" : "")" asp-controller="AuthorMarketplace" asp-action="AuthorDesk">
+                        <i class="bi bi-pencil-square"></i> Author Desk
+                    </a>
+                    <a class="sw-nav-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index">
+                        <i class="bi bi-compass"></i> Discover Catalogue
+                    </a>
+                    <a class="sw-nav-link @(currentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="Index">
+                        <i class="bi bi-person-vcard"></i> My Card
+                    </a>
+                }
+                else
+                {
+                    <a class="sw-nav-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index">
+                        <i class="bi bi-compass"></i> Explore Collection
+                    </a>
+                    <a class="sw-nav-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index">
+                        <i class="bi bi-file-earmark-pdf"></i> Digital Library
+                    </a>
+                    <a class="sw-nav-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index">
+                        <i class="bi bi-mortarboard"></i> Research Papers
+                    </a>
+                    <a class="sw-nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house"></i> About Library
+                    </a>
+                }
+            </nav>
+
+            <!-- Right Tools Suite -->
+            <div class="sw-nav-tools">
+                <!-- Global Quick Search -->
+                <div class="sw-nav-search">
+                    <i class="bi bi-search"></i>
+                    <input type="search" placeholder="Search collection (title, author, ISBN)..." aria-label="Search collection" />
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                    <a class="btn btn-sm btn-outline-secondary" asp-controller="AdminReports" asp-action="Index">
-                        <i class="bi bi-graph-up me-1"></i> Reports
-                    </a>
-                    <a class="btn btn-sm btn-outline-secondary" asp-controller="AdminProfile" asp-action="Index">
-                        <i class="bi bi-person me-1"></i> My Profile
-                    </a>
+
+                <!-- Theme Switcher -->
+                <button type="button" class="sw-tool-btn" data-theme-switcher aria-label="Toggle visual theme">
+                    <i class="bi bi-circle-half"></i>
+                </button>
+
+                <!-- Notifications Toggle -->
+                <button type="button" class="sw-tool-btn" id="swNotificationToggle" aria-label="View library notices">
+                    <i class="bi bi-bell"></i>
+                    <span class="sw-tool-badge">2</span>
+                </button>
+
+                @if (isSignedIn)
+                {
+                    <!-- User Profile Dropdown -->
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-gear"></i>
+                        <button class="sw-user-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="sw-user-avatar">
+                                <i class="@(isAdmin ? "bi bi-shield-check" : isStaff ? "bi bi-person-badge" : "bi bi-person")"></i>
+                            </span>
+                            <span class="sw-user-name">@User.Identity?.Name</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <li><a class="dropdown-item" asp-controller="AdminProfile" asp-action="Index"><i class="bi bi-person me-2"></i>Admin Profile</a></li>
-                            <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="bi bi-key me-2"></i>Change Password</a></li>
-                            <li><a class="dropdown-item" asp-controller="AdminSettings" asp-action="Index"><i class="bi bi-sliders me-2"></i>Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
+                        <ul class="dropdown-menu dropdown-menu-end sw-dropdown-menu">
+                            <li class="sw-dropdown-header">
+                                <div class="sw-dropdown-header-name">@User.Identity?.Name</div>
+                                <div class="sw-dropdown-header-role">@roleLabel</div>
+                            </li>
+                            @if (isAdmin || isStaff)
+                            {
+                                <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminProfile" asp-action="Index"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                            }
+                            else
+                            {
+                                <li><a class="dropdown-item sw-dropdown-item" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-circle me-2"></i>Reader Profile</a></li>
+                            }
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="bi bi-key me-2"></i>Security & Password</a></li>
+                            @if (isAdmin)
+                            {
+                                <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminSettings" asp-action="Index"><i class="bi bi-sliders me-2"></i>Library Policies</a></li>
+                            }
+                            <li><hr class="dropdown-divider sw-dropdown-divider" /></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check me-2 text-success"></i>My Acquired Papers</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square me-2 text-primary"></i>Author Research Desk</a></li>
+                            @if (isAdmin || isStaff)
+                            {
+                                <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check me-2 text-danger"></i>Editorial Moderation</a></li>
+                            }
+                            <li><hr class="dropdown-divider sw-dropdown-divider" /></li>
                             <li>
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="px-2">
-                                    <button class="dropdown-item text-danger rounded" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    <button class="dropdown-item sw-dropdown-item text-danger" type="submit">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Sign out
+                                    </button>
                                 </form>
                             </li>
                         </ul>
                     </div>
-                </div>
-            </header>
-
-            <main class="container-fluid px-3 px-lg-4 py-4">
-                @if (TempData["Success"] is string success)
-                {
-                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
-                        <i class="bi bi-check-circle-fill fs-5"></i>
-                        <div>@success</div>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-                @if (TempData["Error"] is string error)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                        <div>@error</div>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                }
-                @RenderBody()
-            </main>
-        </div>
-    </div>
-}
-else
-{
-    <!-- Public & Member Layout -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
-        <div class="container-fluid px-lg-4">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                <span class="brand-mark"><i class="bi bi-book-half"></i></span>
-                <span>Shelfwise</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div id="mainNav" class="collapse navbar-collapse">
-                @if (SignInManager.IsSignedIn(User))
-                {
-                    <ul class="navbar-nav me-auto ms-lg-4 gap-lg-1">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Books" asp-action="Index"><i class="bi bi-book me-1"></i> Catalogue</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Profile" asp-action="Index"><i class="bi bi-person me-1"></i> My Profile</a></li>
-                    </ul>
-                    <div class="d-flex align-items-center gap-3 ms-auto">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light border dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-                                <span class="user-avatar" style="width:22px;height:22px;font-size:.7rem"><i class="bi bi-person"></i></span>
-                                <span>@User.Identity?.Name</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index"><i class="bi bi-person me-2"></i>My Profile</a></li>
-                                <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="bi bi-key me-2"></i>Change Password</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form asp-controller="Account" asp-action="Logout" method="post" class="px-2">
-                                        <button class="dropdown-item text-danger rounded" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
                 }
                 else
                 {
-                    <ul class="navbar-nav me-auto ms-lg-4">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Books" asp-action="Index">Browse Books</a></li>
-                    </ul>
-                    <div class="ms-auto d-flex gap-2 py-2 py-lg-0">
-                        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Login">Sign in</a>
-                        <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Create account</a>
-                    </div>
+                    <a class="sw-btn sw-btn-outline sw-btn-sm d-none d-sm-inline-flex" asp-controller="Account" asp-action="Login">Sign in</a>
+                    <a class="sw-btn sw-btn-primary sw-btn-sm d-none d-md-inline-flex" asp-controller="Account" asp-action="Register">Join Library</a>
                 }
+
+                <!-- Mobile Navigation Hamburger -->
+                <button type="button" class="sw-nav-toggle" id="swNavToggle" aria-label="Toggle navigation menu">
+                    <i class="bi bi-list"></i>
+                </button>
             </div>
         </div>
-    </nav>
-    <main class="container-fluid px-3 px-lg-4 py-4">
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="sw-mobile-overlay" id="swMobileOverlay"></div>
+    <aside class="sw-mobile-drawer" id="swMobileDrawer" aria-label="Mobile Navigation">
+        <div class="sw-mobile-drawer-header">
+            <a class="sw-brand" asp-controller="Home" asp-action="Index">
+                <span class="sw-brand-icon"><i class="bi bi-book-half"></i></span>
+                <span class="sw-brand-title">Shelfwise<span class="sw-brand-period">.</span></span>
+            </a>
+            <button type="button" class="sw-tool-btn" id="swDrawerClose" aria-label="Close menu">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <nav class="sw-mobile-drawer-links">
+            <span class="sw-kicker sw-kicker-navy">Navigation</span>
+            @if (isAdmin)
+            {
+                <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-grid-1x2"></i> Dashboard Overview</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index"><i class="bi bi-journal-bookmark"></i> Books Catalogue</a>
+                <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop"></i> Research Marketplace</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminMarketplace" ? "active" : "")" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check text-danger"></i> Moderation Desk</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AuthorMarketplace" ? "active" : "")" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square"></i> Author Desk</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminCategories" ? "active" : "")" asp-controller="AdminCategories" asp-action="Index"><i class="bi bi-tags"></i> Categories</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle text-primary"></i> Issue Book</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminCirculation" && currentAction == "Index" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Index"><i class="bi bi-arrow-left-right"></i> Circulation Desk</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history text-danger"></i> Overdue Loans</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Payments" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Payments"><i class="bi bi-cash-stack text-success"></i> Fine Payments</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminMembers" ? "active" : "")" asp-controller="AdminMembers" asp-action="Index"><i class="bi bi-people"></i> Member Accounts</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminReports" ? "active" : "")" asp-controller="AdminReports" asp-action="Index"><i class="bi bi-bar-chart-line"></i> Analytics & Reports</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminSettings" ? "active" : "")" asp-controller="AdminSettings" asp-action="Index"><i class="bi bi-sliders"></i> Library Settings</a>
+            }
+            else if (isStaff)
+            {
+                <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-inboxes"></i> Operations Desk</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle text-primary"></i> Quick Issue</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminCirculation" && currentAction == "Index" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Index"><i class="bi bi-arrow-left-right"></i> Circulation</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history text-danger"></i> Overdue Loans</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index"><i class="bi bi-journal-bookmark"></i> Books Catalogue</a>
+                <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-shop"></i> Research Marketplace</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminMarketplace" ? "active" : "")" asp-controller="AdminMarketplace" asp-action="Index"><i class="bi bi-shield-check text-danger"></i> Moderation Desk</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AuthorMarketplace" ? "active" : "")" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square"></i> Author Desk</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AdminMembers" ? "active" : "")" asp-controller="AdminMembers" asp-action="Index"><i class="bi bi-people"></i> Member Lookup</a>
+                <a class="sw-mobile-drawer-link @(currentAction == "Payments" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Payments"><i class="bi bi-cash-stack text-success"></i> Payments Ledger</a>
+            }
+            else if (isMember)
+            {
+                <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-book-half"></i> Reading Room</a>
+                <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-mortarboard"></i> Research Papers</a>
+                <a class="sw-mobile-drawer-link @(currentController == "AuthorMarketplace" ? "active" : "")" asp-controller="AuthorMarketplace" asp-action="AuthorDesk"><i class="bi bi-pencil-square"></i> Author Desk</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Marketplace" && currentAction == "MyPurchases" ? "active" : "")" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check"></i> My Acquired Papers</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index"><i class="bi bi-compass"></i> Discover Catalogue</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-vcard"></i> My Library Card</a>
+            }
+            else
+            {
+                <a class="sw-mobile-drawer-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index"><i class="bi bi-compass"></i> Explore Collection</a>
+                <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
+                <a class="sw-mobile-drawer-link @(currentController == "Marketplace" ? "active" : "")" asp-controller="Marketplace" asp-action="Index"><i class="bi bi-mortarboard"></i> Research Papers</a>
+                <a class="sw-mobile-drawer-link" asp-controller="Account" asp-action="Login"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
+                <a class="sw-mobile-drawer-link" asp-controller="Account" asp-action="Register"><i class="bi bi-person-plus"></i> Join Library</a>
+            }
+        </nav>
+    </aside>
+
+    <!-- Notifications Drawer -->
+    <aside class="sw-notification-drawer" id="swNotificationDrawer" aria-label="Notifications Drawer">
+        <div class="sw-mobile-drawer-header p-3 border-bottom d-flex align-items-center justify-content-between">
+            <div>
+                <span class="sw-kicker mb-0">Editorial Dispatch</span>
+                <h5 class="sw-h5 mb-0">Library Notices</h5>
+            </div>
+            <button type="button" class="sw-tool-btn" id="swNotificationClose" aria-label="Close notifications">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="p-3 d-flex flex-column gap-3 overflow-y-auto">
+            <div class="p-3 bg-light rounded border">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="sw-badge sw-badge-info">System Policy</span>
+                    <span class="sw-mono small text-muted">Today</span>
+                </div>
+                <div class="fw-bold small mb-1">14-Day Standard Loan Period</div>
+                <p class="text-muted small mb-0">Borrowing limits and daily overdue fees remain active under current library regulations.</p>
+            </div>
+            <div class="p-3 bg-light rounded border">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="sw-badge sw-badge-success">Curated Shelf</span>
+                    <span class="sw-mono small text-muted">Active</span>
+                </div>
+                <div class="fw-bold small mb-1">New Computer Science Editions</div>
+                <p class="text-muted small mb-0">Fresh arrivals in software architecture, cloud platforms, and modern systems are now available in the catalogue.</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Root Container -->
+    <main class="sw-main-content sw-fade-in-up">
         @if (TempData["Success"] is string success)
         {
-            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+            <div class="sw-alert sw-alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
                 <i class="bi bi-check-circle-fill fs-5"></i>
-                <div>@success</div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="flex-grow-1">@success</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
         @if (TempData["Error"] is string error)
         {
-            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+            <div class="sw-alert sw-alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
                 <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                <div>@error</div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="flex-grow-1">@error</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
         @RenderBody()
     </main>
-    <footer class="container-fluid px-4 py-4 text-secondary small border-top mt-auto text-center">
-        Shelfwise Library Management System · Enterprise Edition
-    </footer>
-}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+    <!-- Editorial Footer -->
+    <footer class="sw-footer">
+        <div class="sw-footer-inner">
+            <div class="d-flex flex-column gap-1">
+                <div class="sw-footer-brand">
+                    <span class="text-primary"><i class="bi bi-book-half"></i></span>
+                    <span>Shelfwise Library Management</span>
+                </div>
+                <div class="sw-footer-tagline">The Art of Reading — Curated Library Intelligence</div>
+            </div>
+            <div class="d-flex flex-column align-items-md-end gap-1">
+                <div class="sw-footer-meta">VOL. XII · ENTERPRISE EDITION · HYBRID MONOLITH</div>
+                <div class="small text-muted">Crafted with ASP.NET Core &amp; Modern Editorial Standards</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts: Bootstrap & Shelfwise Modules -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <script src="~/js/navigation.js" asp-append-version="true"></script>
+    <script src="~/js/animations.js" asp-append-version="true"></script>
+    <script src="~/js/interactions.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

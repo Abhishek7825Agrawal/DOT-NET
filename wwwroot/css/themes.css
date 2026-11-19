@@ -1,0 +1,141 @@
+/* ==========================================================================
+   SHELFWISE — THE ART OF READING
+   Themes: Light (Default), Dark, and Auto (System Preference)
+   ========================================================================== */
+
+/* Dark Mode Tokens (Applied via data-theme="dark" on <html> or system preference) */
+[data-theme="dark"] {
+    --sw-bg: #0F1725;
+    --sw-bg-alt: #141E2F;
+    --sw-surface: #17243A;
+    --sw-surface-alt: #1B2B44;
+    --sw-surface-elevated: #223450;
+    --sw-surface-dark: #0A101A;
+
+    --sw-text: #F5F1E8;
+    --sw-text-muted: #A3B1C5;
+    --sw-text-subtle: #73849B;
+    --sw-text-inverse: #0F1725;
+    --sw-text-on-accent: #FFFFFF;
+
+    --sw-border: #2B3D59;
+    --sw-border-strong: #E5DFD2;
+    --sw-border-subtle: #20314A;
+
+    --sw-primary: #F5F1E8;
+    --sw-primary-hover: #FFFFFF;
+    --sw-accent: #E07A55;
+    --sw-accent-hover: #F28C67;
+    --sw-accent-subtle: rgba(224, 122, 85, 0.16);
+
+    --sw-status-success: #78B06F;
+    --sw-status-success-bg: rgba(120, 176, 111, 0.15);
+    --sw-status-success-border: rgba(120, 176, 111, 0.35);
+
+    --sw-status-warning: #E0A63E;
+    --sw-status-warning-bg: rgba(224, 166, 62, 0.15);
+    --sw-status-warning-border: rgba(224, 166, 62, 0.35);
+
+    --sw-status-danger: #E55C45;
+    --sw-status-danger-bg: rgba(229, 92, 69, 0.15);
+    --sw-status-danger-border: rgba(229, 92, 69, 0.35);
+
+    --sw-status-info: #6B9AD6;
+    --sw-status-info-bg: rgba(107, 154, 214, 0.15);
+    --sw-status-info-border: rgba(107, 154, 214, 0.35);
+
+    --sw-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --sw-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --sw-shadow-lg: 0 14px 32px rgba(0, 0, 0, 0.45);
+    --sw-shadow-editorial: 3px 3px 0 rgba(229, 223, 210, 0.85);
+    --sw-shadow-editorial-hover: 4px 5px 0 rgba(229, 223, 210, 0.95);
+    --sw-shadow-book: 6px 8px 20px rgba(0, 0, 0, 0.55), 1px 2px 6px rgba(0, 0, 0, 0.3);
+
+    --sw-input-bg: #141E2F;
+    --sw-input-border: #2B3D59;
+    --sw-input-focus-border: #F5F1E8;
+    --sw-input-focus-ring: rgba(245, 241, 232, 0.15);
+}
+
+/* System preference fallback when theme is set to 'auto' or unspecified */
+@media (prefers-color-scheme: dark) {
+    [data-theme="auto"] {
+        --sw-bg: #0F1725;
+        --sw-bg-alt: #141E2F;
+        --sw-surface: #17243A;
+        --sw-surface-alt: #1B2B44;
+        --sw-surface-elevated: #223450;
+        --sw-surface-dark: #0A101A;
+
+        --sw-text: #F5F1E8;
+        --sw-text-muted: #A3B1C5;
+        --sw-text-subtle: #73849B;
+        --sw-text-inverse: #0F1725;
+        --sw-text-on-accent: #FFFFFF;
+
+        --sw-border: #2B3D59;
+        --sw-border-strong: #E5DFD2;
+        --sw-border-subtle: #20314A;
+
+        --sw-primary: #F5F1E8;
+        --sw-primary-hover: #FFFFFF;
+        --sw-accent: #E07A55;
+        --sw-accent-hover: #F28C67;
+        --sw-accent-subtle: rgba(224, 122, 85, 0.16);
+
+        --sw-status-success: #78B06F;
+        --sw-status-success-bg: rgba(120, 176, 111, 0.15);
+        --sw-status-success-border: rgba(120, 176, 111, 0.35);
+
+        --sw-status-warning: #E0A63E;
+        --sw-status-warning-bg: rgba(224, 166, 62, 0.15);
+        --sw-status-warning-border: rgba(224, 166, 62, 0.35);
+
+        --sw-status-danger: #E55C45;
+        --sw-status-danger-bg: rgba(229, 92, 69, 0.15);
+        --sw-status-danger-border: rgba(229, 92, 69, 0.35);
+
+        --sw-status-info: #6B9AD6;
+        --sw-status-info-bg: rgba(107, 154, 214, 0.15);
+        --sw-status-info-border: rgba(107, 154, 214, 0.35);
+
+        --sw-shadow-editorial: 3px 3px 0 rgba(229, 223, 210, 0.85);
+        --sw-shadow-editorial-hover: 4px 5px 0 rgba(229, 223, 210, 0.95);
+        --sw-shadow-book: 6px 8px 20px rgba(0, 0, 0, 0.55);
+
+        --sw-input-bg: #141E2F;
+        --sw-input-border: #2B3D59;
+        --sw-input-focus-border: #F5F1E8;
+        --sw-input-focus-ring: rgba(245, 241, 232, 0.15);
+    }
+}
+
+/* Global Transitions for Theme Toggling */
+html {
+    transition: background-color var(--sw-transition-editorial), color var(--sw-transition-editorial);
+}
+
+body {
+    background-color: var(--sw-bg);
+    color: var(--sw-text);
+    font-family: var(--sw-font-body);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Special Dark Hero Surfaces (even in Light Mode) */
+.sw-dark-surface,
+.sw-reading-surface-dark {
+    background-color: var(--sw-navy);
+    color: var(--sw-paper);
+    border-color: rgba(245, 241, 232, 0.15);
+}
+
+.sw-dark-surface .sw-text-muted {
+    color: var(--sw-sand);
+}

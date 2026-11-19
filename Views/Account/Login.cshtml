@@ -1,29 +1,61 @@
 @model LoginViewModel
-@{ ViewData["Title"] = "Sign in"; }
-<section class="login-layout" aria-labelledby="login-title">
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<section class="login-layout sw-fade-in-up my-4" aria-labelledby="login-title">
     <div class="login-story">
-        <a class="login-brand" asp-controller="Home" asp-action="Index"><span class="brand-mark"><i class="bi bi-book-half"></i></span><span>Shelfwise<span class="brand-period">.</span></span></a>
+        <a class="login-brand" asp-controller="Home" asp-action="Index">
+            <span class="brand-mark"><i class="bi bi-book-half"></i></span>
+            <span>Shelfwise<span class="brand-period">.</span></span>
+        </a>
         <div class="login-story-copy">
             <span class="eyebrow"><i class="bi bi-bookmark-star"></i> YOUR LIBRARY, YOUR PLACE</span>
             <h1>Every good story<br />starts <em>with a welcome.</em></h1>
-            <p>Sign in to pick up where you left off, keep an eye on your loans, and find your next favourite.</p>
+            <p>Sign in to pick up where you left off, keep an eye on your loans, and find your next favourite volume.</p>
         </div>
-        <div class="login-still-life" aria-hidden="true"><span class="login-sun"></span><span class="login-shelf"></span><span class="login-volume volume-a"></span><span class="login-volume volume-b"></span><span class="login-volume volume-c"></span><span class="login-shelf shelf-lower"></span></div>
+        <div class="login-still-life" aria-hidden="true">
+            <span class="login-sun"></span>
+            <span class="login-shelf"></span>
+            <span class="login-volume volume-a"></span>
+            <span class="login-volume volume-b"></span>
+            <span class="login-volume volume-c"></span>
+            <span class="login-shelf shelf-lower"></span>
+        </div>
         <span class="login-note">A little room<br />for big ideas.</span>
     </div>
     <div class="login-form-side">
         <div class="auth-card login-card">
-            <div class="eyebrow">WELCOME BACK</div>
-            <h2 id="login-title">Sign in</h2>
+            <span class="sw-kicker">Welcome Back</span>
+            <h2 id="login-title" class="sw-h2 mb-2">Sign in</h2>
             <p class="auth-intro">Use your library account to continue.</p>
+
             <form asp-action="Login" method="post">
                 <input asp-for="ReturnUrl" type="hidden" />
-                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
-                <div class="mb-3"><label asp-for="Email" class="form-label">Email address</label><input asp-for="Email" class="form-control" autocomplete="username" placeholder="you@yourlibrary.org" /><span asp-validation-for="Email" class="text-danger small"></span></div>
-                <div class="mb-3"><label asp-for="Password" class="form-label">Password</label><input asp-for="Password" class="form-control" autocomplete="current-password" placeholder="Enter your password" /><span asp-validation-for="Password" class="text-danger small"></span></div>
-                <div class="form-check mb-4"><input asp-for="RememberMe" class="form-check-input" /><label asp-for="RememberMe" class="form-check-label">Keep me signed in</label></div>
-                <button class="btn btn-primary w-100" type="submit">Sign in <i class="bi bi-arrow-right ms-2"></i></button>
+                <div asp-validation-summary="ModelOnly" class="sw-alert sw-alert-danger py-2 small mb-3" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="sw-form-label">Email address</label>
+                    <input asp-for="Email" class="sw-form-control" autocomplete="username" placeholder="you@shelfwise.local" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="sw-form-label">Password</label>
+                    <input asp-for="Password" class="sw-form-control" autocomplete="current-password" placeholder="Enter your password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label text-muted small">Keep me signed in</label>
+                </div>
+
+                <button class="sw-btn sw-btn-primary w-100 py-2" type="submit">
+                    Sign in <i class="bi bi-arrow-right ms-2"></i>
+                </button>
             </form>
+
             <p class="auth-switch">New to Shelfwise? <a asp-action="Register">Create a member account</a></p>
         </div>
         <p class="login-help"><i class="bi bi-shield-lock me-1"></i> Your account keeps your reading history private.</p>

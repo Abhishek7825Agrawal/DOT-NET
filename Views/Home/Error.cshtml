@@ -1,2 +1,87 @@
-@{ ViewData["Title"] = "Something went wrong"; }
-<div class="empty-state panel"><i class="bi bi-exclamation-circle"></i><h1 class="h3 mt-3">We couldn’t complete that request</h1><p>Please return to the dashboard and try again.</p><a class="btn btn-primary" asp-controller="Home" asp-action="Index">Go home</a></div>
+@model ErrorViewModel
+@{
+    ViewData["Title"] = $"{Model.StatusCode} · {Model.Title}";
+    var badgeClass = Model.StatusCode switch
+    {
+        404 => "badge-404",
+        403 => "badge-403",
+        500 => "badge-500",
+        _ => "badge-default"
+    };
+
+    var iconClass = Model.StatusCode switch
+    {
+        404 => "bi-journal-x",
+        403 => "bi-shield-slash-fill",
+        500 => "bi-exclamation-triangle-fill",
+        _ => "bi-info-circle-fill"
+    };
+}
+
+<div class="error-hero-wrapper">
+    <div class="error-panel">
+        <div class="error-badge-row">
+            <div class="eyebrow mb-0">
+                <span class="eyebrow-mark"></span> SHELFWISE RECOVERY DESK &bull; STATUS CODE @Model.StatusCode
+            </div>
+            <div class="error-code-badge @badgeClass" aria-label="Error code @Model.StatusCode">
+                <i class="bi @iconClass"></i>
+                <span>@Model.StatusCode</span>
+            </div>
+        </div>
+
+        <h1 class="error-title">@Model.Title</h1>
+        <div class="error-subtitle">@Model.Subtitle</div>
+        <p class="error-desc">@Model.Description</p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.OriginalPath) || Model.ShowRequestId)
+        {
+            <div class="error-meta-box">
+                @if (!string.IsNullOrWhiteSpace(Model.OriginalPath))
+                {
+                    <div>
+                        <span class="text-secondary fw-bold me-1"><i class="bi bi-link-45deg"></i> Requested Resource:</span>
+                        <code>@Model.OriginalPath</code>
+                    </div>
+                }
+                @if (Model.ShowRequestId)
+                {
+                    <div class="ms-auto text-secondary">
+                        <span class="fw-bold me-1"><i class="bi bi-fingerprint"></i> Incident ID:</span>
+                        <code>@Model.RequestId</code>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (Model.StatusCode == 404)
+        {
+            <div class="error-search-box mb-4">
+                <label for="errorSearchInput" class="form-label small fw-bold text-secondary text-uppercase mb-2">
+                    <i class="bi bi-search me-1"></i> Looking for a specific book? Search the catalogue:
+                </label>
+                <form method="get" asp-controller="Books" asp-action="Index" class="d-flex gap-2">
+                    <input type="search" id="errorSearchInput" name="q" class="form-control" placeholder="Search titles, authors, or subjects..." aria-label="Search catalogue from error page" />
+                    <button type="submit" class="btn btn-ink text-nowrap">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        }
+
+        <div class="error-actions d-flex flex-wrap gap-2 pt-3 border-top">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a class="btn btn-ink" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-grid-1x2 me-1"></i> Back to Dashboard
+                </a>
+            }
+            <a class="btn btn-paper" asp-controller="Books" asp-action="Index">
+                <i class="bi bi-book me-1"></i> Browse Catalogue
+            </a>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house me-1"></i> Return Home
+            </a>
+        </div>
+    </div>
+</div>

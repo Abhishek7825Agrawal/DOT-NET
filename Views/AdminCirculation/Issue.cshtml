@@ -1,49 +1,59 @@
 @model IssueBookViewModel
-@{ ViewData["Title"] = "Issue a Book"; }
+@{
+    ViewData["Title"] = "Issue a Book";
+}
 
-<div class="page-heading">
-    <div>
-        <div class="eyebrow">Borrowing Desk</div>
-        <h1>Issue a Book</h1>
-        <p class="text-secondary mb-0 mt-1">Select an active member and an available catalogue title to create a new loan record.</p>
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Circulation Operations</div>
+        <h1 class="sw-title-display">Issue a Book</h1>
+        <p class="sw-page-subtitle">Select an eligible borrower and an available catalogue title to originate a loan record.</p>
     </div>
-    <a class="btn btn-outline-secondary" asp-action="Index">
-        <i class="bi bi-arrow-left me-1"></i> Back to Circulation Desk
-    </a>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i> Return to Desk
+        </a>
+    </div>
 </div>
 
-<div class="panel" style="max-width:760px">
-    <form asp-action="Issue" method="post">
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="sw-table-card p-4 p-md-5 sw-fade-in-up">
+            <form asp-action="Issue" method="post" id="issueBookForm">
+                <div asp-validation-summary="ModelOnly" class="sw-alert sw-alert-danger mb-4"></div>
 
-        <div class="mb-4">
-            <label asp-for="MemberId" class="form-label">Select Borrower / Member <span class="text-danger">*</span></label>
-            <select asp-for="MemberId" asp-items="ViewBag.Members" class="form-select form-select-lg" required>
-                <option value="0">-- Choose registered active member --</option>
-            </select>
-            <span asp-validation-for="MemberId" class="text-danger small"></span>
-            <div class="form-text">Only active members without excessive overdue holds are eligible to borrow.</div>
-        </div>
+                <div class="mb-4">
+                    <label asp-for="MemberId" class="sw-form-label">Select Borrower / Member <span class="text-danger">*</span></label>
+                    <select asp-for="MemberId" asp-items="ViewBag.Members" class="form-select sw-input" required>
+                        <option value="0">-- Choose registered active member --</option>
+                    </select>
+                    <span asp-validation-for="MemberId" class="text-danger small mt-1 d-block"></span>
+                    <div class="form-text small text-muted mt-1">Only active borrowers without excessive overdue penalties are eligible for issuance.</div>
+                </div>
 
-        <div class="mb-4">
-            <label asp-for="BookId" class="form-label">Select Book Title <span class="text-danger">*</span></label>
-            <select asp-for="BookId" asp-items="ViewBag.Books" class="form-select form-select-lg" required>
-                <option value="0">-- Choose book with available inventory copies --</option>
-            </select>
-            <span asp-validation-for="BookId" class="text-danger small"></span>
-            <div class="form-text">Available stock decreases by 1 immediately upon issue.</div>
-        </div>
+                <div class="mb-4">
+                    <label asp-for="BookId" class="sw-form-label">Select Book Volume <span class="text-danger">*</span></label>
+                    <select asp-for="BookId" asp-items="ViewBag.Books" class="form-select sw-input" required>
+                        <option value="0">-- Choose book title with available inventory copies --</option>
+                    </select>
+                    <span asp-validation-for="BookId" class="text-danger small mt-1 d-block"></span>
+                    <div class="form-text small text-muted mt-1">Available inventory count decrements immediately upon issue submission.</div>
+                </div>
 
-        <div class="p-3 rounded bg-light border mb-4 small text-secondary">
-            <i class="bi bi-info-circle text-primary me-1"></i>
-            Due date will automatically be set according to the configured standard loan period (default 14 days). Duplicate active loans of the same title to the same borrower are rejected by system policy.
-        </div>
+                <div class="p-3 rounded mb-4 d-flex align-items-start gap-2" style="background-color: var(--sw-bg-alt); border: 1.5px solid var(--sw-border);">
+                    <i class="bi bi-info-circle text-primary mt-1"></i>
+                    <div class="small text-muted">
+                        Due date will automatically be set according to the active library loan period (14 standard days). Duplicate active loans of the exact same title to a single member are prevented.
+                    </div>
+                </div>
 
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary btn-lg px-4" type="submit">
-                <i class="bi bi-check2-circle me-1"></i> Confirm & Issue Loan
-            </button>
-            <a class="btn btn-outline-secondary btn-lg" asp-action="Index">Cancel</a>
+                <div class="d-flex align-items-center gap-3 pt-3 border-top" style="border-color: var(--sw-border) !important;">
+                    <button class="sw-btn sw-btn-primary sw-btn-lg" type="submit">
+                        <i class="bi bi-check2-circle me-1"></i> Confirm &amp; Issue Volume
+                    </button>
+                    <a class="sw-btn sw-btn-outline sw-btn-lg" asp-action="Index">Cancel</a>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>

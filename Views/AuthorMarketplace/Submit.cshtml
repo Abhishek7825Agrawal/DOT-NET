@@ -1,0 +1,193 @@
+@model PaperSubmitViewModel
+@{
+    ViewData["Title"] = "Submit Research Manuscript";
+    var commissionRate = (decimal)(ViewBag.CommissionRate ?? 15.0m);
+}
+
+<div class="sw-editorial-container py-4 pb-5">
+    <nav class="pb-3" aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Marketplace" asp-action="Index" class="text-decoration-none">Research Marketplace</a></li>
+            <li class="breadcrumb-item"><a asp-action="AuthorDesk" class="text-decoration-none">Author Desk</a></li>
+            <li class="breadcrumb-item active" aria-current="page">New Manuscript</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="sw-table-card p-4 p-md-5 mb-4">
+                <span class="sw-kicker sw-kicker-navy">Academic Peer-Review Pipeline</span>
+                <h1 class="h3 fw-bold mb-2" style="font-family: var(--sw-font-serif); color: var(--sw-navy);">
+                    Submit Research Manuscript<span class="text-primary">.</span>
+                </h1>
+                <p class="text-muted small mb-4">
+                    Submit your original scholarship, working paper, or thesis for editorial review. Once approved, your paper will be indexed in the Shelfwise Research Marketplace.
+                </p>
+
+                <form asp-action="Submit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                    <!-- Section: Paper Metadata -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            1. Manuscript Identification
+                        </h2>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Manuscript Title *</label>
+                            <input asp-for="Title" class="form-control sw-input" placeholder="e.g., Deep Residual Transformer Networks for Scalable Genomic Clustering" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Authors" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Contributing Author(s) *</label>
+                                <input asp-for="Authors" class="form-control sw-input" placeholder="e.g., Jane Doe, John Smith" />
+                                <span asp-validation-for="Authors" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Affiliation" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Institutional Affiliation *</label>
+                                <input asp-for="Affiliation" class="form-control sw-input" placeholder="e.g., MIT CSAIL / Stanford University" />
+                                <span asp-validation-for="Affiliation" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Category" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Subject Domain / Field *</label>
+                                <input asp-for="Category" class="form-control sw-input" placeholder="e.g., Computer Science, Economics" list="categoryOptions" />
+                                <datalist id="categoryOptions">
+                                    <option value="Computer Science" />
+                                    <option value="Artificial Intelligence" />
+                                    <option value="Economics &amp; Finance" />
+                                    <option value="Medicine &amp; Health Sciences" />
+                                    <option value="Physics &amp; Mathematics" />
+                                    <option value="Environmental Science" />
+                                    <option value="Social Sciences" />
+                                </datalist>
+                                <span asp-validation-for="Category" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-5">
+                                <label asp-for="Keywords" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Keywords (Comma Separated) *</label>
+                                <input asp-for="Keywords" class="form-control sw-input" placeholder="e.g., transformers, genomics, clustering" />
+                                <span asp-validation-for="Keywords" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label asp-for="PublicationYear" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Publication Year *</label>
+                                <input asp-for="PublicationYear" type="number" class="form-control sw-input" />
+                                <span asp-validation-for="PublicationYear" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Doi" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Digital Object Identifier (DOI, Optional)</label>
+                            <input asp-for="Doi" class="form-control sw-input font-monospace" placeholder="e.g., 10.1145/3318464.3389700" />
+                            <span asp-validation-for="Doi" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Section: Abstract -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            2. Academic Abstract
+                        </h2>
+                        <div class="mb-3">
+                            <label asp-for="Abstract" class="form-label fw-bold small text-muted">Provide a comprehensive summary of the research methodology, experimental findings, and academic contributions (minimum 50 characters).</label>
+                            <textarea asp-for="Abstract" rows="6" class="form-control sw-input" placeholder="Type or paste the complete academic abstract here..."></textarea>
+                            <span asp-validation-for="Abstract" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Section: Pricing & Commercial Terms -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            3. Publication Access &amp; Pricing
+                        </h2>
+
+                        <div class="p-3 rounded mb-3" style="background-color: var(--sw-bg-alt, #f8f9fa); border: 1px solid var(--sw-border);">
+                            <div class="form-check form-switch mb-2">
+                                <input asp-for="IsPaid" class="form-check-input" type="checkbox" id="isPaidSwitch" />
+                                <label class="form-check-label fw-bold" for="isPaidSwitch">Publish as Premium Paid Manuscript</label>
+                            </div>
+                            <div class="text-muted small">
+                                Unchecked manuscripts will be listed as <strong>Open Access (Free)</strong>. If enabled, cardholders will purchase reading and archival access at your set price.
+                            </div>
+                        </div>
+
+                        <div id="priceFields" style="display: @(Model.IsPaid ? "block" : "none");" class="mb-3">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-5">
+                                    <label asp-for="Price" class="form-label fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Listing Price (INR ₹) *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input asp-for="Price" type="number" step="0.01" class="form-control sw-input font-monospace" placeholder="0.00" />
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="small text-muted p-2 bg-white rounded border">
+                                        <i class="bi bi-info-circle text-primary me-1"></i>
+                                        Platform commission rate is <strong>@commissionRate.ToString("0.##")%</strong>. When a paper sells, you receive @((100m - commissionRate).ToString("0.##"))% directly into your author earnings ledger.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: PDF Manuscript Upload -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            4. Manuscript PDF Document
+                        </h2>
+                        <div class="mb-3">
+                            <label asp-for="PdfFile" class="form-label fw-bold small text-muted">Attach primary PDF file (Maximum 50MB. Validated for PDF header signatures and safe server-side storage).</label>
+                            <input asp-for="PdfFile" type="file" accept="application/pdf,.pdf" class="form-control sw-input" />
+                            <span asp-validation-for="PdfFile" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Section: Copyright Declaration -->
+                    <div class="mb-4">
+                        <h2 class="h6 text-uppercase fw-bold pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                            5. Copyright Warranty &amp; Distribution Terms
+                        </h2>
+                        <div class="form-check p-3 rounded" style="background-color: var(--sw-bg-alt, #f8f9fa); border: 1px solid var(--sw-border);">
+                            <input asp-for="CopyrightAccepted" class="form-check-input ms-0 me-2" type="checkbox" id="copyrightCheck" />
+                            <label class="form-check-label small" for="copyrightCheck">
+                                <strong>Author Warranty:</strong> I warrant that I am the author / legal copyright owner of this manuscript, that the submission does not infringe any third-party intellectual property or confidentiality agreements, and I grant Shelfwise a non-exclusive license to index, host, and distribute this document in accordance with the selected pricing tier.
+                            </label>
+                            <div><span asp-validation-for="CopyrightAccepted" class="text-danger small"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top" style="border-color: var(--sw-border) !important;">
+                        <a asp-action="AuthorDesk" class="sw-btn sw-btn-outline">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="sw-btn sw-btn-primary px-4 py-2">
+                            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Submit Manuscript for Editorial Review
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const isPaidSwitch = document.getElementById('isPaidSwitch');
+            const priceFields = document.getElementById('priceFields');
+            if (isPaidSwitch && priceFields) {
+                isPaidSwitch.addEventListener('change', function () {
+                    priceFields.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+        });
+    </script>
+}

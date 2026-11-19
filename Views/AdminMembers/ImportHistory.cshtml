@@ -1,0 +1,104 @@
+@model IReadOnlyList<CustomerImportBatch>
+@{
+    ViewData["Title"] = "Import Batch History";
+}
+
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Audit Log &bull; Batch Onboarding</div>
+        <h1 class="sw-title-display">Spreadsheet Import History</h1>
+        <p class="sw-page-subtitle">Track historical Excel bulk registrations, auditing staff actions, committed cardholders, and validation error records.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i> Member Directory
+        </a>
+        <a class="sw-btn sw-btn-accent" asp-action="BulkImport">
+            <i class="bi bi-cloud-arrow-up me-1"></i> New Excel Import
+        </a>
+    </div>
+</div>
+
+<div class="sw-table-card">
+    @if (Model.Count == 0)
+    {
+        <div class="sw-empty-state py-5">
+            <div class="sw-empty-icon"><i class="bi bi-clock-history"></i></div>
+            <h3 class="sw-empty-title">No import batches recorded</h3>
+            <p class="sw-empty-text">No spreadsheet imports have been processed yet.</p>
+            <a asp-action="BulkImport" class="sw-btn sw-btn-primary mt-3">
+                <i class="bi bi-cloud-arrow-up me-1"></i> Start First Excel Import
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sw-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Batch Reference</th>
+                        <th>Uploaded (UTC)</th>
+                        <th>Staff Member</th>
+                        <th>File Name</th>
+                        <th class="text-center">Total Rows</th>
+                        <th class="text-center">Enrolled</th>
+                        <th class="text-center">Duplicates</th>
+                        <th class="text-center">Invalid</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var batch in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong class="font-monospace" style="color: var(--sw-navy);">@batch.BatchReference</strong>
+                            </td>
+                            <td class="font-monospace text-nowrap small">
+                                @batch.CreatedAtUtc.ToString("dd MMM yyyy HH:mm")
+                            </td>
+                            <td>
+                                <span class="small fw-semibold">@(batch.StaffUser?.UserName ?? batch.StaffUserId)</span>
+                            </td>
+                            <td>
+                                <span class="small text-muted font-monospace">@batch.OriginalFileName</span>
+                            </td>
+                            <td class="text-center font-monospace fw-bold">@batch.TotalRows</td>
+                            <td class="text-center font-monospace text-success fw-bold">
+                                @(batch.IsCommitted ? batch.SuccessImportedCount : batch.ValidRowsCount)
+                            </td>
+                            <td class="text-center font-monospace text-warning fw-bold">@batch.DuplicateRowsCount</td>
+                            <td class="text-center font-monospace text-danger fw-bold">@batch.InvalidRowsCount</td>
+                            <td>
+                                @if (batch.IsCommitted)
+                                {
+                                    <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span> Committed</span>
+                                }
+                                else
+                                {
+                                    <span class="sw-badge sw-badge-warning"><span class="sw-badge-dot"></span> Staged</span>
+                                }
+                            </td>
+                            <td class="text-end text-nowrap">
+                                @if (!batch.IsCommitted)
+                                {
+                                    <a asp-action="ImportPreview" asp-route-batchId="@batch.Id" class="sw-btn sw-btn-sm sw-btn-accent me-1" title="Review staged rows">
+                                        <i class="bi bi-eye me-1"></i> Review
+                                    </a>
+                                }
+                                @if (batch.InvalidRowsCount > 0 || batch.DuplicateRowsCount > 0)
+                                {
+                                    <a asp-action="DownloadErrorReport" asp-route-batchId="@batch.Id" class="sw-btn sw-btn-sm sw-btn-outline" title="Download rejected entries (.xlsx)">
+                                        <i class="bi bi-download me-1"></i> Error Report
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

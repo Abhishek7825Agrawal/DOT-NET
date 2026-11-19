@@ -1,16 +1,24 @@
+using System.Security.Claims;
+using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Services;
 using LibraryManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Controllers;
 
-[Authorize(Roles = "Admin")]
-public sealed class AdminBooksController(BookService books, CategoryService categories) : Controller
+[Authorize(Roles = "Admin,Staff")]
+public sealed class AdminBooksController(
+    BookService books,
+    CategoryService categories,
+    ApplicationDbContext db,
+    DigitalDocumentService documents) : Controller
 {
+    private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     public async Task<IActionResult> Index(string? q, string? category, int page = 1, CancellationToken cancellationToken = default)
     {
         const int pageSize = 15;
@@ -148,6 +156,136 @@ public sealed class AdminBooksController(BookService books, CategoryService cate
         }
         return RedirectToAction(nameof(Index));
     }
+
+    #region Digital Book Edition Management
+
+    [HttpGet]
+    public async Task<IActionResult> ManageDigital(int id, CancellationToken cancellationToken)
+    {
+        var book = await db.Books.AsNoTracking()
+            .Include(b => b.DigitalEdition)
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
+
+        if (book is null) return NotFound("Book not found.");
+
+        var vm = new ManageDigitalBookViewModel
+        {
+            BookId = book.Id,
+            BookTitle = book.Title,
+            Author = book.Author,
+            Category = book.Category,
+            Isbn = book.Isbn,
+            TotalPhysicalCopies = book.TotalQuantity,
+            AvailablePhysicalCopies = book.AvailableQuantity,
+            HasDigitalEdition = book.DigitalEdition is not null,
+            DigitalBookId = book.DigitalEdition?.Id,
+            OriginalFileName = book.DigitalEdition?.OriginalFileName,
+            FileSizeBytes = book.DigitalEdition?.FileSizeBytes ?? 0,
+            PageCount = book.DigitalEdition?.PageCount ?? 0,
+            DocumentVersion = book.DigitalEdition?.DocumentVersion ?? 1,
+            IsDigitalAvailable = book.DigitalEdition?.IsDigitalAvailable ?? true,
+            UploadedAtUtc = book.DigitalEdition?.UploadedAtUtc,
+            ChecksumSha256 = book.DigitalEdition?.ChecksumSha256
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UploadDigital([FromForm] int bookId, [FromForm] IFormFile? pdfFile, CancellationToken cancellationToken)
+    {
+        var book = await db.Books
+            .Include(b => b.DigitalEdition)
+            .FirstOrDefaultAsync(b => b.Id == bookId, cancellationToken);
+
+        if (book is null) return NotFound("Book not found.");
+
+        if (pdfFile is null || pdfFile.Length == 0)
+        {
+            TempData["Error"] = "Please select a valid PDF file to upload.";
+            return RedirectToAction(nameof(ManageDigital), new { id = bookId });
+        }
+
+        try
+        {
+            var meta = await documents.SaveDocumentAsync(pdfFile, cancellationToken);
+
+            if (book.DigitalEdition is null)
+            {
+                var digitalBook = new DigitalBook
+                {
+                    BookId = book.Id,
+                    StorageFileName = meta.StorageFileName,
+                    OriginalFileName = meta.OriginalFileName,
+                    FileSizeBytes = meta.FileSizeBytes,
+                    PageCount = meta.PageCount,
+                    DocumentVersion = 1,
+                    IsDigitalAvailable = true,
+                    UploadedAtUtc = DateTime.UtcNow,
+                    UploadedByUserId = CurrentUserId,
+                    ChecksumSha256 = meta.ChecksumSha256
+                };
+                db.DigitalBooks.Add(digitalBook);
+            }
+            else
+            {
+                // Delete previous file from storage
+                var previousStorageFile = book.DigitalEdition.StorageFileName;
+                documents.DeleteDocument(previousStorageFile);
+
+                book.DigitalEdition.StorageFileName = meta.StorageFileName;
+                book.DigitalEdition.OriginalFileName = meta.OriginalFileName;
+                book.DigitalEdition.FileSizeBytes = meta.FileSizeBytes;
+                book.DigitalEdition.PageCount = meta.PageCount;
+                book.DigitalEdition.DocumentVersion++;
+                book.DigitalEdition.UploadedAtUtc = DateTime.UtcNow;
+                book.DigitalEdition.UploadedByUserId = CurrentUserId;
+                book.DigitalEdition.ChecksumSha256 = meta.ChecksumSha256;
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
+            TempData["Success"] = $"Digital edition for '{book.Title}' ({meta.PageCount} pages, {meta.FileSizeBytes / 1024:N0} KB) saved successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"Failed to upload digital document: {ex.Message}";
+        }
+
+        return RedirectToAction(nameof(ManageDigital), new { id = bookId });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ToggleDigital([FromForm] int bookId, CancellationToken cancellationToken)
+    {
+        var digital = await db.DigitalBooks.FirstOrDefaultAsync(d => d.BookId == bookId, cancellationToken);
+        if (digital is null) return NotFound("Digital edition not found.");
+
+        digital.IsDigitalAvailable = !digital.IsDigitalAvailable;
+        await db.SaveChangesAsync(cancellationToken);
+
+        TempData["Success"] = digital.IsDigitalAvailable
+            ? "Digital book access enabled for readers."
+            : "Digital book access temporarily suspended.";
+
+        return RedirectToAction(nameof(ManageDigital), new { id = bookId });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteDigital([FromForm] int bookId, CancellationToken cancellationToken)
+    {
+        var digital = await db.DigitalBooks.FirstOrDefaultAsync(d => d.BookId == bookId, cancellationToken);
+        if (digital is null) return NotFound("Digital edition not found.");
+
+        documents.DeleteDocument(digital.StorageFileName);
+        db.DigitalBooks.Remove(digital);
+        await db.SaveChangesAsync(cancellationToken);
+
+        TempData["Success"] = "Digital PDF edition permanently removed from this title.";
+        return RedirectToAction(nameof(ManageDigital), new { id = bookId });
+    }
+
+    #endregion
 
     private async Task PopulateCategoriesAsync(CancellationToken cancellationToken)
     {

@@ -1,0 +1,123 @@
+@model StaffRegistrationSuccessViewModel
+@{
+    ViewData["Title"] = "Registration Successful";
+}
+
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker text-success"><i class="bi bi-check-circle-fill me-1"></i> Cardholder Enrolled &bull; #MB-@Model.MemberId.ToString("D4")</div>
+        <h1 class="sw-title-display">Member Account Created</h1>
+        <p class="sw-page-subtitle">The cardholder record has been committed to the database. Provide the activation link below so the member can complete their password setup.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="RegisterCustomer">
+            <i class="bi bi-person-plus me-1"></i> Register Another Member
+        </a>
+        <a class="sw-btn sw-btn-outline" asp-action="Index">
+            <i class="bi bi-people me-1"></i> Member Directory
+        </a>
+        <a class="sw-btn sw-btn-primary" asp-action="Details" asp-route-id="@Model.MemberId">
+            <i class="bi bi-person-vcard me-1"></i> View Dossier
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+        <!-- Activation Link Prominent Card -->
+        <div class="sw-table-card p-4 p-md-5 mb-4" style="border-left: 4px solid var(--sw-terracotta);">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="sw-kpi-icon sw-icon-terracotta" style="width: 44px; height: 44px; font-size: 1.3rem;">
+                    <i class="bi bi-key-fill"></i>
+                </div>
+                <div>
+                    <h3 class="h5 mb-0 fw-bold" style="font-family: var(--sw-font-serif);">One-Time Account Activation Link</h3>
+                    <small class="text-muted">Direct the cardholder to this secure URL to set their private password.</small>
+                </div>
+            </div>
+
+            <p class="small text-muted mb-3">
+                This single-use cryptographic token allows the member to safely activate their account without sharing credentials with staff:
+            </p>
+
+            <div class="input-group mb-3">
+                <input type="text" id="activationUrlInput" class="form-control sw-input font-monospace bg-light" value="@Model.ActivationUrl" readonly />
+                <button class="sw-btn sw-btn-primary" type="button" id="copyLinkBtn" onclick="copyActivationUrl()">
+                    <i class="bi bi-clipboard me-1" id="copyIcon"></i> <span id="copyText">Copy Link</span>
+                </button>
+            </div>
+
+            <div id="copyAlert" class="alert alert-success py-2 px-3 small d-none" role="alert">
+                <i class="bi bi-check2-circle me-1"></i> Activation link copied to clipboard!
+            </div>
+        </div>
+
+        <!-- Registered Member Dossier Summary -->
+        <div class="sw-table-card p-4 mb-4">
+            <h4 class="h6 text-uppercase fw-bold text-muted mb-4 pb-2 border-bottom" style="letter-spacing: 0.05em; border-color: var(--sw-border) !important;">
+                Enrolled Profile Summary
+            </h4>
+
+            <div class="row g-4">
+                <div class="col-sm-6">
+                    <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Full Legal Name</span>
+                    <span class="fs-6 fw-bold" style="color: var(--sw-navy);">@Model.FullName</span>
+                </div>
+                <div class="col-sm-6">
+                    <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Member Account ID</span>
+                    <span class="badge font-monospace px-2 py-1" style="background-color: var(--sw-navy); color: #fff;">#MB-@Model.MemberId.ToString("D4")</span>
+                </div>
+                <div class="col-sm-6">
+                    <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Registered Email</span>
+                    <span class="font-monospace">@Model.Email</span>
+                </div>
+                <div class="col-sm-6">
+                    <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Phone Number</span>
+                    <span>@(Model.PhoneNumber ?? "—")</span>
+                </div>
+                <div class="col-12">
+                    <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Address</span>
+                    <span>@(Model.Address ?? "—")</span>
+                </div>
+                <div class="col-12">
+                    <span class="text-muted small text-uppercase d-block mb-1" style="font-size: 0.72rem; letter-spacing: 0.05em;">Registration Timestamp</span>
+                    <span class="font-monospace text-muted">@Model.RegisteredAtUtc.ToString("dd MMMM yyyy HH:mm:ss") UTC</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Next Steps -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2">
+            <a asp-action="RegisterCustomer" class="sw-btn sw-btn-outline">
+                <i class="bi bi-plus-lg me-1"></i> Register Another Cardholder
+            </a>
+            <a asp-action="Details" asp-route-id="@Model.MemberId" class="sw-btn sw-btn-accent">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Open Member Dossier &amp; Issue Books
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyActivationUrl() {
+        const input = document.getElementById('activationUrlInput');
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(() => {
+            const copyBtn = document.getElementById('copyLinkBtn');
+            const copyIcon = document.getElementById('copyIcon');
+            const copyText = document.getElementById('copyText');
+            const copyAlert = document.getElementById('copyAlert');
+
+            copyIcon.className = "bi bi-check2";
+            copyText.textContent = "Copied!";
+            copyAlert.classList.remove('d-none');
+
+            setTimeout(() => {
+                copyIcon.className = "bi bi-clipboard me-1";
+                copyText.textContent = "Copy Link";
+                copyAlert.classList.add('d-none');
+            }, 3500);
+        });
+    }
+</script>

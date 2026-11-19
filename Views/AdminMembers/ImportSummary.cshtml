@@ -1,0 +1,159 @@
+@model CustomerImportSummaryViewModel
+@{
+    ViewData["Title"] = $"Import Summary · {Model.BatchReference}";
+}
+
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker text-success"><i class="bi bi-check-circle-fill me-1"></i> Batch Committed &bull; @Model.BatchReference</div>
+        <h1 class="sw-title-display">Import Execution Summary</h1>
+        <p class="sw-page-subtitle">Batch commit finalized on @Model.CommittedAtUtc.ToString("dd MMM yyyy HH:mm:ss") UTC. All valid cardholders are enrolled with zero-trust credentials and ready for account activation.</p>
+    </div>
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-outline" asp-action="BulkImport">
+            <i class="bi bi-file-earmark-plus me-1"></i> Import Another File
+        </a>
+        <a class="sw-btn sw-btn-primary" asp-action="Index">
+            <i class="bi bi-people me-1"></i> Member Directory
+        </a>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label">Total Processed</span>
+                <div class="sw-kpi-icon sw-icon-navy"><i class="bi bi-list-nested"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2">@Model.TotalProcessed.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Spreadsheet rows</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3" style="border-left: 4px solid #198754;">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label text-success">Successfully Enrolled</span>
+                <div class="sw-kpi-icon sw-icon-sage"><i class="bi bi-person-check-fill"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2 text-success">@Model.SuccessfullyImported.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Active member accounts</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3" style="border-left: 4px solid #ffc107;">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label text-warning">Duplicates Skipped</span>
+                <div class="sw-kpi-icon sw-icon-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2 text-warning">@Model.DuplicateSkipped.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Preserved existing accounts</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="sw-kpi-card p-3" style="border-left: 4px solid #dc3545;">
+            <div class="sw-kpi-header mb-1">
+                <span class="sw-kpi-label text-danger">Invalid Skipped</span>
+                <div class="sw-kpi-icon sw-icon-danger"><i class="bi bi-x-circle-fill"></i></div>
+            </div>
+            <div class="sw-kpi-value fs-2 text-danger">@Model.InvalidSkipped.ToString("N0")</div>
+            <div class="sw-kpi-footer small text-muted">Schema/format errors</div>
+        </div>
+    </div>
+</div>
+
+<!-- Enrolled Members & Activation Tokens -->
+<div class="sw-table-card mb-4">
+    <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2" style="border-color: var(--sw-border) !important;">
+        <div>
+            <h3 class="h5 mb-0 fw-bold" style="font-family: var(--sw-font-serif);">Enrolled Cardholders &amp; Activation Tokens</h3>
+            <small class="text-muted">Distribute these single-use activation URLs to the cardholders to set their private passwords.</small>
+        </div>
+        @if (Model.InvalidSkipped > 0 || Model.DuplicateSkipped > 0)
+        {
+            <a class="sw-btn sw-btn-sm sw-btn-outline" asp-action="DownloadErrorReport" asp-route-batchId="@Model.BatchId">
+                <i class="bi bi-download me-1"></i> Download Error Report (.xlsx)
+            </a>
+        }
+    </div>
+
+    @if (Model.ImportedMembers.Count == 0)
+    {
+        <div class="sw-empty-state py-5">
+            <div class="sw-empty-icon"><i class="bi bi-info-circle"></i></div>
+            <h3 class="sw-empty-title">No new members were committed</h3>
+            <p class="sw-empty-text">All rows were either duplicates or contained format errors.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="sw-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">Row #</th>
+                        <th>Cardholder Name</th>
+                        <th>Email Address</th>
+                        <th>One-Time Activation URL</th>
+                        <th class="text-end" style="width: 140px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var member in Model.ImportedMembers)
+                    {
+                        <tr>
+                            <td class="font-monospace fw-bold text-muted">@member.RowNumber</td>
+                            <td>
+                                <strong style="color: var(--sw-navy);">@member.FullName</strong>
+                            </td>
+                            <td>
+                                <span class="font-monospace small">@member.Email</span>
+                            </td>
+                            <td>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control font-monospace bg-light" value="@member.ActivationUrl" id="link-@member.RowNumber" readonly />
+                                    <button class="btn btn-outline-secondary" type="button" onclick="copyRowLink(@member.RowNumber, this)" title="Copy link">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <a href="@member.ActivationUrl" target="_blank" class="sw-btn sw-btn-sm sw-btn-outline" title="Open activation page in new tab">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Test Link
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <a asp-action="Index" class="sw-btn sw-btn-primary">
+        <i class="bi bi-people me-1"></i> Return to Member Directory
+    </a>
+    <a asp-controller="AdminCirculation" asp-action="Index" class="sw-btn sw-btn-outline">
+        <i class="bi bi-journal-check me-1"></i> Front Circulation Desk
+    </a>
+</div>
+
+<script>
+    function copyRowLink(rowNum, button) {
+        const input = document.getElementById('link-' + rowNum);
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(() => {
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check2 text-success"></i>';
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+            }, 2500);
+        });
+    }
+</script>

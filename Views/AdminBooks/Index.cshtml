@@ -1,29 +1,31 @@
 @model IReadOnlyList<Book>
-@{ ViewData["Title"] = "Book Collection"; }
+@{
+    ViewData["Title"] = "Book Collection";
+}
 
-<div class="page-heading">
-    <div>
-        <div class="eyebrow">Inventory Management</div>
-        <h1>Book Collection</h1>
-        <p class="text-secondary mb-0 mt-1">Manage catalogued titles, monitor available inventory, and archive retired books.</p>
+<div class="sw-page-header">
+    <div class="sw-page-title-group">
+        <div class="sw-kicker"><span class="sw-kicker-dot"></span> Inventory Management</div>
+        <h1 class="sw-title-display">Book Collection</h1>
+        <p class="sw-page-subtitle">Curate library catalogued titles, monitor inventory stock, and manage volume availability.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-primary" asp-action="Create">
+    <div class="sw-page-actions">
+        <a class="sw-btn sw-btn-primary" asp-action="Create">
             <i class="bi bi-plus-lg me-1"></i> Add Title
         </a>
     </div>
 </div>
 
-<form method="get" class="panel mb-3">
+<form method="get" class="sw-table-card p-3 mb-4">
     <div class="row g-2 align-items-center">
-        <div class="col-md-7">
+        <div class="col-lg-7 col-md-12">
             <div class="input-group">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input class="form-control border-start-0 ps-0" name="q" value="@ViewBag.Query" placeholder="Search title, author, ISBN or publisher..." aria-label="Search books" />
+                <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--sw-input-border);"><i class="bi bi-search text-muted"></i></span>
+                <input class="form-control border-start-0 ps-0 sw-input" name="q" value="@ViewBag.Query" placeholder="Search title, author, ISBN or publisher..." aria-label="Search books" />
             </div>
         </div>
-        <div class="col-md-3">
-            <select class="form-select" name="category" aria-label="Filter by category">
+        <div class="col-lg-3 col-md-6">
+            <select class="form-select sw-input" name="category" aria-label="Filter by category">
                 <option value="">All Categories</option>
                 @if (ViewBag.Categories is List<string> categoryList)
                 {
@@ -34,31 +36,31 @@
                 }
             </select>
         </div>
-        <div class="col-md-2 d-grid">
-            <button class="btn btn-outline-secondary" type="submit">Filter</button>
+        <div class="col-lg-2 col-md-6 d-grid">
+            <button class="sw-btn sw-btn-outline" type="submit">Filter Titles</button>
         </div>
     </div>
 </form>
 
-<div class="panel">
+<div class="sw-table-card">
     @if (Model.Count == 0)
     {
-        <div class="empty-state">
-            <i class="bi bi-book"></i>
-            <h3 class="h6 mt-3">No titles found</h3>
-            <p class="mb-0 text-muted">Try adjusting your search criteria or add a new title to the collection.</p>
+        <div class="sw-empty-state py-5">
+            <div class="sw-empty-icon"><i class="bi bi-book"></i></div>
+            <h3 class="sw-empty-title">No book titles found</h3>
+            <p class="sw-empty-text">No catalogue items match your search criteria. Add a new book or reset filters.</p>
         </div>
     }
     else
     {
         <div class="table-responsive">
-            <table class="table mb-0">
+            <table class="sw-table mb-0">
                 <thead>
                     <tr>
-                        <th>Title & Author</th>
+                        <th>Title &amp; Author</th>
                         <th>ISBN</th>
                         <th>Category</th>
-                        <th>Copies</th>
+                        <th>Copies (Avail / Total)</th>
                         <th>Status</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -68,42 +70,45 @@
                     {
                         <tr>
                             <td>
-                                <div class="fw-semibold">@book.Title</div>
-                                <small class="text-secondary">by @book.Author</small>
+                                <div class="fw-semibold text-dark">@book.Title</div>
+                                <small class="text-muted">by @book.Author</small>
                             </td>
-                            <td><code>@(book.Isbn ?? "—")</code></td>
-                            <td><span class="badge rounded-pill badge-soft">@book.Category</span></td>
+                            <td><code class="font-monospace">@(book.Isbn ?? "—")</code></td>
+                            <td><span class="sw-badge sw-badge-neutral">@book.Category</span></td>
                             <td>
-                                <span class="fw-bold @(book.AvailableQuantity > 0 ? "text-success" : "text-danger")">@book.AvailableQuantity</span>
-                                <span class="text-secondary">/ @book.TotalQuantity</span>
+                                <span class="fw-bold font-monospace @(book.AvailableQuantity > 0 ? "text-success" : "text-danger")">@book.AvailableQuantity</span>
+                                <span class="text-muted font-monospace">/ @book.TotalQuantity</span>
                             </td>
                             <td>
                                 @if (book.IsActive)
                                 {
-                                    <span class="badge rounded-pill text-bg-success">Active</span>
+                                    <span class="sw-badge sw-badge-success"><span class="sw-badge-dot"></span> Active</span>
                                 }
                                 else
                                 {
-                                    <span class="badge rounded-pill text-bg-secondary">Archived</span>
+                                    <span class="sw-badge sw-badge-neutral"><span class="sw-badge-dot"></span> Archived</span>
                                 }
                             </td>
                             <td class="text-end text-nowrap">
-                                <a class="btn btn-sm btn-outline-secondary me-1" asp-action="Edit" asp-route-id="@book.Id">
+                                <a class="sw-btn sw-btn-sm sw-btn-outline me-1" asp-action="ManageDigital" asp-route-id="@book.Id" title="Manage PDF manuscript & digital edition">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Digital
+                                </a>
+                                <a class="sw-btn sw-btn-sm sw-btn-outline me-1" asp-action="Edit" asp-route-id="@book.Id">
                                     <i class="bi bi-pencil me-1"></i> Edit
                                 </a>
 
                                 @if (book.IsActive)
                                 {
                                     <form asp-action="Delete" asp-route-id="@book.Id" method="post" class="d-inline" data-confirm="Archive this title? Existing loan records will be preserved safely.">
-                                        <button class="btn btn-sm btn-outline-danger" type="submit">
+                                        <button class="sw-btn sw-btn-sm sw-btn-outline text-danger" type="submit">
                                             <i class="bi bi-archive me-1"></i> Archive
                                         </button>
                                     </form>
                                 }
                                 else
                                 {
-                                    <form asp-action="Restore" asp-route-id="@book.Id" method="post" class="d-inline" data-confirm="Restore this archived title back to the active catalogue?">
-                                        <button class="btn btn-sm btn-outline-success" type="submit">
+                                    <form asp-action="Restore" asp-route-id="@book.Id" method="post" class="d-inline" data-confirm="Restore this title to the active public catalogue?">
+                                        <button class="sw-btn sw-btn-sm sw-btn-outline text-success" type="submit">
                                             <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
                                         </button>
                                     </form>
@@ -119,23 +124,23 @@
 
 @if ((int)ViewBag.TotalPages > 1)
 {
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <span class="small text-secondary">Page @ViewBag.Page of @ViewBag.TotalPages</span>
-        <nav aria-label="Book pagination">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item @((int)ViewBag.Page <= 1 ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page - 1)" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category">Previous</a>
-                </li>
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <span class="small text-muted font-monospace">Page @ViewBag.Page of @ViewBag.TotalPages</span>
+        <nav aria-label="Book catalogue pagination">
+            <div class="d-flex gap-1">
+                @if ((int)ViewBag.Page > 1)
+                {
+                    <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index" asp-route-page="@((int)ViewBag.Page - 1)" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category">&larr; Prev</a>
+                }
                 @for (var p = Math.Max(1, (int)ViewBag.Page - 2); p <= Math.Min((int)ViewBag.TotalPages, (int)ViewBag.Page + 2); p++)
                 {
-                    <li class="page-item @(p == (int)ViewBag.Page ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category">@p</a>
-                    </li>
+                    <a class="sw-btn sw-btn-sm @(p == (int)ViewBag.Page ? "sw-btn-primary" : "sw-btn-outline")" asp-action="Index" asp-route-page="@p" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category">@p</a>
                 }
-                <li class="page-item @((int)ViewBag.Page >= (int)ViewBag.TotalPages ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.Page + 1)" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category">Next</a>
-                </li>
-            </ul>
+                @if ((int)ViewBag.Page < (int)ViewBag.TotalPages)
+                {
+                    <a class="sw-btn sw-btn-outline sw-btn-sm" asp-action="Index" asp-route-page="@((int)ViewBag.Page + 1)" asp-route-q="@ViewBag.Query" asp-route-category="@ViewBag.Category">Next &rarr;</a>
+                }
+            </div>
         </nav>
     </div>
 }
