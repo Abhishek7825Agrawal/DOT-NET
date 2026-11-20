@@ -23,4 +23,7 @@ public sealed class LibraryCalendar
 
     public DateTimeOffset ToLocal(DateTimeOffset instant) =>
         TimeZoneInfo.ConvertTime(instant, timeZone);
+
+    public DateTime ToUtc(DateTime localDateTime) =>
+        TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(localDateTime, DateTimeKind.Unspecified), timeZone);
 }

@@ -114,9 +114,11 @@ public static class BusinessLogicTests
         ExcelImportTests.Run(out var excelPassed, out var excelFailed);
         DigitalLibraryTests.Run(out var digitalPassed, out var digitalFailed);
         MarketplaceTests.Run(out var marketPassed, out var marketFailed);
+        var (auditPassed, auditFailed) = ActivityAuditTests.Run();
+        var (passwordPassed, passwordFailed) = PasswordRecoveryTests.RunAsync().GetAwaiter().GetResult();
 
-        var totalPassed = basePassed + sqlPassed + excelPassed + digitalPassed + marketPassed;
-        var totalFailed = baseFailed + sqlFailed + excelFailed + digitalFailed + marketFailed;
+        var totalPassed = basePassed + sqlPassed + excelPassed + digitalPassed + marketPassed + auditPassed + passwordPassed;
+        var totalFailed = baseFailed + sqlFailed + excelFailed + digitalFailed + marketFailed + auditFailed + passwordFailed;
         var totalTests = totalPassed + totalFailed;
 
         Console.WriteLine("==================================================");
@@ -127,6 +129,8 @@ public static class BusinessLogicTests
         Console.WriteLine($"  Excel Bulk Import & Security     : {excelPassed} passed, {excelFailed} failed");
         Console.WriteLine($"  Phase 5 Digital Library Tests    : {digitalPassed} passed, {digitalFailed} failed");
         Console.WriteLine($"  Phase 6 Research Marketplace     : {marketPassed} passed, {marketFailed} failed");
+        Console.WriteLine($"  Phase 7A Activity & Audit        : {auditPassed} passed, {auditFailed} failed");
+        Console.WriteLine($"  Phase 7A Password Recovery       : {passwordPassed} passed, {passwordFailed} failed");
         Console.WriteLine("--------------------------------------------------");
         Console.WriteLine($"  TOTAL SUITE TESTS: {totalTests} | PASSED: {totalPassed} | FAILED: {totalFailed}");
         Console.WriteLine("==================================================");

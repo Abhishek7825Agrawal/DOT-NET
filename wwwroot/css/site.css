@@ -1363,3 +1363,190 @@ body.is-page-exiting .page-content-root {
 .error-search-box .form-control:focus {
     box-shadow: 2px 2px 0 var(--charcoal);
 }
+
+/* Phase 7A global readability guardrails. Components keep their Warm Archive
+   shapes, while text, controls and interactive states use semantic theme pairs. */
+:root, [data-theme] {
+    --bs-body-color: var(--sw-text);
+    --bs-body-bg: var(--sw-bg);
+    --bs-emphasis-color: var(--sw-text);
+    --bs-secondary-color: var(--sw-text-muted);
+    --bs-tertiary-color: var(--sw-text-muted);
+    --bs-border-color: var(--sw-border);
+    --bs-link-color: var(--sw-primary);
+    --bs-link-hover-color: var(--sw-primary-hover);
+    --bs-form-control-bg: var(--sw-input-bg);
+    --bs-form-control-color: var(--sw-text);
+}
+
+html, body, body.sw-shell {
+    background-color: var(--sw-bg);
+    color: var(--sw-text);
+    color-scheme: inherit;
+}
+body.sw-shell footer.sw-footer {
+    background: var(--sw-nav-bg);
+    border-color: var(--sw-accent);
+    color: var(--sw-text-muted);
+}
+
+/* The sign-in illustration panel stays theme-aware because the global text
+   rules also cover its heading and supporting copy. */
+body.sw-shell .login-story { background: var(--sw-surface-alt); }
+body.sw-shell .login-layout,
+body.sw-shell .auth-card { background: var(--sw-surface); }
+body.sw-shell .login-story-copy .eyebrow,
+body.sw-shell .login-story-copy p { color: var(--sw-text-muted); }
+body.sw-shell .login-story-copy h1 em { color: var(--sw-accent); }
+
+body.sw-shell :is(h1, h2, h3, h4, h5, h6, p, label, legend, dt, dd, th, td, .sw-h1, .sw-h2, .sw-h3, .sw-h4, .sw-h5, .sw-h6) {
+    color: var(--sw-text);
+}
+
+body.sw-shell :is(.text-muted, .text-secondary, .form-text, .sw-text-muted, .sw-nav-subtitle, .breadcrumb-item, small) {
+    color: var(--sw-text-muted) !important;
+}
+
+body.sw-shell a:not(.sw-btn):not(.sw-nav-link):not(.sw-mobile-drawer-link):not(.dropdown-item) {
+    color: var(--sw-primary);
+}
+body.sw-shell a:not(.sw-btn):not(.sw-nav-link):not(.sw-mobile-drawer-link):not(.dropdown-item):hover {
+    color: var(--sw-primary-hover);
+}
+
+body.sw-shell :is(.form-control, .form-select, .sw-form-control, input, select, textarea) {
+    color: var(--sw-text);
+    background-color: var(--sw-input-bg);
+    border-color: var(--sw-input-border);
+    -webkit-text-fill-color: var(--sw-text);
+}
+body.sw-shell :is(.form-control, .form-select, .sw-form-control, input, textarea)::placeholder {
+    color: var(--sw-text-muted);
+    opacity: 1;
+    -webkit-text-fill-color: var(--sw-text-muted);
+}
+body.sw-shell select option {
+    color: var(--sw-text);
+    background-color: var(--sw-surface);
+}
+body.sw-shell :is(.form-control, .form-select, .sw-form-control, input, select, textarea):disabled,
+body.sw-shell :is(.form-control, .form-select, .sw-form-control, input, select, textarea)[readonly] {
+    color: var(--sw-text-muted);
+    background-color: var(--sw-surface-alt);
+    opacity: 1;
+    -webkit-text-fill-color: var(--sw-text-muted);
+}
+
+body.sw-shell :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid var(--sw-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--sw-surface);
+}
+
+body.sw-shell .sw-btn-primary,
+body.sw-shell .btn-primary {
+    color: var(--sw-button-text);
+    background-color: #2b1d14;
+    border-color: #2b1d14;
+}
+body.sw-shell .sw-btn-primary:hover,
+body.sw-shell .btn-primary:hover,
+body.sw-shell .sw-btn-primary:active,
+body.sw-shell .btn-primary:active {
+    color: var(--sw-button-text);
+    background-color: #3b281c;
+    border-color: #3b281c;
+}
+body.sw-shell :is(.sw-btn, .btn):disabled,
+body.sw-shell :is(.sw-btn, .btn).disabled {
+    color: var(--sw-text-muted);
+    background-color: var(--sw-surface-alt);
+    border-color: var(--sw-border);
+    opacity: 1;
+}
+
+body.sw-shell :is(.table, table, .sw-table) {
+    --bs-table-color: var(--sw-text);
+    --bs-table-bg: var(--sw-surface);
+    --bs-table-border-color: var(--sw-border);
+    color: var(--sw-text);
+}
+body.sw-shell :is(.table, table) :is(th, td) { color: var(--sw-text); }
+body.sw-shell :is(.dropdown-menu, .modal-content, .popover, .pagination, .page-link) {
+    color: var(--sw-text);
+    background-color: var(--sw-surface);
+    border-color: var(--sw-border);
+}
+body.sw-shell .dropdown-item { color: var(--sw-text); }
+body.sw-shell .dropdown-item:hover,
+body.sw-shell .dropdown-item:focus { color: var(--sw-text); background-color: var(--sw-surface-alt); }
+body.sw-shell .page-link { color: var(--sw-primary); }
+body.sw-shell :is(.text-success, .sw-text-success) { color: var(--sw-success-text) !important; }
+body.sw-shell :is(.text-warning, .sw-text-warning) { color: var(--sw-warning-text) !important; }
+body.sw-shell :is(.text-danger, .sw-text-danger) { color: var(--sw-danger-text) !important; }
+body.sw-shell :is(.text-info, .sw-text-info) { color: var(--sw-info-text) !important; }
+body.sw-shell :is(.sw-alert-success, .alert-success) { color: var(--sw-success-text); }
+body.sw-shell :is(.sw-alert-danger, .alert-danger) { color: var(--sw-danger-text); }
+body.sw-shell ::selection { color: var(--sw-text-inverse); background: var(--sw-accent); }
+
+.activity-timeline { display: grid; gap: 1rem; }
+.activity-card { position: relative; margin-left: 1rem; padding: 1.2rem 1.25rem 1.2rem 1.5rem; border: 1px solid var(--sw-border); border-radius: var(--sw-radius-lg); background: var(--sw-surface); box-shadow: var(--sw-shadow-card); }
+.activity-card::before { content: ""; position: absolute; left: -1rem; top: 0; bottom: 0; width: 2px; background: var(--sw-accent); }
+.activity-marker { position: absolute; left: -1.43rem; top: 1.45rem; width: .9rem; height: .9rem; border: 2px solid var(--sw-surface); border-radius: 50%; background: var(--sw-accent); box-shadow: 0 0 0 2px var(--sw-accent); }
+.activity-marker-success { background: var(--sw-success-text); box-shadow: 0 0 0 2px var(--sw-success-text); }
+.activity-card-head, .activity-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .9rem; }
+.activity-card-head { justify-content: space-between; margin-bottom: .6rem; }
+.activity-card-head time, .activity-meta { color: var(--sw-text-muted); font-size: .86rem; }
+.activity-card .sw-h5 { margin-bottom: .6rem; }
+.activity-empty { padding: 3rem 1rem; text-align: center; color: var(--sw-text); }
+.password-strength { color: var(--sw-text-muted); font-weight: 700; }
+.password-strength[data-strength="weak"] { color: var(--sw-danger-text); }
+.password-strength[data-strength="fair"] { color: var(--sw-warning-text); }
+.password-strength[data-strength="good"], .password-strength[data-strength="strong"] { color: var(--sw-success-text); }
+
+@media (prefers-reduced-motion: reduce) {
+    .activity-card, body.sw-shell * { scroll-behavior: auto; }
+}
+
+/* Theme variables are declared last so page-level legacy styles inherit the same pairs. */
+html[data-theme="light"], html[data-theme="auto"] {
+    color-scheme: light;
+    --sw-bg: #f3e9d2; --sw-bg-alt: #fff8e9; --sw-surface: #fff8e9;
+    --sw-surface-alt: #f3e9d2; --sw-surface-elevated: #fff8e9;
+    --sw-text: #251c16; --sw-text-muted: #63452e; --sw-text-subtle: #63452e;
+    --sw-text-inverse: #fff8e9; --sw-border: #b9a17c; --sw-border-strong: #63452e;
+    --sw-border-subtle: #d7c5a4; --sw-primary: #2b1d14; --sw-primary-hover: #3b281c;
+    --sw-accent: #c8963e; --sw-accent-hover: #9d7126; --sw-input-bg: #fff8e9;
+    --sw-input-border: #806d58; --sw-input-focus-border: #63452e; --sw-focus: #63452e;
+    --sw-button-text: #fff8e9; --sw-success-text: #1f3d36; --sw-warning-text: #63452e;
+    --sw-danger-text: #8b2518; --sw-info-text: #244c55;
+    --sw-bg-parchment: #f3e9d2; --sw-bg-parchment-subtle: #fff8e9; --sw-paper-parchment: #f3e9d2;
+}
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --sw-bg: #2b1d14; --sw-bg-alt: #2b1d14; --sw-surface: #3b281c;
+    --sw-surface-alt: #2b1d14; --sw-surface-elevated: #493222;
+    --sw-text: #fff8e9; --sw-text-muted: #dfbd78; --sw-text-subtle: #dfbd78;
+    --sw-text-inverse: #251c16; --sw-border: #63452e; --sw-border-strong: #dfbd78;
+    --sw-border-subtle: #63452e; --sw-primary: #dfbd78; --sw-primary-hover: #eecf8e;
+    --sw-accent: #dfbd78; --sw-accent-hover: #eecf8e; --sw-input-bg: #3b281c;
+    --sw-input-border: #806044; --sw-input-focus-border: #dfbd78; --sw-focus: #dfbd78;
+    --sw-button-text: #fff8e9; --sw-success-text: #a4d0bf; --sw-warning-text: #dfbd78;
+    --sw-danger-text: #ffb4a8; --sw-info-text: #aad5e3;
+    --sw-bg-parchment: #2b1d14; --sw-bg-parchment-subtle: #3b281c; --sw-paper-parchment: #2b1d14;
+}
+@media (prefers-color-scheme: dark) {
+    html[data-theme="auto"] {
+        color-scheme: dark;
+        --sw-bg: #2b1d14; --sw-bg-alt: #2b1d14; --sw-surface: #3b281c;
+        --sw-surface-alt: #2b1d14; --sw-surface-elevated: #493222;
+        --sw-text: #fff8e9; --sw-text-muted: #dfbd78; --sw-text-subtle: #dfbd78;
+        --sw-text-inverse: #251c16; --sw-border: #63452e; --sw-border-strong: #dfbd78;
+        --sw-border-subtle: #63452e; --sw-primary: #dfbd78; --sw-primary-hover: #eecf8e;
+        --sw-accent: #dfbd78; --sw-accent-hover: #eecf8e; --sw-input-bg: #3b281c;
+        --sw-input-border: #806044; --sw-input-focus-border: #dfbd78; --sw-focus: #dfbd78;
+        --sw-button-text: #fff8e9; --sw-success-text: #a4d0bf; --sw-warning-text: #dfbd78;
+        --sw-danger-text: #ffb4a8; --sw-info-text: #aad5e3;
+        --sw-bg-parchment: #2b1d14; --sw-bg-parchment-subtle: #3b281c; --sw-paper-parchment: #2b1d14;
+    }
+}

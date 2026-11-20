@@ -1,17 +1,23 @@
 using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.ViewModels;
+using LibraryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LibraryManagementSystem.Controllers;
 
 public sealed class AccountController(
     ApplicationDbContext db,
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager) : Controller
+    SignInManager<ApplicationUser> signInManager,
+    IShelfwiseEmailSender emailSender,
+    ActivityLogService activityLogs,
+    IWebHostEnvironment environment,
+    IConfiguration configuration) : Controller
 {
     [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null, string? reason = null)
@@ -31,6 +37,8 @@ public sealed class AccountController(
         var user = await userManager.FindByEmailAsync(model.Email.Trim());
         if (user is null || string.IsNullOrWhiteSpace(user.UserName))
         {
+            await activityLogs.RecordSecurityAsync(null, "LoginFailed", "Authentication",
+                "A sign-in attempt did not match an account.", "Failure", "Warning", cancellationToken: cancellationToken);
             ModelState.AddModelError(string.Empty, "Email or password is incorrect.");
             return View(model);
         }
@@ -39,11 +47,15 @@ public sealed class AccountController(
             user, model.Password, model.RememberMe, lockoutOnFailure: true);
         if (result.IsLockedOut)
         {
+            await activityLogs.RecordSecurityAsync(user.Id, "LoginLocked", "Authentication",
+                "Sign-in was blocked because the account is locked.", "Failure", "Warning", "User", user.Id, cancellationToken);
             ModelState.AddModelError(string.Empty, "This account is locked due to multiple failed login attempts or administrator deactivation.");
             return View(model);
         }
         if (!result.Succeeded)
         {
+            await activityLogs.RecordSecurityAsync(user.Id, "LoginFailed", "Authentication",
+                "A sign-in attempt failed.", "Failure", "Warning", "User", user.Id, cancellationToken);
             ModelState.AddModelError(string.Empty, "Email or password is incorrect.");
             return View(model);
         }
@@ -52,11 +64,106 @@ public sealed class AccountController(
         if (member is { IsActive: false })
         {
             await signInManager.SignOutAsync();
+            await activityLogs.RecordSecurityAsync(user.Id, "LoginBlockedInactive", "Authentication",
+                "Sign-in was blocked for an inactive account.", "Failure", "Warning", "User", user.Id, cancellationToken);
             ModelState.AddModelError(string.Empty, "This member account has been deactivated. Please contact the library administrator.");
             return View(model);
         }
+        if (!user.IsActive)
+        {
+            await signInManager.SignOutAsync();
+            await activityLogs.RecordSecurityAsync(user.Id, "LoginBlockedInactive", "Authentication",
+                "Sign-in was blocked for an inactive account.", "Failure", "Warning", "User", user.Id, cancellationToken);
+            ModelState.AddModelError(string.Empty, "Email or password is incorrect.");
+            return View(model);
+        }
+        await activityLogs.RecordAsync(user.Id, "LoginSucceeded", "Authentication", "You logged in.",
+            entityType: "User", entityReference: user.Id, securityEvent: true, cancellationToken: cancellationToken);
         if (Url.IsLocalUrl(model.ReturnUrl)) return LocalRedirect(model.ReturnUrl!);
         return RedirectToAction("Index", "Dashboard");
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
+
+    [AllowAnonymous]
+    [HttpPost]
+    [EnableRateLimiting("password-recovery")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var user = await userManager.FindByEmailAsync(model.Email.Trim());
+        if (user is not null && (await userManager.IsInRoleAsync(user, "Member") || await userManager.IsInRoleAsync(user, "Staff")))
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var resetUrl = BuildSecureResetUrl(user.Email!, token);
+            EmailSendResult delivery;
+            if (resetUrl is null)
+                delivery = new EmailSendResult(false, "A secure public base URL is not configured.");
+            else
+                delivery = await emailSender.SendPasswordResetLinkAsync(user.Email!, user.UserName ?? "Shelfwise member", resetUrl, cancellationToken);
+
+            await activityLogs.RecordSecurityAsync(user.Id, "PasswordResetRequested", "PasswordRecovery",
+                "A password reset link was requested.", delivery.AcceptedByProvider ? "AcceptedByProvider" : "DeliveryUnavailable",
+                delivery.AcceptedByProvider ? "Information" : "Warning", "User", user.Id, cancellationToken);
+            await activityLogs.RecordAsync(user.Id, "PasswordResetRequested", "PasswordRecovery",
+                "You requested a password reset link.", "Requested", "User", user.Id, cancellationToken: cancellationToken);
+        }
+        else
+        {
+            // Deliberately omit the supplied email to avoid storing unnecessary personal data.
+            await activityLogs.RecordSecurityAsync(null, "PasswordResetRequested", "PasswordRecovery",
+                "A password reset request did not match an eligible account.", "NoMatchingAccount", "Information",
+                cancellationToken: cancellationToken);
+        }
+
+        return View("ForgotPasswordConfirmation");
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult ResetPassword(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return View("ResetPasswordInvalid");
+        return View(new ResetPasswordViewModel { Email = email });
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [EnableRateLimiting("password-recovery")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var user = await userManager.FindByEmailAsync(model.Email.Trim());
+        if (user is null || !(await userManager.IsInRoleAsync(user, "Member") || await userManager.IsInRoleAsync(user, "Staff")))
+        {
+            await activityLogs.RecordSecurityAsync(null, "PasswordResetFailed", "PasswordRecovery",
+                "A password reset link could not be validated.", "Failure", "Warning", cancellationToken: cancellationToken);
+            return View("ResetPasswordInvalid");
+        }
+
+        var result = await userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            await activityLogs.RecordSecurityAsync(user.Id, "PasswordResetFailed", "PasswordRecovery",
+                "A password reset attempt failed validation.", "Failure", "Warning", "User", user.Id, cancellationToken);
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Code == "InvalidToken"
+                    ? "This reset link is invalid or expired. Request a new link to continue."
+                    : error.Description);
+            return View(model);
+        }
+
+        await userManager.UpdateSecurityStampAsync(user);
+        await activityLogs.RecordAsync(user.Id, "PasswordResetCompleted", "PasswordRecovery",
+            "Your password was reset successfully.", entityType: "User", entityReference: user.Id,
+            securityEvent: true, cancellationToken: cancellationToken);
+        await signInManager.SignOutAsync();
+        return View("ResetPasswordConfirmation");
     }
 
     [AllowAnonymous]
@@ -98,6 +205,9 @@ public sealed class AccountController(
         });
         await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
+        await activityLogs.RecordAsync(user.Id, "AccountRegistered", "AccountManagement",
+            "You registered a member account.", entityType: "User", entityReference: user.Id,
+            securityEvent: true, cancellationToken: cancellationToken);
         if (User.IsInRole("Admin"))
             return RedirectToAction("Index", "AdminMembers");
         await signInManager.SignInAsync(user, isPersistent: false);
@@ -122,7 +232,11 @@ public sealed class AccountController(
             return View(model);
         }
 
+        await userManager.UpdateSecurityStampAsync(user);
         await signInManager.RefreshSignInAsync(user);
+        await activityLogs.RecordAsync(user.Id, "PasswordChanged", "PasswordRecovery",
+            "You changed your password.", entityType: "User", entityReference: user.Id,
+            securityEvent: true);
         TempData["Success"] = "Your password has been changed successfully.";
         return RedirectToAction("Index", "Dashboard");
     }
@@ -130,6 +244,9 @@ public sealed class AccountController(
     [HttpPost, Authorize]
     public async Task<IActionResult> Logout()
     {
+        var userId = userManager.GetUserId(User);
+        await activityLogs.RecordAsync(userId, "Logout", "Authentication", "You logged out.",
+            entityType: "User", entityReference: userId, securityEvent: true);
         await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
@@ -199,4 +316,23 @@ public sealed class AccountController(
 
     [AllowAnonymous]
     public IActionResult AccessDenied() => View();
+
+    private string? BuildSecureResetUrl(string email, string token)
+    {
+        var configuredBaseUrl = configuration["Email:PublicBaseUrl"];
+        Uri? baseUri = null;
+        if (Uri.TryCreate(configuredBaseUrl, UriKind.Absolute, out var configuredUri))
+            baseUri = configuredUri;
+        else if (environment.IsDevelopment() && Request.Host.HasValue
+                 && (Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+                     || System.Net.IPAddress.TryParse(Request.Host.Host, out var ip) && System.Net.IPAddress.IsLoopback(ip)))
+            baseUri = new Uri($"{Request.Scheme}://{Request.Host}");
+
+        if (baseUri is null || (!environment.IsDevelopment() && baseUri.Scheme != Uri.UriSchemeHttps))
+            return null;
+
+        var path = Url.Action(nameof(ResetPassword), "Account", new { email }) ?? "/Account/ResetPassword";
+        var absoluteUrl = new UriBuilder(baseUri) { Path = path.Split('?', 2)[0], Query = path.Contains('?') ? path.Split('?', 2)[1] : string.Empty }.Uri;
+        return absoluteUrl.ToString() + "#token=" + Uri.EscapeDataString(token);
+    }
 }

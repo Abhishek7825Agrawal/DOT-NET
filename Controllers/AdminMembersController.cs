@@ -15,7 +15,9 @@ public sealed class AdminMembersController(
     MemberService members,
     LibraryCalendar calendar,
     CustomerImportService customerImport,
-    ApplicationDbContext db) : Controller
+    ApplicationDbContext db,
+    ActivityLogService activityLogs,
+    UserManager<ApplicationUser> userManager) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
@@ -47,7 +49,20 @@ public sealed class AdminMembersController(
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> SetStatus(int id, bool active, bool returnToDetails = false, CancellationToken cancellationToken = default)
     {
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         if (!await members.SetActiveAsync(id, active, cancellationToken)) return NotFound();
+        var member = await db.Members.Include(item => item.User).FirstOrDefaultAsync(item => item.Id == id, cancellationToken);
+        if (member is not null)
+        {
+            member.User.IsActive = active;
+            await db.SaveChangesAsync(cancellationToken);
+            await userManager.UpdateSecurityStampAsync(member.User);
+            await transaction.CommitAsync(cancellationToken);
+            var actorId = userManager.GetUserId(User);
+            await activityLogs.RecordAsync(actorId, active ? "MemberReactivated" : "MemberDeactivated", "AccountManagement",
+                $"You {(active ? "reactivated" : "deactivated")} member {member.FullName}.", entityType: "Member",
+                entityReference: member.Id.ToString(), securityEvent: true, cancellationToken: cancellationToken);
+        }
         TempData["Success"] = active ? "Member account activated." : "Member account deactivated.";
         if (returnToDetails) return RedirectToAction(nameof(Details), new { id });
         return RedirectToAction(nameof(Index));
@@ -78,6 +93,10 @@ public sealed class AdminMembersController(
                 CurrentUserId,
                 BuildActivationUrl,
                 cancellationToken);
+
+            await activityLogs.RecordAsync(CurrentUserId, "MemberRegistered", "AccountManagement",
+                $"You registered member {result.FullName}.", entityType: "Member", entityReference: result.Email,
+                securityEvent: true, cancellationToken: cancellationToken);
 
             TempData["Success"] = $"Member account for '{result.FullName}' created successfully.";
             return View("RegistrationSuccess", result);
@@ -148,6 +167,10 @@ public sealed class AdminMembersController(
                 CurrentUserId,
                 cancellationToken);
 
+            await activityLogs.RecordAsync(CurrentUserId, "MemberImportStaged", "DataImport",
+                $"You staged member import batch {batch.BatchReference} for review.", entityType: "ImportBatch",
+                entityReference: batch.BatchReference, securityEvent: true, cancellationToken: cancellationToken);
+
             return RedirectToAction(nameof(ImportPreview), new { batchId = batch.Id });
         }
         catch (Exception ex)
@@ -204,6 +227,11 @@ public sealed class AdminMembersController(
                 CurrentUserId,
                 BuildActivationUrl,
                 cancellationToken);
+
+            await activityLogs.RecordAsync(CurrentUserId, "MemberImportCommitted", "DataImport",
+                $"You committed import batch {summary.BatchReference} with {summary.SuccessfullyImported} new accounts.",
+                entityType: "ImportBatch", entityReference: summary.BatchReference,
+                securityEvent: true, cancellationToken: cancellationToken);
 
             TempData["Success"] = $"Batch '{summary.BatchReference}' committed successfully: {summary.SuccessfullyImported} cardholder accounts created.";
             return View("ImportSummary", summary);

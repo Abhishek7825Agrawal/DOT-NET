@@ -13,7 +13,8 @@ namespace LibraryManagementSystem.Controllers;
 public sealed class AdminMarketplaceController(
     ApplicationDbContext db,
     MarketplaceService marketplace,
-    PaperStorageService storage) : Controller
+    PaperStorageService storage,
+    ActivityLogService activityLogs) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
@@ -95,6 +96,9 @@ public sealed class AdminMarketplaceController(
         paper.RejectionReason = null;
 
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "ResearchPaperApproved", "MarketplaceModeration",
+            "You approved a research paper submission.", entityType: "ResearchPaper", entityReference: id.ToString(),
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = $"Manuscript '{paper.Title}' approved and published to the Research Paper Marketplace.";
         return RedirectToAction(nameof(Index), new { tab = "pending" });
     }
@@ -118,6 +122,9 @@ public sealed class AdminMarketplaceController(
         paper.ReviewedByUserId = CurrentUserId;
 
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "ResearchPaperRejected", "MarketplaceModeration",
+            "You rejected a research paper submission.", entityType: "ResearchPaper", entityReference: id.ToString(),
+            securityEvent: true, severity: "Warning", cancellationToken: cancellationToken);
         TempData["Success"] = $"Manuscript '{paper.Title}' rejected with editorial feedback.";
         return RedirectToAction(nameof(Index), new { tab = "pending" });
     }
@@ -141,6 +148,9 @@ public sealed class AdminMarketplaceController(
         paper.ReviewedByUserId = CurrentUserId;
 
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "ResearchPaperCorrectionsRequested", "MarketplaceModeration",
+            "You requested revisions for a research paper.", entityType: "ResearchPaper", entityReference: id.ToString(),
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = $"Revisions requested for '{paper.Title}'. Author has been notified.";
         return RedirectToAction(nameof(Index), new { tab = "pending" });
     }
@@ -158,6 +168,9 @@ public sealed class AdminMarketplaceController(
         paper.ReviewedByUserId = CurrentUserId;
 
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "ResearchPaperSuspended", "MarketplaceModeration",
+            "You suspended a research paper from the public catalogue.", entityType: "ResearchPaper", entityReference: id.ToString(),
+            securityEvent: true, severity: "Warning", cancellationToken: cancellationToken);
         TempData["Success"] = $"Manuscript '{paper.Title}' has been suspended from the public catalogue.";
         return RedirectToAction(nameof(Index), new { tab = "approved" });
     }
@@ -190,6 +203,10 @@ public sealed class AdminMarketplaceController(
         }
 
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "CopyrightReportResolved", "MarketplaceModeration",
+            "You resolved a copyright report.", entityType: "CopyrightReport", entityReference: report.Id.ToString(),
+            securityEvent: true, severity: string.Equals(decision, "uphold", StringComparison.OrdinalIgnoreCase) ? "Warning" : "Information",
+            cancellationToken: cancellationToken);
         return RedirectToAction(nameof(Index), new { tab = "reports" });
     }
 
@@ -213,6 +230,9 @@ public sealed class AdminMarketplaceController(
         settings.UpdatedByUserId = CurrentUserId;
 
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "MarketplaceSettingsUpdated", "Configuration",
+            "You updated marketplace approval, pricing or commission settings.", entityType: "MarketplaceSettings",
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = "Marketplace policies and platform commission updated.";
         return RedirectToAction(nameof(Index), new { tab = "settings" });
     }

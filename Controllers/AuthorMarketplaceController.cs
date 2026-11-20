@@ -13,7 +13,8 @@ namespace LibraryManagementSystem.Controllers;
 public sealed class AuthorMarketplaceController(
     ApplicationDbContext db,
     MarketplaceService marketplace,
-    PaperStorageService storage) : Controller
+    PaperStorageService storage,
+    ActivityLogService activityLogs) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
@@ -99,6 +100,9 @@ public sealed class AuthorMarketplaceController(
             };
 
             await marketplace.SubmitPaperAsync(paper, pdfMeta, cancellationToken);
+            await activityLogs.RecordAsync(CurrentUserId, "ResearchPaperSubmitted", "Marketplace",
+                $"You submitted '{paper.Title}' for review.", entityType: "ResearchPaper",
+                entityReference: paper.Id.ToString(), securityEvent: true, cancellationToken: cancellationToken);
 
             TempData["Success"] = $"Manuscript '{paper.Title}' submitted successfully for editorial peer review.";
             return RedirectToAction(nameof(AuthorDesk));
@@ -176,6 +180,9 @@ public sealed class AuthorMarketplaceController(
                 model.Keywords,
                 model.ChangeSummary,
                 cancellationToken);
+            await activityLogs.RecordAsync(CurrentUserId, "ResearchPaperResubmitted", "Marketplace",
+                $"You submitted revisions for '{model.Title}'.", entityType: "ResearchPaper",
+                entityReference: model.Id.ToString(), securityEvent: true, cancellationToken: cancellationToken);
 
             TempData["Success"] = $"Revisions for '{model.Title}' submitted. Manuscript is back in editorial review.";
             return RedirectToAction(nameof(AuthorDesk));

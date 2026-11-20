@@ -13,7 +13,8 @@ namespace LibraryManagementSystem.Controllers;
 [Authorize]
 public sealed class DigitalLibraryController(
     ApplicationDbContext db,
-    DigitalDocumentService documents) : Controller
+    DigitalDocumentService documents,
+    ActivityLogService activityLogs) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
@@ -245,6 +246,9 @@ public sealed class DigitalLibraryController(
             }).ToList()
         };
 
+        await activityLogs.RecordAsync(CurrentUserId, "DigitalBookOpened", "DigitalReading",
+            $"You opened '{digital.Book.Title}'.", entityType: "DigitalBook", entityReference: digital.Id.ToString(),
+            cancellationToken: cancellationToken);
         return View(vm);
     }
 
@@ -308,6 +312,11 @@ public sealed class DigitalLibraryController(
 
         await db.SaveChangesAsync(cancellationToken);
 
+        await activityLogs.RecordAsync(CurrentUserId, request.NoteId <= 0 ? "NoteCreated" : "NoteEdited", "DigitalReading",
+            request.NoteId <= 0 ? "You created reading notes." : "You edited reading notes.",
+            entityType: "Note", entityReference: note.Id.ToString(),
+            safeContext: new { note.BookId, note.Version }, cancellationToken: cancellationToken);
+
         return Ok(new SaveNoteResponse
         {
             Success = true,
@@ -338,6 +347,9 @@ public sealed class DigitalLibraryController(
 
         db.UserNotes.Add(note);
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "NoteCreated", "DigitalReading",
+            "You created reading notes.", entityType: "Note", entityReference: note.Id.ToString(),
+            safeContext: new { note.BookId }, cancellationToken: cancellationToken);
 
         return Ok(new UserNoteItemViewModel
         {
@@ -360,8 +372,12 @@ public sealed class DigitalLibraryController(
             return Forbid();
         }
 
+        var bookId = note.BookId;
         db.UserNotes.Remove(note);
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "NoteDeleted", "DigitalReading",
+            "You deleted reading notes.", entityType: "Note", entityReference: id.ToString(),
+            safeContext: new { BookId = bookId }, cancellationToken: cancellationToken);
 
         return Ok(new { success = true });
     }
@@ -436,6 +452,13 @@ public sealed class DigitalLibraryController(
 
         await db.SaveChangesAsync(cancellationToken);
 
+        await activityLogs.RecordAsync(CurrentUserId,
+            request.AnnotationId.HasValue ? "HighlightEdited" : "HighlightAdded", "DigitalReading",
+            request.AnnotationId.HasValue ? "You edited a highlight." : $"You added a highlight on page {annotation.PageNumber}.",
+            entityType: "Annotation", entityReference: annotation.Id.ToString(),
+            safeContext: new { annotation.DigitalBookId, annotation.PageNumber, annotation.DocumentVersion },
+            cancellationToken: cancellationToken);
+
         return Ok(new
         {
             success = true,
@@ -454,8 +477,12 @@ public sealed class DigitalLibraryController(
             return Forbid();
         }
 
+        var pageNumber = annotation.PageNumber;
         db.BookAnnotations.Remove(annotation);
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "HighlightDeleted", "DigitalReading",
+            $"You removed a highlight from page {pageNumber}.", entityType: "Annotation", entityReference: id.ToString(),
+            cancellationToken: cancellationToken);
 
         return Ok(new { success = true });
     }
@@ -506,8 +533,12 @@ public sealed class DigitalLibraryController(
 
         if (existing is not null)
         {
+            var pageNumber = existing.PageNumber;
             db.BookBookmarks.Remove(existing);
             await db.SaveChangesAsync(cancellationToken);
+            await activityLogs.RecordAsync(CurrentUserId, "BookmarkRemoved", "DigitalReading",
+                $"You removed a bookmark from page {pageNumber}.", entityType: "DigitalBook",
+                entityReference: request.DigitalBookId.ToString(), cancellationToken: cancellationToken);
             return Ok(new { success = true, isBookmarked = false, pageNumber = request.PageNumber });
         }
 
@@ -522,6 +553,9 @@ public sealed class DigitalLibraryController(
 
         db.BookBookmarks.Add(bookmark);
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "BookmarkAdded", "DigitalReading",
+            $"You bookmarked page {bookmark.PageNumber}.", entityType: "DigitalBook",
+            entityReference: bookmark.DigitalBookId.ToString(), cancellationToken: cancellationToken);
 
         return Ok(new { success = true, isBookmarked = true, pageNumber = request.PageNumber, bookmarkId = bookmark.Id, label = bookmark.Label });
     }
@@ -548,6 +582,7 @@ public sealed class DigitalLibraryController(
         var progress = await db.ReadingProgresses
             .FirstOrDefaultAsync(p => p.DigitalBookId == request.DigitalBookId && p.UserId == CurrentUserId, cancellationToken);
 
+        var previousPage = progress?.LastPageRead ?? 0;
         if (progress is null)
         {
             progress = new ReadingProgress
@@ -570,6 +605,10 @@ public sealed class DigitalLibraryController(
         }
 
         await db.SaveChangesAsync(cancellationToken);
+        if (page > previousPage && (page % 5 == 0 || page == totalPages))
+            await activityLogs.RecordAsync(CurrentUserId, "ReadingProgressUpdated", "DigitalReading",
+                $"You read up to page {page}.", entityType: "DigitalBook", entityReference: request.DigitalBookId.ToString(),
+                safeContext: new { Page = page, TotalPages = totalPages }, cancellationToken: cancellationToken);
 
         return Ok(new { success = true, page = page, total = totalPages, percent = pct });
     }

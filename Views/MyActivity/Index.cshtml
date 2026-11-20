@@ -1,0 +1,36 @@
+@model UserActivityPageViewModel
+@{
+    ViewData["Title"] = "My Activity";
+}
+<section class="sw-page-header">
+    <span class="sw-kicker">Your archive trail</span>
+    <h1 class="sw-h2">My Activity</h1>
+    <p class="text-muted">A private timeline of completed actions on your account.</p>
+</section>
+<section class="parchment-card p-3 p-lg-4 mb-4">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-6"><label class="sw-form-label" for="q">Search activity</label><input class="sw-form-control" id="q" name="q" value="@Model.Query" placeholder="Search descriptions or references" /></div>
+        <div class="col-6 col-md-2"><label class="sw-form-label" for="fromDate">From</label><input class="sw-form-control" id="fromDate" name="fromDate" type="date" value="@Model.FromDate?.ToString("yyyy-MM-dd")" /></div>
+        <div class="col-6 col-md-2"><label class="sw-form-label" for="toDate">To</label><input class="sw-form-control" id="toDate" name="toDate" type="date" value="@Model.ToDate?.ToString("yyyy-MM-dd")" /></div>
+        <div class="col-md-2"><button class="sw-btn sw-btn-primary w-100">Filter</button></div>
+    </form>
+</section>
+<section class="activity-timeline" aria-label="Your activity timeline">
+    @foreach (var item in Model.Items)
+    {
+        <article class="activity-card parchment-card">
+            <span class="activity-marker @(item.Status == "Success" || item.Status == "Completed" ? "activity-marker-success" : "")" aria-hidden="true"></span>
+            <div class="activity-card-head"><span class="sw-badge sw-badge-success">@item.Category</span><time datetime="@item.LocalTimestamp.ToString("O")">@item.LocalTimestamp.ToString("ddd, dd MMM yyyy · HH:mm")</time></div>
+            <h2 class="sw-h5">@item.Description</h2>
+            <div class="activity-meta"><span>@item.ActivityType</span><span>Status: @item.Status</span>@if (!string.IsNullOrWhiteSpace(item.EntityType)) { <span>@item.EntityType @item.EntityReference</span> }</div>
+        </article>
+    }
+    @if (Model.Items.Count == 0)
+    {
+        <div class="parchment-card activity-empty"><i class="bi bi-journal-bookmark fs-2" aria-hidden="true"></i><h2 class="sw-h5">No activity found</h2><p class="text-muted mb-0">Completed actions will appear here.</p></div>
+    }
+</section>
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Activity pages" class="d-flex justify-content-between align-items-center mt-4"><span>Page @Model.Page of @Model.TotalPages</span><div class="d-flex gap-2"><a class="sw-btn sw-btn-sm sw-btn-secondary" asp-route-page="@(Model.Page - 1)" asp-route-q="@Model.Query" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">Previous</a><a class="sw-btn sw-btn-sm sw-btn-secondary" asp-route-page="@(Model.Page + 1)" asp-route-q="@Model.Query" asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")">Next</a></div></nav>
+}

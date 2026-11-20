@@ -1,0 +1,37 @@
+@model AdminUserListViewModel
+@{
+    ViewData["Title"] = "User Management";
+}
+<section class="sw-page-header">
+    <span class="sw-kicker">Account administration</span>
+    <h1 class="sw-h2">User Management</h1>
+    <p class="text-muted">Search Staff and Member accounts, manage active status, and open secure password recovery actions.</p>
+</section>
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="sw-btn sw-btn-secondary" asp-action="PasswordManagement"><i class="bi bi-key me-1"></i>Password Management</a>
+    <a class="sw-btn sw-btn-secondary" asp-controller="AdminActivity" asp-action="Index">Global Activity</a>
+    <a class="sw-btn sw-btn-secondary" asp-controller="AdminAudit" asp-action="Index">Backend Audit Logs</a>
+</div>
+<section class="parchment-card p-3 p-lg-4">
+    <form method="get" class="row g-2 mb-3" role="search">
+        <div class="col-md-7"><label class="visually-hidden" for="q">Search accounts</label><input id="q" name="q" value="@Model.Query" class="sw-form-control" placeholder="Search name or email" /></div>
+        <div class="col-md-3"><label class="visually-hidden" for="role">Role</label><select id="role" name="role" class="sw-form-control"><option value="">All Staff and Members</option><option value="Staff" selected="@(Model.Role == "Staff")">Staff</option><option value="Member" selected="@(Model.Role == "Member")">Members</option></select></div>
+        <div class="col-md-2"><button class="sw-btn sw-btn-primary w-100">Search</button></div>
+    </form>
+    <div class="table-responsive">
+        <table class="table sw-table align-middle">
+            <thead><tr><th>Account</th><th>Role</th><th>Status</th><th>Last reset activity</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr><td><strong>@user.DisplayName</strong><br /><span class="small text-muted">@user.Email</span></td><td>@user.Role</td><td><span class="sw-badge @(user.IsActive ? "sw-badge-success" : "sw-badge-danger")">@(user.IsActive ? "Active" : "Inactive")</span></td><td>@(user.LastResetStatus ?? "No reset recorded")</td><td><a class="sw-btn sw-btn-sm sw-btn-secondary" asp-action="Details" asp-route-id="@user.Id">Open account</a></td></tr>
+            }
+            @if (Model.Users.Count == 0) { <tr><td colspan="5" class="text-center text-muted py-4">No matching accounts.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="User pages" class="d-flex justify-content-between align-items-center"><span>Page @Model.Page of @Model.TotalPages</span><div class="d-flex gap-2"><a class="sw-btn sw-btn-sm sw-btn-secondary @(Model.Page <= 1 ? "disabled" : "")" asp-route-page="@(Model.Page - 1)" asp-route-q="@Model.Query" asp-route-role="@Model.Role">Previous</a><a class="sw-btn sw-btn-sm sw-btn-secondary @(Model.Page >= Model.TotalPages ? "disabled" : "")" asp-route-page="@(Model.Page + 1)" asp-route-q="@Model.Query" asp-route-role="@Model.Role">Next</a></div></nav>
+    }
+</section>

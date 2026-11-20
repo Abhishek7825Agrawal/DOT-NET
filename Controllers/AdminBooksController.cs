@@ -16,7 +16,8 @@ public sealed class AdminBooksController(
     BookService books,
     CategoryService categories,
     ApplicationDbContext db,
-    DigitalDocumentService documents) : Controller
+    DigitalDocumentService documents,
+    ActivityLogService activityLogs) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     public async Task<IActionResult> Index(string? q, string? category, int page = 1, CancellationToken cancellationToken = default)
@@ -51,7 +52,8 @@ public sealed class AdminBooksController(
             return View("Form", model);
         }
 
-        var result = await books.CreateAsync(Map(model), cancellationToken);
+        var book = Map(model);
+        var result = await books.CreateAsync(book, cancellationToken);
         if (!result.Success)
         {
             var key = result.Error!.Contains("ISBN", StringComparison.OrdinalIgnoreCase) ? nameof(model.Isbn) : string.Empty;
@@ -60,6 +62,9 @@ public sealed class AdminBooksController(
             return View("Form", model);
         }
 
+        await activityLogs.RecordAsync(CurrentUserId, "BookCreated", "Catalogue",
+            $"You added '{model.Title}' to the catalogue.", entityType: "Book",
+            entityReference: book.Id.ToString(), securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = "Book added successfully to the catalogue.";
         return RedirectToAction(nameof(Index));
     }
@@ -124,6 +129,9 @@ public sealed class AdminBooksController(
             return View("Form", model);
         }
 
+        await activityLogs.RecordAsync(CurrentUserId, "BookUpdated", "Catalogue",
+            $"You updated '{model.Title}'.", entityType: "Book", entityReference: model.Id.ToString(),
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = "Book details updated.";
         return RedirectToAction(nameof(Index));
     }
@@ -138,6 +146,9 @@ public sealed class AdminBooksController(
             TempData["Error"] = result.Error;
             return RedirectToAction(nameof(Index));
         }
+        await activityLogs.RecordAsync(CurrentUserId, "BookArchived", "Catalogue",
+            "You archived a catalogue title.", entityType: "Book", entityReference: id.ToString(),
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = "Book archived or permanently removed.";
         return RedirectToAction(nameof(Index));
     }
@@ -152,6 +163,9 @@ public sealed class AdminBooksController(
         }
         else
         {
+            await activityLogs.RecordAsync(CurrentUserId, "BookRestored", "Catalogue",
+                "You restored a catalogue title.", entityType: "Book", entityReference: id.ToString(),
+                securityEvent: true, cancellationToken: cancellationToken);
             TempData["Success"] = "Book restored and made active in the catalogue.";
         }
         return RedirectToAction(nameof(Index));
@@ -244,10 +258,15 @@ public sealed class AdminBooksController(
             }
 
             await db.SaveChangesAsync(cancellationToken);
+            await activityLogs.RecordAsync(CurrentUserId, "DigitalBookUploaded", "DigitalLibrary",
+                "You uploaded or replaced a digital book edition.", entityType: "Book", entityReference: bookId.ToString(),
+                securityEvent: true, cancellationToken: cancellationToken);
             TempData["Success"] = $"Digital edition for '{book.Title}' ({meta.PageCount} pages, {meta.FileSizeBytes / 1024:N0} KB) saved successfully.";
         }
         catch (Exception ex)
         {
+            await activityLogs.RecordSecurityAsync(CurrentUserId, "DigitalBookUploadFailed", "DigitalLibrary",
+                "A digital book upload failed.", "Failure", "Warning", "Book", bookId.ToString(), cancellationToken);
             TempData["Error"] = $"Failed to upload digital document: {ex.Message}";
         }
 
@@ -262,6 +281,10 @@ public sealed class AdminBooksController(
 
         digital.IsDigitalAvailable = !digital.IsDigitalAvailable;
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, digital.IsDigitalAvailable ? "DigitalBookEnabled" : "DigitalBookDisabled",
+            "DigitalLibrary", $"You {(digital.IsDigitalAvailable ? "enabled" : "disabled")} a digital book edition.",
+            entityType: "DigitalBook", entityReference: digital.Id.ToString(), securityEvent: true,
+            cancellationToken: cancellationToken);
 
         TempData["Success"] = digital.IsDigitalAvailable
             ? "Digital book access enabled for readers."
@@ -280,6 +303,9 @@ public sealed class AdminBooksController(
         documents.DeleteDocument(digital.StorageFileName);
         db.DigitalBooks.Remove(digital);
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(CurrentUserId, "DigitalBookDeleted", "DigitalLibrary",
+            "You permanently deleted a digital book edition.", entityType: "DigitalBook", entityReference: digital.Id.ToString(),
+            securityEvent: true, severity: "Warning", cancellationToken: cancellationToken);
 
         TempData["Success"] = "Digital PDF edition permanently removed from this title.";
         return RedirectToAction(nameof(ManageDigital), new { id = bookId });

@@ -15,6 +15,7 @@ public sealed class DbInitializer(
         if (db.Database.IsSqlite())
         {
             await db.Database.EnsureCreatedAsync(cancellationToken);
+            await EnsureSqlitePhase7SchemaAsync(cancellationToken);
         }
         else
         {
@@ -99,17 +100,22 @@ public sealed class DbInitializer(
                 throw new InvalidOperationException(string.Join("; ", assigned.Errors.Select(error => error.Description)));
         }
 
-        // Provision library staff account for operations desk
+        // Create the optional operations account only when a deployment supplies
+        // its initial secret. Never create a reusable default credential.
         var staffEmail = "staff@shelfwise.local";
         var staffUser = await userManager.FindByEmailAsync(staffEmail);
         if (staffUser is null)
         {
-            staffUser = new ApplicationUser { UserName = staffEmail, Email = staffEmail, EmailConfirmed = true };
-            var staffPass = Environment.GetEnvironmentVariable("LIBRARY_STAFF_PASSWORD") ?? "Staff@12345!";
-            var created = await userManager.CreateAsync(staffUser, staffPass);
-            if (created.Succeeded)
+            var staffPass = Environment.GetEnvironmentVariable("LIBRARY_STAFF_PASSWORD");
+            if (!string.IsNullOrWhiteSpace(staffPass))
             {
-                await userManager.AddToRoleAsync(staffUser, "Staff");
+                staffUser = new ApplicationUser { UserName = staffEmail, Email = staffEmail, EmailConfirmed = true };
+                var created = await userManager.CreateAsync(staffUser, staffPass);
+                if (!created.Succeeded)
+                    throw new InvalidOperationException(string.Join("; ", created.Errors.Select(error => error.Description)));
+                var assigned = await userManager.AddToRoleAsync(staffUser, "Staff");
+                if (!assigned.Succeeded)
+                    throw new InvalidOperationException(string.Join("; ", assigned.Errors.Select(error => error.Description)));
             }
         }
         else if (!await userManager.IsInRoleAsync(staffUser, "Staff"))
@@ -325,6 +331,55 @@ public sealed class DbInitializer(
                 });
                 await db.SaveChangesAsync(cancellationToken);
             }
+        }
+    }
+
+    private async Task EnsureSqlitePhase7SchemaAsync(CancellationToken cancellationToken)
+    {
+        // EnsureCreated is a no-op for an existing SQLite database. Add the
+        // Phase 7A structures explicitly so upgrades preserve existing data.
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        try
+        {
+            var hasIsActive = false;
+            await using (var command = db.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "PRAGMA table_info('AspNetUsers')";
+                await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+                while (await reader.ReadAsync(cancellationToken))
+                    if (string.Equals(reader.GetString(1), "IsActive", StringComparison.OrdinalIgnoreCase))
+                        hasIsActive = true;
+            }
+            if (!hasIsActive)
+                await db.Database.ExecuteSqlRawAsync(
+                    "ALTER TABLE AspNetUsers ADD COLUMN IsActive INTEGER NOT NULL DEFAULT 1",
+                    cancellationToken);
+
+            await db.Database.ExecuteSqlRawAsync("""
+                CREATE TABLE IF NOT EXISTS UserActivityLogs (
+                    Id INTEGER NOT NULL CONSTRAINT PK_UserActivityLogs PRIMARY KEY AUTOINCREMENT,
+                    UserId TEXT NOT NULL, UserRole TEXT NOT NULL, ActivityType TEXT NOT NULL,
+                    Category TEXT NOT NULL, Description TEXT NOT NULL, Status TEXT NOT NULL,
+                    EntityType TEXT NULL, EntityReference TEXT NULL, ContextJson TEXT NULL,
+                    CorrelationId TEXT NOT NULL, CreatedAtUtc TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS SecurityAuditLogs (
+                    Id INTEGER NOT NULL CONSTRAINT PK_SecurityAuditLogs PRIMARY KEY AUTOINCREMENT,
+                    UserId TEXT NULL, UserRole TEXT NULL, EventType TEXT NOT NULL,
+                    Category TEXT NOT NULL, Severity TEXT NOT NULL, Outcome TEXT NOT NULL,
+                    Description TEXT NOT NULL, EntityType TEXT NULL, EntityReference TEXT NULL,
+                    RequestPath TEXT NULL, CorrelationId TEXT NOT NULL, CreatedAtUtc TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS IX_UserActivityLogs_UserId_CreatedAtUtc ON UserActivityLogs(UserId, CreatedAtUtc);
+                CREATE INDEX IF NOT EXISTS IX_UserActivityLogs_ActivityType_CreatedAtUtc ON UserActivityLogs(ActivityType, CreatedAtUtc);
+                CREATE INDEX IF NOT EXISTS IX_UserActivityLogs_CorrelationId ON UserActivityLogs(CorrelationId);
+                CREATE INDEX IF NOT EXISTS IX_SecurityAuditLogs_UserId_CreatedAtUtc ON SecurityAuditLogs(UserId, CreatedAtUtc);
+                CREATE INDEX IF NOT EXISTS IX_SecurityAuditLogs_Severity_CreatedAtUtc ON SecurityAuditLogs(Severity, CreatedAtUtc);
+                CREATE INDEX IF NOT EXISTS IX_SecurityAuditLogs_EventType_CreatedAtUtc ON SecurityAuditLogs(EventType, CreatedAtUtc);
+                CREATE INDEX IF NOT EXISTS IX_SecurityAuditLogs_CorrelationId ON SecurityAuditLogs(CorrelationId);
+                """, cancellationToken);
+        }
+        finally
+        {
+            await db.Database.CloseConnectionAsync();
         }
     }
 }

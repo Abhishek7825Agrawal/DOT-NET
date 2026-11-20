@@ -1,0 +1,24 @@
+@model AdminActivityPageViewModel
+@{
+    ViewData["Title"] = "Global Activity";
+}
+<section class="sw-page-header"><span class="sw-kicker">Administrator oversight</span><h1 class="sw-h2">Global Activity</h1><p class="text-muted">User-visible records of completed operations. Security events are available in Backend Audit Logs.</p></section>
+<section class="parchment-card p-3 p-lg-4 mb-4">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-sm-6 col-lg-3"><label class="sw-form-label" for="q">User or text</label><input id="q" name="q" value="@Model.Query" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="role">Role</label><select id="role" name="role" class="sw-form-control"><option value="">Any role</option><option value="Member" selected="@(Model.RoleFilter == "Member")">Member</option><option value="Staff" selected="@(Model.RoleFilter == "Staff")">Staff</option><option value="Admin" selected="@(Model.RoleFilter == "Admin")">Admin</option></select></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="category">Category</label><input id="category" name="category" value="@Model.CategoryFilter" class="sw-form-control" placeholder="e.g. Circulation" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="status">Status</label><input id="status" name="status" value="@Model.StatusFilter" class="sw-form-control" placeholder="Success" /></div>
+        <div class="col-6 col-lg-3"><label class="sw-form-label" for="activityType">Activity type</label><input id="activityType" name="activityType" value="@Model.ActivityTypeFilter" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="fromDate">From</label><input id="fromDate" name="fromDate" type="date" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="toDate">To</label><input id="toDate" name="toDate" type="date" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="sw-form-control" /></div>
+        <div class="col-8 col-lg-5"><label class="sw-form-label" for="entity">Entity reference</label><input id="entity" name="entity" value="@Model.EntityFilter" class="sw-form-control" /></div>
+        <div class="col-4 col-lg-3 d-flex gap-2"><button class="sw-btn sw-btn-primary flex-grow-1">Apply</button><a class="sw-btn sw-btn-secondary" asp-action="Export" asp-all-route-data="@(new Dictionary<string,string?> { ["q"] = Model.Query, ["role"] = Model.RoleFilter, ["category"] = Model.CategoryFilter, ["activityType"] = Model.ActivityTypeFilter, ["status"] = Model.StatusFilter, ["entity"] = Model.EntityFilter, ["fromDate"] = Model.FromDate?.ToString("yyyy-MM-dd"), ["toDate"] = Model.ToDate?.ToString("yyyy-MM-dd") })">CSV</a></div>
+    </form>
+</section>
+<section class="parchment-card p-3 p-lg-4"><div class="table-responsive"><table class="table sw-table align-middle"><thead><tr><th>When</th><th>User</th><th>Role</th><th>Activity</th><th>Status</th><th>Reference</th></tr></thead><tbody>
+@foreach (var item in Model.Items) { <tr><td>@item.LocalTimestamp.ToString("yyyy-MM-dd HH:mm")</td><td>@(item.UserEmail ?? item.UserId)</td><td>@item.UserRole</td><td><strong>@item.Description</strong><br /><span class="small text-muted">@item.Category · @item.ActivityType</span></td><td>@item.Status</td><td>@item.EntityType @item.EntityReference</td></tr> }
+@if (Model.Items.Count == 0) { <tr><td colspan="6" class="text-center text-muted py-4">No activity matches these filters.</td></tr> }
+</tbody></table></div>
+@if (Model.TotalPages > 1) { <nav aria-label="Global activity pages" class="d-flex justify-content-between"><span>Page @Model.Page of @Model.TotalPages</span><div class="d-flex gap-2"><a class="sw-btn sw-btn-sm sw-btn-secondary" asp-route-page="@(Model.Page - 1)" asp-route-q="@Model.Query" asp-route-role="@Model.RoleFilter">Previous</a><a class="sw-btn sw-btn-sm sw-btn-secondary" asp-route-page="@(Model.Page + 1)" asp-route-q="@Model.Query" asp-route-role="@Model.RoleFilter">Next</a></div></nav> }
+</section>

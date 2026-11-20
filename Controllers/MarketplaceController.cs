@@ -14,7 +14,8 @@ namespace LibraryManagementSystem.Controllers;
 public sealed class MarketplaceController(
     ApplicationDbContext db,
     MarketplaceService marketplace,
-    PaperStorageService storage) : Controller
+    PaperStorageService storage,
+    ActivityLogService activityLogs) : Controller
 {
     private string CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
     private bool IsAdminOrStaff => User.IsInRole("Admin") || User.IsInRole("Staff");
@@ -229,6 +230,11 @@ public sealed class MarketplaceController(
             TempData["Error"] = error ?? "Could not acquire manuscript.";
             return RedirectToAction(nameof(Details), new { id = paperId });
         }
+
+        await activityLogs.RecordAsync(CurrentUserId, "ResearchPaperPurchased", "Marketplace",
+            $"You acquired '{paper.Title}'.", entityType: "PaperOrder", entityReference: order!.OrderNumber,
+            safeContext: new { order.Amount, order.PaymentMethod }, securityEvent: true,
+            cancellationToken: cancellationToken);
 
         TempData["Success"] = $"Access to '{paper.Title}' granted. You can read online or download now.";
         return RedirectToAction(nameof(MyPurchases));

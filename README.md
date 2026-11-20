@@ -15,6 +15,45 @@ On a fresh database, set `LIBRARY_ADMIN_PASSWORD` before starting the app to cre
 
 To start manually instead, run `dotnet run` from the project folder. The launcher files are convenient when local user-secrets or environment variables select a different database provider.
 
+### Password recovery email (local development)
+
+Password reset links are sent only when an SMTP provider accepts the message. For local testing, run a local mail catcher such as Mailpit:
+
+```bash
+docker run --rm --name shelfwise-mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit
+```
+
+In another terminal, configure the app and start it:
+
+```bash
+export Email__SmtpHost=localhost
+export Email__SmtpPort=1025
+export Email__EnableSsl=false
+export Email__FromAddress=no-reply@shelfwise.local
+export Email__PublicBaseUrl=http://localhost:5000
+export Email__ResetTokenLifetimeMinutes=60
+./start.sh
+```
+
+Open <http://localhost:8025> to inspect locally captured email. Reset tokens are placed in the URL fragment, removed from the address bar on the reset page, and are not written to application logs. When SMTP or a secure public base URL is missing, the forgot-password page keeps the same generic response and the application does not claim delivery.
+
+For production, provide `Email__SmtpHost`, `Email__SmtpPort`, `Email__EnableSsl`, `Email__FromAddress`, optional `Email__Username` and `Email__Password`, and an HTTPS `Email__PublicBaseUrl` through the deployment secret store. Do not add SMTP credentials to configuration files or source control.
+
+Staff accounts are not created with a default password. To seed the optional local staff account once, set `LIBRARY_STAFF_PASSWORD` to a unique secret before initialization. The optional demo member still requires `LIBRARY_SAMPLE_MEMBER_PASSWORD`. Existing Admin credentials are never changed by startup initialization.
+
+### Activity and audit retention
+
+User activity and security audit entries are stored as append-only database records. The app retains both categories for five years by default, then removes expired entries during a daily background sweep. Configure `ActivityLogRetention__RetentionDays` (30–3650 days) and `ActivityLogRetention__SweepIntervalHours` (1–168 hours) through environment configuration. Admin screens can search/export records but cannot edit them. Security audit records are separate from user-visible activity, and neither stores passwords, hashes, reset tokens, cookies, or request query strings.
+
+### Phase 7A account and activity screens
+
+- Members and Staff can use **Forgot your password?** from Login and see their own event timeline at **My Activity**.
+- Admin tools are under **Oversight**: User Management, Password Management, Global Activity, Backend Audit Logs, and Security Events. Admin password operations send Identity reset links; the UI never exposes an existing password or hash.
+- For SQL Server, startup applies the EF Core migration. For an existing SQLite database, startup adds the Phase 7A column/tables/indexes without replacing existing records.
+- The current application has no payment gateway/refund workflow. Paid marketplace orders remain pending until that existing integration is implemented; the activity log does not imply that a payment completed.
+
+See [the Phase 7A verification record](docs/VERIFICATION-PLAN.md) for test counts, screenshot scope, migration status, and remaining environment checks.
+
 ---
 
 ## 1. System Architecture

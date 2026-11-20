@@ -1,6 +1,11 @@
 # Verification of Security, Cross-User Isolation, and Logout/Login Session Persistence
 $ErrorActionPreference = "Stop"
 $baseUrl = "http://127.0.0.1:5000"
+$memberPassword = $env:SHELFWISE_TEST_MEMBER_PASSWORD
+$staffPassword = $env:SHELFWISE_TEST_STAFF_PASSWORD
+if ([string]::IsNullOrWhiteSpace($memberPassword) -or [string]::IsNullOrWhiteSpace($staffPassword)) {
+    throw "Set SHELFWISE_TEST_MEMBER_PASSWORD and SHELFWISE_TEST_STAFF_PASSWORD to the existing test accounts before running this verification."
+}
 
 Write-Host "=================================================================" -ForegroundColor Cyan
 Write-Host "  VERIFICATION: SECURITY, CROSS-USER ISOLATION & SESSION AUDIT   " -ForegroundColor Cyan
@@ -86,7 +91,7 @@ $memberSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $loginGet = Invoke-WebRequest -Uri "$baseUrl/Account/Login" -WebSession $memberSession -UseBasicParsing
 $loginToken = ""
 if ($loginGet.Content -match '__RequestVerificationToken"[^>]*value="([^"]+)"') { $loginToken = $matches[1] }
-$loginBody = @{ "Email" = "member@shelfwise.local"; "Password" = "Member@12345!"; "RememberMe" = "false"; "__RequestVerificationToken" = $loginToken }
+$loginBody = @{ "Email" = "member@shelfwise.local"; "Password" = $memberPassword; "RememberMe" = "false"; "__RequestVerificationToken" = $loginToken }
 $loginResp = Invoke-WebRequest -Uri "$baseUrl/Account/Login" -Method Post -Body $loginBody -WebSession $memberSession -UseBasicParsing -MaximumRedirection 0 -ErrorAction SilentlyContinue
 Write-Host "  [PASS] Member logged in successfully (HTTP $($loginResp.StatusCode))" -ForegroundColor Green
 
@@ -174,7 +179,7 @@ $staffSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $staffLoginGet = Invoke-WebRequest -Uri "$baseUrl/Account/Login" -WebSession $staffSession -UseBasicParsing
 $staffLoginToken = ""
 if ($staffLoginGet.Content -match '__RequestVerificationToken"[^>]*value="([^"]+)"') { $staffLoginToken = $matches[1] }
-$staffLoginBody = @{ "Email" = "staff@shelfwise.local"; "Password" = "Staff@12345!"; "RememberMe" = "false"; "__RequestVerificationToken" = $staffLoginToken }
+$staffLoginBody = @{ "Email" = "staff@shelfwise.local"; "Password" = $staffPassword; "RememberMe" = "false"; "__RequestVerificationToken" = $staffLoginToken }
 $staffLoginResp = Invoke-WebRequest -Uri "$baseUrl/Account/Login" -Method Post -Body $staffLoginBody -WebSession $staffSession -UseBasicParsing -MaximumRedirection 0 -ErrorAction SilentlyContinue
 Write-Host "  [PASS] User B (Staff) logged in successfully" -ForegroundColor Green
 
@@ -223,7 +228,7 @@ $reloginSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $reloginGet = Invoke-WebRequest -Uri "$baseUrl/Account/Login" -WebSession $reloginSession -UseBasicParsing
 $reloginToken = ""
 if ($reloginGet.Content -match '__RequestVerificationToken"[^>]*value="([^"]+)"') { $reloginToken = $matches[1] }
-$reloginBody = @{ "Email" = "member@shelfwise.local"; "Password" = "Member@12345!"; "RememberMe" = "false"; "__RequestVerificationToken" = $reloginToken }
+$reloginBody = @{ "Email" = "member@shelfwise.local"; "Password" = $memberPassword; "RememberMe" = "false"; "__RequestVerificationToken" = $reloginToken }
 $reloginResp = Invoke-WebRequest -Uri "$baseUrl/Account/Login" -Method Post -Body $reloginBody -WebSession $reloginSession -UseBasicParsing -MaximumRedirection 0 -ErrorAction SilentlyContinue
 Write-Host "  [PASS] Member logged back in (HTTP $($reloginResp.StatusCode))" -ForegroundColor Green
 

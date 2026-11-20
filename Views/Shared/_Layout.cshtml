@@ -100,6 +100,16 @@
                     <a class="sw-nav-link @(currentController == "AdminMembers" ? "active" : "")" asp-controller="AdminMembers" asp-action="Index">
                         <i class="bi bi-people"></i> Members
                     </a>
+                    <div class="dropdown d-inline-block">
+                        <a class="sw-nav-link dropdown-toggle @(currentController == "AdminUsers" || currentController == "AdminActivity" || currentController == "AdminAudit" ? "active" : "")" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-shield-lock"></i> Oversight</a>
+                        <ul class="dropdown-menu sw-dropdown-menu">
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminUsers" asp-action="Index">User Management</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminUsers" asp-action="PasswordManagement">Password Management</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminActivity" asp-action="Index">Global Activity</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminAudit" asp-action="Index">Backend Audit Logs</a></li>
+                            <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminAudit" asp-action="Index" asp-route-category="Authorization">Security Events</a></li>
+                        </ul>
+                    </div>
                     <a class="sw-nav-link @(currentController == "AdminReports" ? "active" : "")" asp-controller="AdminReports" asp-action="Index">
                         <i class="bi bi-bar-chart-line"></i> Analytics
                     </a>
@@ -146,6 +156,7 @@
                     <a class="sw-nav-link @(currentAction == "Payments" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Payments">
                         <i class="bi bi-cash-stack"></i> Payments
                     </a>
+                    <a class="sw-nav-link @(currentController == "MyActivity" ? "active" : "")" asp-controller="MyActivity" asp-action="Index"><i class="bi bi-clock-history"></i> My Activity</a>
                 }
                 else if (isMember)
                 {
@@ -167,6 +178,7 @@
                     <a class="sw-nav-link @(currentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="Index">
                         <i class="bi bi-person-vcard"></i> My Card
                     </a>
+                    <a class="sw-nav-link @(currentController == "MyActivity" ? "active" : "")" asp-controller="MyActivity" asp-action="Index"><i class="bi bi-clock-history"></i> My Activity</a>
                 }
                 else
                 {
@@ -228,6 +240,10 @@
                                 <li><a class="dropdown-item sw-dropdown-item" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-circle me-2"></i>Reader Profile</a></li>
                             }
                             <li><a class="dropdown-item sw-dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="bi bi-key me-2"></i>Security & Password</a></li>
+                            @if (isMember || isStaff)
+                            {
+                                <li><a class="dropdown-item sw-dropdown-item" asp-controller="MyActivity" asp-action="Index"><i class="bi bi-clock-history me-2"></i>My Activity</a></li>
+                            }
                             @if (isAdmin)
                             {
                                 <li><a class="dropdown-item sw-dropdown-item" asp-controller="AdminSettings" asp-action="Index"><i class="bi bi-sliders me-2"></i>Library Policies</a></li>
@@ -293,6 +309,11 @@
                 <a class="sw-mobile-drawer-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history text-danger"></i> Overdue Loans</a>
                 <a class="sw-mobile-drawer-link @(currentAction == "Payments" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Payments"><i class="bi bi-cash-stack text-success"></i> Fine Payments</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminMembers" ? "active" : "")" asp-controller="AdminMembers" asp-action="Index"><i class="bi bi-people"></i> Member Accounts</a>
+                <a class="sw-mobile-drawer-link" asp-controller="AdminUsers" asp-action="Index"><i class="bi bi-person-gear"></i> User Management</a>
+                <a class="sw-mobile-drawer-link" asp-controller="AdminUsers" asp-action="PasswordManagement"><i class="bi bi-key"></i> Password Management</a>
+                <a class="sw-mobile-drawer-link" asp-controller="AdminActivity" asp-action="Index"><i class="bi bi-clock-history"></i> Global Activity</a>
+                <a class="sw-mobile-drawer-link" asp-controller="AdminAudit" asp-action="Index"><i class="bi bi-shield-lock"></i> Backend Audit Logs</a>
+                <a class="sw-mobile-drawer-link" asp-controller="AdminAudit" asp-action="Index" asp-route-category="Authorization"><i class="bi bi-exclamation-shield"></i> Security Events</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminReports" ? "active" : "")" asp-controller="AdminReports" asp-action="Index"><i class="bi bi-bar-chart-line"></i> Analytics & Reports</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminSettings" ? "active" : "")" asp-controller="AdminSettings" asp-action="Index"><i class="bi bi-sliders"></i> Library Settings</a>
             }
@@ -301,6 +322,7 @@
                 <a class="sw-mobile-drawer-link @(currentController == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-inboxes"></i> Operations Desk</a>
                 <a class="sw-mobile-drawer-link @(currentAction == "Issue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Issue"><i class="bi bi-plus-circle text-warning"></i> Quick Issue</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminCirculation" && currentAction == "Index" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Index"><i class="bi bi-arrow-left-right"></i> Circulation</a>
+                <a class="sw-mobile-drawer-link" asp-controller="MyActivity" asp-action="Index"><i class="bi bi-clock-history"></i> My Activity</a>
                 <a class="sw-mobile-drawer-link @(currentAction == "Overdue" ? "active" : "")" asp-controller="AdminCirculation" asp-action="Overdue"><i class="bi bi-clock-history text-danger"></i> Overdue Loans</a>
                 <a class="sw-mobile-drawer-link @(currentController == "AdminBooks" ? "active" : "")" asp-controller="AdminBooks" asp-action="Index"><i class="bi bi-bookshelf"></i> Books Catalogue</a>
                 <a class="sw-mobile-drawer-link @(currentController == "DigitalLibrary" ? "active" : "")" asp-controller="DigitalLibrary" asp-action="Index"><i class="bi bi-file-earmark-pdf"></i> Digital Library</a>
@@ -319,6 +341,7 @@
                 <a class="sw-mobile-drawer-link @(currentController == "Marketplace" && currentAction == "MyPurchases" ? "active" : "")" asp-controller="Marketplace" asp-action="MyPurchases"><i class="bi bi-journal-check"></i> My Acquired Papers</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index"><i class="bi bi-compass"></i> Discover Bookshelf</a>
                 <a class="sw-mobile-drawer-link @(currentController == "Profile" ? "active" : "")" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-vcard"></i> My Library Card</a>
+                <a class="sw-mobile-drawer-link" asp-controller="MyActivity" asp-action="Index"><i class="bi bi-clock-history"></i> My Activity</a>
             }
             else
             {

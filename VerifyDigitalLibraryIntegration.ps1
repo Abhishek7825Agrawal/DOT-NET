@@ -2,6 +2,10 @@
 $ErrorActionPreference = "Stop"
 
 $baseUrl = "http://127.0.0.1:5000"
+$staffPassword = $env:SHELFWISE_TEST_STAFF_PASSWORD
+if ([string]::IsNullOrWhiteSpace($staffPassword)) {
+    throw "Set SHELFWISE_TEST_STAFF_PASSWORD to the existing staff test account password before running this verification."
+}
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 
 Write-Host "==================================================" -ForegroundColor Cyan
@@ -18,7 +22,7 @@ if ($loginGet.Content -match '__RequestVerificationToken"[^>]*value="([^"]+)"') 
 
 $loginBody = @{
     "Email" = "staff@shelfwise.local"
-    "Password" = "Staff@12345!"
+    "Password" = $staffPassword
     "RememberMe" = "false"
     "__RequestVerificationToken" = $token
 }

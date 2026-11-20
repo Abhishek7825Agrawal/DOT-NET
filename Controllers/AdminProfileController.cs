@@ -1,6 +1,7 @@
 using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.ViewModels;
+using LibraryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,8 @@ namespace LibraryManagementSystem.Controllers;
 
 [Authorize(Roles = "Admin,Staff")]
 public sealed class AdminProfileController(
-    UserManager<ApplicationUser> userManager) : Controller
+    UserManager<ApplicationUser> userManager,
+    ActivityLogService activityLogs) : Controller
 {
     public async Task<IActionResult> Index()
     {
@@ -42,6 +44,8 @@ public sealed class AdminProfileController(
         }
 
         TempData["Success"] = "Admin profile updated successfully.";
+        await activityLogs.RecordAsync(user.Id, "ProfileUpdated", "AccountManagement",
+            "You updated your staff profile.", entityType: "User", entityReference: user.Id);
         return RedirectToAction(nameof(Index));
     }
 }

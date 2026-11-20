@@ -13,6 +13,26 @@ public sealed class LoginViewModel
     public string? ReturnUrl { get; set; }
 }
 
+public sealed class ForgotPasswordViewModel
+{
+    [Required, EmailAddress, StringLength(256)]
+    public string Email { get; set; } = string.Empty;
+}
+
+public sealed class ResetPasswordViewModel
+{
+    [Required, EmailAddress, StringLength(256)]
+    public string Email { get; set; } = string.Empty;
+    [Required]
+    public string Token { get; set; } = string.Empty;
+    [Required, DataType(DataType.Password), MinLength(10), StringLength(100)]
+    [Display(Name = "New password")]
+    public string NewPassword { get; set; } = string.Empty;
+    [Required, DataType(DataType.Password), Compare(nameof(NewPassword))]
+    [Display(Name = "Confirm new password")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
+
 public sealed class RegisterViewModel
 {
     [Required, StringLength(120)]

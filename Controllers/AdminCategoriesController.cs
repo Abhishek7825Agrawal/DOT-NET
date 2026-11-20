@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryManagementSystem.Controllers;
 
 [Authorize(Roles = "Admin")]
-public sealed class AdminCategoriesController(CategoryService categories) : Controller
+public sealed class AdminCategoriesController(CategoryService categories, ActivityLogService activityLogs,
+    Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -34,6 +35,9 @@ public sealed class AdminCategoriesController(CategoryService categories) : Cont
             return View("Form", model);
         }
 
+        await activityLogs.RecordAsync(userManager.GetUserId(User), "CategoryCreated", "Catalogue",
+            $"You created category '{model.Name}'.", entityType: "Category", entityReference: model.Name,
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = $"Category '{model.Name}' created successfully.";
         return RedirectToAction(nameof(Index));
     }
@@ -69,6 +73,9 @@ public sealed class AdminCategoriesController(CategoryService categories) : Cont
             return View("Form", model);
         }
 
+        await activityLogs.RecordAsync(userManager.GetUserId(User), "CategoryUpdated", "Catalogue",
+            $"You updated category '{model.Name}'.", entityType: "Category", entityReference: model.Id.ToString(),
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = "Category updated successfully.";
         return RedirectToAction(nameof(Index));
     }
@@ -83,6 +90,9 @@ public sealed class AdminCategoriesController(CategoryService categories) : Cont
         }
         else
         {
+            await activityLogs.RecordAsync(userManager.GetUserId(User), "CategoryDeleted", "Catalogue",
+                "You deleted a catalogue category.", entityType: "Category", entityReference: id.ToString(),
+                securityEvent: true, severity: "Warning", cancellationToken: cancellationToken);
             TempData["Success"] = "Category deleted.";
         }
         return RedirectToAction(nameof(Index));

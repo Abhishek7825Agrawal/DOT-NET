@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 if (args.Contains("--run-tests", StringComparer.Ordinal))
 {
@@ -20,6 +22,10 @@ Directory.CreateDirectory(keysFolder);
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysFolder))
     .SetApplicationName("ShelfwiseLibrary");
+var resetTokenMinutes = Math.Clamp(builder.Configuration.GetValue("Email:ResetTokenLifetimeMinutes", 60), 5, 1440);
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+    options.TokenLifespan = TimeSpan.FromMinutes(resetTokenMinutes));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 
 var dbProvider = builder.Configuration.GetValue<string>("DatabaseProvider");
 
@@ -87,7 +93,26 @@ builder.Services.AddScoped<CustomerImportService>();
 builder.Services.AddScoped<DigitalDocumentService>();
 builder.Services.AddScoped<PaperStorageService>();
 builder.Services.AddScoped<MarketplaceService>();
+builder.Services.AddScoped<ActivityLogService>();
+builder.Services.AddScoped<IShelfwiseEmailSender, SmtpEmailSender>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.Configure<ActivityLogRetentionOptions>(builder.Configuration.GetSection("ActivityLogRetention"));
+builder.Services.AddHostedService<ActivityLogRetentionService>();
 builder.Services.AddSingleton<LibraryCalendar>();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("password-recovery", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(15),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
 
 var app = builder.Build();
 
@@ -139,37 +164,6 @@ if (args.Contains("--recover-admin-account", StringComparer.Ordinal))
     {
         app.Logger.LogError("Admin recovery failed with {ExceptionType}; passwords and credentials were not logged.",
             exception.GetType().Name);
-        Environment.Exit(1);
-    }
-    return;
-}
-
-if (args.Contains("--recover-member-account", StringComparer.Ordinal))
-{
-    var recoveryPassword = Environment.GetEnvironmentVariable("SHELFWISE_MEMBER_RECOVERY_PASSWORD") ?? "Member@12345!";
-    await using var recoveryScope = app.Services.CreateAsyncScope();
-    var users = recoveryScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var memberUser = await users.FindByEmailAsync("member@shelfwise.local");
-    if (memberUser is not null)
-    {
-        var token = await users.GeneratePasswordResetTokenAsync(memberUser);
-        var result = await users.ResetPasswordAsync(memberUser, token, recoveryPassword);
-        if (result.Succeeded)
-        {
-            await users.SetLockoutEndDateAsync(memberUser, null);
-            await users.ResetAccessFailedCountAsync(memberUser);
-            Console.WriteLine($"[MEMBER RECOVERY SUCCESS] Password successfully set to {recoveryPassword}");
-            Environment.Exit(0);
-        }
-        else
-        {
-            Console.WriteLine($"[MEMBER RECOVERY FAILED] {string.Join(", ", result.Errors.Select(e => e.Description))}");
-            Environment.Exit(1);
-        }
-    }
-    else
-    {
-        Console.WriteLine("[MEMBER RECOVERY FAILED] member@shelfwise.local not found.");
         Environment.Exit(1);
     }
     return;
@@ -264,9 +258,11 @@ app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<ActiveMemberMiddleware>();
 app.UseAuthorization();
+app.UseMiddleware<CorrelationAuditMiddleware>();
 
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 

@@ -1,0 +1,27 @@
+@model AdminUserDetailsViewModel
+@{
+    ViewData["Title"] = "Account details";
+    var account = Model.Account;
+}
+<section class="sw-page-header">
+    <span class="sw-kicker">@account.Role account</span>
+    <h1 class="sw-h2">@account.DisplayName</h1>
+    <p class="text-muted">@account.Email</p>
+</section>
+<section class="parchment-card p-3 p-lg-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div><span class="sw-badge @(account.IsActive ? "sw-badge-success" : "sw-badge-danger")">@(account.IsActive ? "Active" : "Inactive")</span><p class="small text-muted mt-2 mb-0">Password status: @(account.LastResetStatus ?? "No reset activity recorded")</p></div>
+        <div class="d-flex flex-wrap gap-2">
+            <form asp-action="SendPasswordReset" method="post"><input type="hidden" name="id" value="@account.Id" /><button class="sw-btn sw-btn-primary" type="submit"><i class="bi bi-envelope me-1"></i>Send reset link</button></form>
+            <form asp-action="SetStatus" method="post"><input type="hidden" name="id" value="@account.Id" /><input type="hidden" name="active" value="@(!account.IsActive)" /><button class="sw-btn sw-btn-secondary" type="submit">@(account.IsActive ? "Deactivate" : "Reactivate")</button></form>
+            <a class="sw-btn sw-btn-secondary" asp-action="Index">Back to users</a>
+        </div>
+    </div>
+</section>
+<section class="parchment-card p-3 p-lg-4">
+    <h2 class="sw-h4">Password reset history</h2>
+    <div class="table-responsive"><table class="table sw-table align-middle"><thead><tr><th>When (UTC)</th><th>Event</th><th>Result</th><th>Details</th></tr></thead><tbody>
+    @foreach (var item in Model.PasswordHistory) { <tr><td>@item.LocalTimestamp.ToString("yyyy-MM-dd HH:mm")</td><td>@item.EventType</td><td>@item.Outcome</td><td>@item.Description</td></tr> }
+    @if (Model.PasswordHistory.Count == 0) { <tr><td colspan="4" class="text-muted text-center py-3">No password reset history.</td></tr> }
+    </tbody></table></div>
+</section>

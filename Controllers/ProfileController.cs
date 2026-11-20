@@ -1,6 +1,7 @@
 using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.ViewModels;
+using LibraryManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,8 @@ namespace LibraryManagementSystem.Controllers;
 [Authorize(Roles = "Member")]
 public sealed class ProfileController(
     ApplicationDbContext db,
-    UserManager<ApplicationUser> userManager) : Controller
+    UserManager<ApplicationUser> userManager,
+    ActivityLogService activityLogs) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -44,6 +46,9 @@ public sealed class ProfileController(
         member.User.PhoneNumber = member.PhoneNumber;
         member.Address = model.Address?.Trim();
         await db.SaveChangesAsync(cancellationToken);
+        await activityLogs.RecordAsync(userId, "ProfileUpdated", "AccountManagement",
+            "You updated your library profile.", entityType: "User", entityReference: userId,
+            cancellationToken: cancellationToken);
         TempData["Success"] = "Profile updated.";
         return RedirectToAction(nameof(Index));
     }

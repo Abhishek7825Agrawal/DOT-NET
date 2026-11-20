@@ -25,8 +25,36 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<PaperOrder> PaperOrders => Set<PaperOrder>();
     public DbSet<PaperCopyrightReport> PaperCopyrightReports => Set<PaperCopyrightReport>();
     public DbSet<MarketplaceSettings> MarketplaceSettings => Set<MarketplaceSettings>();
+    public DbSet<UserActivityLog> UserActivityLogs => Set<UserActivityLog>();
+    public DbSet<SecurityAuditLog> SecurityAuditLogs => Set<SecurityAuditLog>();
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override int SaveChanges() => SaveChanges(acceptAllChangesOnSuccess: true);
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        EnsureAuditEntriesAreAppendOnly();
+        ApplySqliteConcurrencyTokens();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
+        SaveChangesAsync(acceptAllChangesOnSuccess: true, cancellationToken);
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        EnsureAuditEntriesAreAppendOnly();
+        ApplySqliteConcurrencyTokens();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void EnsureAuditEntriesAreAppendOnly()
+    {
+        if (ChangeTracker.Entries<UserActivityLog>().Any(entry => entry.State is EntityState.Modified or EntityState.Deleted)
+            || ChangeTracker.Entries<SecurityAuditLog>().Any(entry => entry.State is EntityState.Modified or EntityState.Deleted))
+            throw new InvalidOperationException("Activity and security audit entries are append-only.");
+    }
+
+    private void ApplySqliteConcurrencyTokens()
     {
         if (Database.IsSqlite())
         {
@@ -42,12 +70,48 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 }
             }
         }
-        return base.SaveChangesAsync(cancellationToken);
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<ApplicationUser>().Property(user => user.IsActive).HasDefaultValue(true);
+        builder.Entity<UserActivityLog>(entity =>
+        {
+            entity.HasKey(log => log.Id);
+            entity.Property(log => log.UserId).HasMaxLength(450).IsRequired();
+            entity.Property(log => log.UserRole).HasMaxLength(80).IsRequired();
+            entity.Property(log => log.ActivityType).HasMaxLength(100).IsRequired();
+            entity.Property(log => log.Category).HasMaxLength(60).IsRequired();
+            entity.Property(log => log.Description).HasMaxLength(500).IsRequired();
+            entity.Property(log => log.Status).HasMaxLength(24).IsRequired();
+            entity.Property(log => log.EntityType).HasMaxLength(100);
+            entity.Property(log => log.EntityReference).HasMaxLength(160);
+            entity.Property(log => log.CorrelationId).HasMaxLength(64).IsRequired();
+            entity.HasIndex(log => new { log.UserId, log.CreatedAtUtc });
+            entity.HasIndex(log => new { log.ActivityType, log.CreatedAtUtc });
+            entity.HasIndex(log => log.CorrelationId);
+        });
+        builder.Entity<SecurityAuditLog>(entity =>
+        {
+            entity.HasKey(log => log.Id);
+            entity.Property(log => log.UserId).HasMaxLength(450);
+            entity.Property(log => log.UserRole).HasMaxLength(80);
+            entity.Property(log => log.EventType).HasMaxLength(100).IsRequired();
+            entity.Property(log => log.Category).HasMaxLength(60).IsRequired();
+            entity.Property(log => log.Severity).HasMaxLength(24).IsRequired();
+            entity.Property(log => log.Outcome).HasMaxLength(24).IsRequired();
+            entity.Property(log => log.Description).HasMaxLength(500).IsRequired();
+            entity.Property(log => log.EntityType).HasMaxLength(100);
+            entity.Property(log => log.EntityReference).HasMaxLength(160);
+            entity.Property(log => log.RequestPath).HasMaxLength(300);
+            entity.Property(log => log.CorrelationId).HasMaxLength(64).IsRequired();
+            entity.HasIndex(log => new { log.Severity, log.CreatedAtUtc });
+            entity.HasIndex(log => new { log.EventType, log.CreatedAtUtc });
+            entity.HasIndex(log => log.CorrelationId);
+            entity.HasIndex(log => new { log.UserId, log.CreatedAtUtc });
+        });
 
         var isSqlServer = Database.IsSqlServer();
 

@@ -12,11 +12,16 @@ public sealed class ActiveMemberMiddleware(RequestDelegate next)
         ApplicationDbContext db,
         SignInManager<ApplicationUser> signInManager)
     {
-        if (context.User.Identity?.IsAuthenticated == true && context.User.IsInRole("Member"))
+        if (context.User.Identity?.IsAuthenticated == true)
         {
             var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isActive = userId is not null && await db.Members.AsNoTracking()
-                .AnyAsync(member => member.UserId == userId && member.IsActive, context.RequestAborted);
+            var isActive = userId is not null && await db.Users.AsNoTracking()
+                .AnyAsync(user => user.Id == userId && user.IsActive, context.RequestAborted);
+            if (isActive && context.User.IsInRole("Member"))
+            {
+                isActive = await db.Members.AsNoTracking()
+                    .AnyAsync(member => member.UserId == userId && member.IsActive, context.RequestAborted);
+            }
             if (!isActive)
             {
                 await signInManager.SignOutAsync();

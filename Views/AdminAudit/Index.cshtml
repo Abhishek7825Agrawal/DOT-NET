@@ -1,0 +1,27 @@
+@model SecurityAuditPageViewModel
+@{
+    ViewData["Title"] = "Backend Audit Logs";
+}
+<section class="sw-page-header"><span class="sw-kicker">Security and server events</span><h1 class="sw-h2">Backend Audit Logs</h1><p class="text-muted">Append-only authentication, authorization, password recovery, account management and exception events.</p></section>
+<div class="d-flex gap-2 mb-3"><a class="sw-btn sw-btn-secondary" asp-action="Index" asp-route-category="Authentication">Authentication events</a><a class="sw-btn sw-btn-secondary" asp-action="Index" asp-route-category="Authorization">Security events</a><a class="sw-btn sw-btn-secondary" asp-controller="AdminUsers" asp-action="PasswordManagement">Password events</a></div>
+<section class="parchment-card p-3 p-lg-4 mb-4">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-sm-6 col-lg-3"><label class="sw-form-label" for="q">User, event or text</label><input id="q" name="q" value="@Model.Query" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="role">Role</label><input id="role" name="role" value="@Model.Role" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="category">Category</label><input id="category" name="category" value="@Model.Category" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="severity">Severity</label><select id="severity" name="severity" class="sw-form-control"><option value="">Any</option><option selected="@(Model.Severity == "Warning")">Warning</option><option selected="@(Model.Severity == "Error")">Error</option><option selected="@(Model.Severity == "Information")">Information</option></select></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="outcome">Outcome</label><input id="outcome" name="outcome" value="@Model.Outcome" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="fromDate">From</label><input id="fromDate" name="fromDate" type="date" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><label class="sw-form-label" for="toDate">To</label><input id="toDate" name="toDate" type="date" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-3"><label class="sw-form-label" for="entity">Entity reference</label><input id="entity" name="entity" value="@Model.Entity" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-3"><label class="sw-form-label" for="correlation">Correlation ID</label><input id="correlation" name="correlation" value="@Model.Correlation" class="sw-form-control" /></div>
+        <div class="col-6 col-lg-2"><button class="sw-btn sw-btn-primary w-100">Filter</button></div>
+        <div class="col-6 col-lg-2"><a class="sw-btn sw-btn-secondary w-100" asp-action="Export" asp-all-route-data="@(new Dictionary<string,string?> { ["q"] = Model.Query, ["role"] = Model.Role, ["category"] = Model.Category, ["severity"] = Model.Severity, ["outcome"] = Model.Outcome, ["entity"] = Model.Entity, ["correlation"] = Model.Correlation, ["fromDate"] = Model.FromDate?.ToString("yyyy-MM-dd"), ["toDate"] = Model.ToDate?.ToString("yyyy-MM-dd") })">Export CSV</a></div>
+    </form>
+</section>
+<section class="parchment-card p-3 p-lg-4"><div class="table-responsive"><table class="table sw-table align-middle"><thead><tr><th>Timestamp</th><th>Actor</th><th>Severity</th><th>Event</th><th>Outcome</th><th>Entity / request</th><th>Correlation</th></tr></thead><tbody>
+@foreach (var item in Model.Items) { <tr><td>@item.LocalTimestamp.ToString("yyyy-MM-dd HH:mm")</td><td>@(item.UserEmail ?? item.UserId ?? "Anonymous")<br /><small>@item.UserRole</small></td><td>@item.Severity</td><td><strong>@item.EventType</strong><br /><span class="small text-muted">@item.Description</span></td><td>@item.Outcome</td><td>@item.EntityType @item.EntityReference<br /><small>@item.RequestPath</small></td><td><code>@item.CorrelationId</code></td></tr> }
+@if (Model.Items.Count == 0) { <tr><td colspan="7" class="text-center text-muted py-4">No audit events match these filters.</td></tr> }
+</tbody></table></div>
+@if (Model.TotalPages > 1) { <nav aria-label="Audit pages" class="d-flex justify-content-between"><span>Page @Model.Page of @Model.TotalPages</span><div class="d-flex gap-2"><a class="sw-btn sw-btn-sm sw-btn-secondary" asp-route-page="@(Model.Page - 1)">Previous</a><a class="sw-btn sw-btn-sm sw-btn-secondary" asp-route-page="@(Model.Page + 1)">Next</a></div></nav> }
+</section>

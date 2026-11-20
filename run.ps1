@@ -1,57 +1,33 @@
-# Shelfwise One-Click PowerShell Runner
-$ErrorActionPreference = "Continue"
+# Shelfwise one-click PowerShell runner.
+$ErrorActionPreference = "Stop"
+Set-Location $PSScriptRoot
 
-$targetDir = $PSScriptRoot
-if (Test-Path (Join-Path $PSScriptRoot "DOT-NET-main")) {
-    $targetDir = Join-Path $PSScriptRoot "DOT-NET-main"
-}
-Set-Location $targetDir
-
-Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host "   Shelfwise Library Management System" -ForegroundColor Cyan
-Write-Host "=======================================================" -ForegroundColor Cyan
-Write-Host ""
-
-# Check Docker & SQL Server container
-Write-Host "[1/2] Checking Database..." -ForegroundColor Cyan
-$sqlReady = $false
 try {
-    $tcp = New-Object System.Net.Sockets.TcpClient
-    $tcp.Connect("127.0.0.1", 1433)
-    $tcp.Close()
-    $sqlReady = $true
+    $sdkVersion = (& dotnet --version).Trim()
 } catch {
-    # If port 1433 is closed, try starting the container
-    Write-Host "Attempting to start 'shelfwise-sqlserver' container..." -ForegroundColor Gray
-    docker start shelfwise-sqlserver 2>$null | Out-Null
-    Start-Sleep -Seconds 3
-    try {
-        $tcp = New-Object System.Net.Sockets.TcpClient
-        $tcp.Connect("127.0.0.1", 1433)
-        $tcp.Close()
-        $sqlReady = $true
-    } catch {}
+    Write-Error ".NET 10 SDK is required. Install it and run this script again."
+    exit 1
+}
+if (-not $sdkVersion.StartsWith("10.")) {
+    Write-Error "This project requires the .NET 10 SDK. Selected: $sdkVersion"
+    exit 1
 }
 
-if ($sqlReady) {
-    Write-Host "[OK] Connected to SQL Server 2022 (localhost:1433)" -ForegroundColor Green
+if (-not [string]::IsNullOrWhiteSpace($env:ConnectionStrings__DefaultConnection)) {
     $env:DatabaseProvider = "SqlServer"
-    $env:ConnectionStrings__DefaultConnection = "Server=localhost,1433;Database=LibraryManagementSystem;User Id=sa;Password=Abhi7825;TrustServerCertificate=True;"
+    Write-Host "Using the explicitly configured SQL Server connection." -ForegroundColor Green
+} elseif ($env:DatabaseProvider -eq "SqlServer") {
+    Write-Error "DatabaseProvider is SqlServer but ConnectionStrings__DefaultConnection is missing."
+    exit 1
 } else {
-    Write-Host "[WARN] SQL Server 1433 not reachable. Using local SQLite (library.db)" -ForegroundColor Yellow
     $env:DatabaseProvider = "Sqlite"
-    $env:ConnectionStrings__DefaultConnection = "Data Source=library.db"
+    $env:ConnectionStrings__DefaultConnection = "Data Source=$PSScriptRoot/library.db"
+    Write-Host "Using local SQLite database." -ForegroundColor Yellow
 }
 
 $env:ASPNETCORE_ENVIRONMENT = "Development"
+$env:ASPNETCORE_URLS = "http://localhost:5000"
+Write-Host "Starting Shelfwise at http://localhost:5000. Press Ctrl+C to stop." -ForegroundColor Cyan
 
-Write-Host ""
-Write-Host "[2/2] Starting Shelfwise Web Server at http://localhost:5000 ..." -ForegroundColor Cyan
-Write-Host "=======================================================" -ForegroundColor Yellow
-Write-Host "  URL:          http://localhost:5000" -ForegroundColor Yellow
-Write-Host "  Admin Login:  admin@shelfwise.local  / Admin@12345!" -ForegroundColor Yellow
-Write-Host "  Member Login: member@shelfwise.local / Member@12345!" -ForegroundColor Yellow
-Write-Host "=======================================================" -ForegroundColor Yellow
-Write-Host "Press Ctrl+C in this window to stop the server.`n" -ForegroundColor Gray
-
-dotnet run --urls "http://localhost:5000"
+& dotnet run --no-launch-profile --project (Join-Path $PSScriptRoot "LibraryManagementSystem.csproj") --urls "http://localhost:5000"
+exit $LASTEXITCODE

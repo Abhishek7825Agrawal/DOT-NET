@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryManagementSystem.Controllers;
 
 [Authorize(Roles = "Admin")]
-public sealed class AdminSettingsController(SettingsService settingsService) : Controller
+public sealed class AdminSettingsController(SettingsService settingsService, ActivityLogService activityLogs,
+    Microsoft.AspNetCore.Identity.UserManager<LibraryManagementSystem.Models.ApplicationUser> userManager) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
@@ -44,6 +45,10 @@ public sealed class AdminSettingsController(SettingsService settingsService) : C
             return View(model);
         }
 
+        var userId = userManager.GetUserId(User);
+        await activityLogs.RecordAsync(userId, "LibrarySettingsUpdated", "Configuration",
+            "You updated library loan, fine, quota or timezone settings.", entityType: "LibrarySettings",
+            securityEvent: true, cancellationToken: cancellationToken);
         TempData["Success"] = "Library rules and operational settings have been updated.";
         return RedirectToAction(nameof(Index));
     }
